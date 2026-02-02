@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated
 from businesses.models import *
 from businesses.serializers import *
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 
 
 @api_view(['POST'])
@@ -28,3 +30,49 @@ def list_records(req):
     records = BusinessRecord.objects.filter(user=req.user)
     serializer = BusinessRecordSerializer(records,many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def business_summary(req):
+    records = BusinessRecord.objects.filter(user=req.user)
+    summary = records.aggregate(
+        total_sales = Sum('sales'),
+        total_expenses = Sum('expenses'),
+        total_profit = Sum('profit'),
+    )
+
+    return Response({
+        "total_sales":summary["total_sales"] or 0,
+        "total_expenses":summary["total_expenses"] or 0,
+        "total_profit":summary["total_profit"] or 0,
+        "total_records":records.count()
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def monthly_summary(req):
+    records = (
+        BusinessRecord.objects
+        .filter(user=req.user)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(
+            total_sales = Sum('sales'),
+            total_expenses = Sum('expenses'),
+            total_profit = Sum('profit')
+        )
+        .order_by('month')
+    )
+    
+    data = []
+    for i in records:
+        data.append({
+            "month":i['month'].strftime("%Y-%m"),
+            "total_sales":i["total_sales"],
+            "total_expenses":i["total_expenses"],
+            "total_profit":i["total_profit"],
+        })
+    return Response(data)
+
