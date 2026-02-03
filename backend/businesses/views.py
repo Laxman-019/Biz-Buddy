@@ -76,3 +76,53 @@ def monthly_summary(req):
         })
     return Response(data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def business_insights(req):
+    records = BusinessRecord.objects.filter(user = req.user)
+
+    if not records.exists():
+        return Response({
+            "status":"info",
+            "message":"No business data available",
+            "suggestion":"Start adding sales and expenses to see insights"
+        })
+    
+    summary = records.aggregate(
+        total_sales = Sum('sales'),
+        total_expenses = Sum('expenses'),
+        total_profit = Sum('profit'),
+    )
+
+    sales = summary['total_sales'] or 0
+    expenses = summary['total_expenses'] or 0
+    profit = summary['total_profit'] or 0
+
+    insights = []
+    suggestions = []
+
+    
+    if profit < 0:
+        insights.append("Your business is running at a loss")
+        suggestions.append("Reduce unnecessary expenses")
+
+    if sales > 0 and expenses > 0.7 * sales:
+        insights.append("Your expenses are very high comapred to sales")
+        suggestions.append("Optimize operational costs")
+
+    if sales > 0 and profit / sales < 0.2:
+        insights.append("Profit margin is low")
+        suggestions.append("Increase sales or adjust pricing")
+
+    if not insights:
+        insights.append("Your business is performing well")
+        suggestions.append("Keep tracking your business data")
+
+
+    return Response({
+        "total_sales": sales,
+        "total_expenses": expenses,
+        "total_profit": profit,
+        "insights": insights,
+        "suggestions": suggestions
+    })
