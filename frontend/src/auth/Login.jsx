@@ -1,18 +1,45 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password:""
+  })
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    navigate("/home");
+    try {
+      const res = await axios.post(`http://127.0.0.1:8000/api/login/`, formData);
+      localStorage.setItem("access",res.data.access)
+      localStorage.setItem("refresh", res.data.refresh)
+      toast.success(res.data.message);
+      
+      setTimeout(() => {
+        navigate("/")
+      }, 3000);
+
+    } catch (error) {
+      toast.error("Invalid email or password")
+      console.log(error)
+    }
   };
 
   return (
     <Layout>
+      <ToastContainer position="top-center" autoClose={2000} />
       <div className="min-h-screen flex items-center justify-center bg-[#E8EEF5] px-6">
 
         {/* Main Card */}
@@ -51,6 +78,8 @@ const Login = () => {
               <div className="relative">
                 <input
                   type="email"
+                  onChange={handleChange}
+                  name="email"
                   required
                   placeholder="Email Address"
                   className="w-full px-12 py-3 border border-gray-300 rounded-xl outline-none text-gray-700 focus:ring-2 focus:ring-[#1E3A8A]"
@@ -62,6 +91,8 @@ const Login = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  onChange={handleChange}
+                  name="password"
                   required
                   placeholder="Password"
                   className="w-full px-12 py-3 border border-gray-300 rounded-xl outline-none text-gray-700 focus:ring-2 focus:ring-[#1E3A8A]"
