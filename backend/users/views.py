@@ -8,7 +8,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 @api_view(['POST'])
 def register(req):
     serializer = RegisterSerializer(data=req.data)
-    serializer.is_valid(raise_exception=True)
+    if not serializer.is_valid():
+        error_msg = next(iter(serializer.errors.values()))[0]
+
+        return Response(
+            {"message": error_msg},
+            status=400
+        )
 
     user = User.objects.create_user(
         username=serializer.validated_data['user_name'],
@@ -18,11 +24,11 @@ def register(req):
 
     return Response(
         {
-            "message":"User Register Successfully",
-            "user_id":user.id,
-            "email":user.email
+            "message": "User Register Successfully",
+            "user_id": user.id,
+            "email": user.email
 
-        },status=201)
+        }, status=201)
 
 
 @api_view(['POST'])
@@ -44,8 +50,7 @@ def login(req):
     refresh = RefreshToken.for_user(user)
 
     return Response({
-        "message":"Login Sucessful",
+        "message": "Login Sucessful",
         "access": str(refresh.access_token),
         "refresh": str(refresh),
     })
-
