@@ -83,7 +83,7 @@ const Home = () => {
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="bg-[#DDF4E7] p-6 rounded-2xl border shadow-md min-w-[250px]"
+                  className="bg-[#DDF4E7] p-6 rounded-2xl border shadow-md min-w-62.5"
                 >
                   <div className="flex justify-center mb-4 text-indigo-600 text-4xl">
                     {step.icon}
