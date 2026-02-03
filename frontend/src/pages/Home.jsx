@@ -65,41 +65,41 @@ const Home = () => {
 
 
 
-       {/* FEATURES */}
-<section className="max-w-7xl mx-auto py-20">
-  <h2 className="text-4xl font-bold text-center">Features</h2>
+        {/* FEATURES */}
+        <section className="max-w-7xl mx-auto py-20">
+          <h2 className="text-4xl font-bold text-center">Features</h2>
 
-  <div className="grid md:grid-cols-3 gap-10 mt-16 text-center">
+          <div className="grid md:grid-cols-3 gap-10 mt-16 text-center">
 
-    {/* Feature 1 */}
-    <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
-      <div className="text-5xl mb-4">📊</div>
-      <h3 className="text-2xl font-semibold">Market Analytics</h3>
-      <p className="text-gray-600 mt-3">
-        Get clear insights into market trends and predictions.
-      </p>
-    </div>
+            {/* Feature 1 */}
+            <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
+              <div className="text-5xl mb-4">📊</div>
+              <h3 className="text-2xl font-semibold">Market Analytics</h3>
+              <p className="text-gray-600 mt-3">
+                Get clear insights into market trends and predictions.
+              </p>
+            </div>
 
-    {/* Feature 2 */}
-    <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
-      <div className="text-5xl mb-4">⚡</div>
-      <h3 className="text-2xl font-semibold">Fast Evaluation</h3>
-      <p className="text-gray-600 mt-3">
-        Instant analysis to check if your business idea can grow or not.
-      </p>
-    </div>
+            {/* Feature 2 */}
+            <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
+              <div className="text-5xl mb-4">⚡</div>
+              <h3 className="text-2xl font-semibold">Fast Evaluation</h3>
+              <p className="text-gray-600 mt-3">
+                Instant analysis to check if your business idea can grow or not.
+              </p>
+            </div>
 
-    {/* Feature 3 */}
-    <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
-      <div className="text-5xl mb-4">🛡️</div>
-      <h3 className="text-2xl font-semibold">AI-Based Scoring</h3>
-      <p className="text-gray-600 mt-3">
-        Smart AI gives you a success score with tips for improvement.
-      </p>
-    </div>
+            {/* Feature 3 */}
+            <div className="bg-[#DDF4E7] p-10 rounded-2xl shadow-lg border">
+              <div className="text-5xl mb-4">🛡️</div>
+              <h3 className="text-2xl font-semibold">AI-Based Scoring</h3>
+              <p className="text-gray-600 mt-3">
+                Smart AI gives you a success score with tips for improvement.
+              </p>
+            </div>
 
-  </div>
-</section>
+          </div>
+        </section>
 
         <section className="text-center py-24">
           <h2 className="text-4xl font-extrabold text-[#1E293B]">
