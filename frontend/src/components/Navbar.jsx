@@ -40,30 +40,26 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="md:hidden bg-[#003C43] p-5 space-y-4 text-lg animate-slideDown">
-          <Link
-            to="/"
-            className="block hover:text-gray-300"
-            onClick={() => setOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/login"
-            className="block hover:text-gray-300"
-            onClick={() => setOpen(false)}
-          >
-            Login
-          </Link>
-          <Link
-            to="/signup"
-            className="block hover:text-gray-300"
-            onClick={() => setOpen(false)}
-          >
-            Sign up
-          </Link>
-        </div>
-      )}
+  <div className="md:hidden bg-[#002b30] mt-3 divide-y divide-gray-700 rounded-xl overflow-hidden">
+
+    <Link to="/" onClick={() => setOpen(false)} 
+      className="block px-6 py-4 text-lg hover:bg-[#01474f] text-center">
+      Home
+    </Link>
+
+    <Link to="/login" onClick={() => setOpen(false)} 
+      className="block px-6 py-4 text-lg hover:bg-[#01474f] text-center">
+      Login
+    </Link>
+
+    <Link to="/signup" onClick={() => setOpen(false)} 
+      className="block px-6 py-4 text-lg hover:bg-[#01474f] text-center">
+      Sign up
+    </Link>
+
+  </div>
+)}
+
     </nav>
   );
 };
