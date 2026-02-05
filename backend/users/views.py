@@ -43,7 +43,7 @@ def login(req):
 
     if user is None:
         return Response(
-            {"error": "Invalid email or password"},
+            {"message": "Invalid email or password"},
             status=401
         )
 
