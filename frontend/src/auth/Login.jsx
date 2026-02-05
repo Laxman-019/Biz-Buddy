@@ -22,17 +22,17 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/login/`, formData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/login/`, formData);
       localStorage.setItem("access",res.data.access)
       localStorage.setItem("refresh", res.data.refresh)
       toast.success(res.data.message);
       
       setTimeout(() => {
-        navigate("/")
+        navigate("/dashboard")
       }, 3000);
 
     } catch (error) {
-      toast.error("Invalid email or password")
+      toast.error(res.data.message)
       console.log(error)
     }
   };
