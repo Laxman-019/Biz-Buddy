@@ -14,7 +14,6 @@ const Dashboard = () => {
     fetchInsights();
   }, []);
 
-  const token = localStorage.getItem("access");
 
   const fetchSummary = async () => {
     try {
