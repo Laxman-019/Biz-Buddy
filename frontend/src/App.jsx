@@ -7,6 +7,8 @@ import Privacy from './pages/Privacy'
 import Terms from "./pages/Terms";
 import Disclaimer from "./pages/Disclaimer";
 import Dashboard from './pages/Dashboard'
+import AddRecord from './pages/AddRecord'
+import ListRecords from './pages/ListRecord'
 
 
 
@@ -17,6 +19,8 @@ const App = () => {
       <Route path="/login" element={<Login />}/>
       <Route path="/signup" element={<Signup />} /> 
       <Route path="/dashboard" element={<Dashboard />} /> 
+      <Route path="/add-record" element={<AddRecord />} />  
+      <Route path="/records" element={<ListRecords />} />  
       <Route path="/privacy-policy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/disclaimer" element={<Disclaimer />} />
