@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Layout from "../components/Layout";
 
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const fetchSummary = async () => {
     try {
-      const res = await axios.get(import.meta.env.VITE_API_URL + "/api/business-summary/", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axiosInstance.get("/api/business-summary/")
       setSummary(res.data);
     } catch (err) {
       console.log(err);
@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   const fetchMonthly = async () => {
     try {
-      const res = await axios.get(import.meta.env.VITE_API_URL + "/api/monthly-summary/", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axiosInstance.get("/api/monthly-summary/")
       setMonthlyData(res.data);
     } catch (err) {
       console.log(err);
@@ -36,7 +36,7 @@ const Dashboard = () => {
 
   const fetchInsights = async () => {
     try {
-      const res = await axios.get(import.meta.env.VITE_API_URL + "/api/business-insights/", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axiosInstance.get("/api/business-insights/")
       setInsights(res.data);
     } catch (err) {
       console.log(err);
