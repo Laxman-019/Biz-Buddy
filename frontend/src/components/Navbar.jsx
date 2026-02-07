@@ -5,20 +5,20 @@ import logo from "../assets/logo.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false); 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const token = localStorage.getItem("access");
     setIsLoggedIn(!!token);
   }, []);
 
-
   const handleLogout = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
     setIsLoggedIn(false);
+    setDashboardOpen(false); 
     navigate("/login");
   };
 
@@ -27,46 +27,144 @@ const Navbar = () => {
       <div className="flex justify-between items-center md:px-10 lg:px-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="BizBuddy Logo" className="w-10 h-10 object-contain" />
+          <img
+            src={logo}
+            alt="BizBuddy Logo"
+            className="w-10 h-10 object-contain"
+          />
           <span className="font-bold text-2xl tracking-wide">BizBuddy</span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-10 text-lg">
+        {/* DESKTOP MENU */}
+        <div className="hidden md:flex gap-10 text-lg items-center">
           <Link to="/" className="hover:text-gray-300">
             Home
           </Link>
+
           {isLoggedIn ? (
             <>
-              <Link to="/dashboard">Dashboard</Link>
-              <button onClick={handleLogout}>Logout</button>
+              {/* DASHBOARD DROPDOWN */}
+              <div className="relative">
+                <div className="flex items-center gap-1">
+                  {/* Dashboard Page Link */}
+                  <Link
+                    to="/dashboard"
+                    className="hover:text-gray-300"
+                    onClick={() => setDashboardOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+
+                  {/* Dropdown Toggle */}
+                  <button
+                    onClick={() => setDashboardOpen(!dashboardOpen)}
+                    className="hover:text-gray-300"
+                  >
+                    ▾
+                  </button>
+                </div>
+
+                {dashboardOpen && (
+                  <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden">
+                    <Link
+                      to="/records"
+                      className="block px-4 py-3 hover:bg-[#01474f]"
+                      onClick={() => setDashboardOpen(false)}
+                    >
+                      List Record
+                    </Link>
+
+                    <Link
+                      to="/add-record"
+                      className="block px-4 py-3 hover:bg-[#01474f]"
+                      onClick={() => setDashboardOpen(false)}
+                    >
+                      Add Record
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              <button onClick={handleLogout} className="hover:text-gray-300">
+                Logout
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/signup">Sign up</Link>
+              <Link to="/login" className="hover:text-gray-300">
+                Login
+              </Link>
+              <Link to="/signup" className="hover:text-gray-300">
+                Sign up
+              </Link>
             </>
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* MOBILE MENU BUTTON */}
         <button className="md:hidden text-3xl" onClick={() => setOpen(!open)}>
           {open ? <HiX /> : <HiMenu />}
         </button>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* MOBILE DROPDOWN */}
       {open && (
         <div className="md:hidden bg-[#002b30] mt-3 divide-y divide-gray-700 rounded-xl overflow-hidden">
-          <Link to="/" onClick={() => setOpen(false)} className="block px-6 py-4 text-lg hover:bg-[#01474f] text-center">
+          <Link
+            to="/"
+            onClick={() => setOpen(false)}
+            className="block px-6 py-4 text-lg hover:bg-[#01474f] text-center"
+          >
             Home
           </Link>
 
           {isLoggedIn ? (
             <>
-              <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-3 text-center">
-                Dashboard
-              </Link>
+              {/* MOBILE DASHBOARD */}
+              <div className="flex items-center gap-1">
+                {/* Dashboard Page Link */}
+                <Link
+                  to="/dashboard"
+                  className="hover:text-gray-300 block w-full py-3 text-center"
+                  onClick={() => setDashboardOpen(false)}
+                >
+                  Dashboard
+                </Link>
+
+                {/* Dropdown Toggle */}
+                <button
+                  onClick={() => setDashboardOpen(!dashboardOpen)}
+                  className="hover:text-gray-300"
+                >
+                  ▾
+                </button>
+              </div>
+
+              {dashboardOpen && (
+                <div className="bg-[#01474f]">
+                  <Link
+                    to="/dashboard/list-record"
+                    onClick={() => {
+                      setOpen(false);
+                      setDashboardOpen(false);
+                    }}
+                    className="block py-2 text-center text-sm"
+                  >
+                    List Record
+                  </Link>
+
+                  <Link
+                    to="/dashboard/add-record"
+                    onClick={() => {
+                      setOpen(false);
+                      setDashboardOpen(false);
+                    }}
+                    className="block py-2 text-center text-sm"
+                  >
+                    Add Record
+                  </Link>
+                </div>
+              )}
 
               <button
                 onClick={() => {
@@ -80,11 +178,19 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setOpen(false)} className="block py-3 text-center">
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="block py-3 text-center"
+              >
                 Login
               </Link>
 
-              <Link to="/signup" onClick={() => setOpen(false)} className="block py-3 text-center">
+              <Link
+                to="/signup"
+                onClick={() => setOpen(false)}
+                className="block py-3 text-center"
+              >
                 Sign up
               </Link>
             </>
