@@ -45,12 +45,24 @@ const Navbar = () => {
             <>
               {/* DASHBOARD DROPDOWN */}
               <div className="relative">
-                <button
-                  onClick={() => setDashboardOpen(!dashboardOpen)}
-                  className="hover:text-gray-300"
-                >
-                  Dashboard ▾
-                </button>
+                <div className="flex items-center gap-1">
+                  {/* Dashboard Page Link */}
+                  <Link
+                    to="/dashboard"
+                    className="hover:text-gray-300"
+                    onClick={() => setDashboardOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+
+                  {/* Dropdown Toggle */}
+                  <button
+                    onClick={() => setDashboardOpen(!dashboardOpen)}
+                    className="hover:text-gray-300"
+                  >
+                    ▾
+                  </button>
+                </div>
 
                 {dashboardOpen && (
                   <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden">
@@ -109,12 +121,24 @@ const Navbar = () => {
           {isLoggedIn ? (
             <>
               {/* MOBILE DASHBOARD */}
-              <button
-                onClick={() => setDashboardOpen(!dashboardOpen)}
-                className="block w-full py-3 text-center"
-              >
-                Dashboard ▾
-              </button>
+              <div className="flex items-center gap-1">
+                {/* Dashboard Page Link */}
+                <Link
+                  to="/dashboard"
+                  className="hover:text-gray-300 block w-full py-3 text-center"
+                  onClick={() => setDashboardOpen(false)}
+                >
+                  Dashboard
+                </Link>
+
+                {/* Dropdown Toggle */}
+                <button
+                  onClick={() => setDashboardOpen(!dashboardOpen)}
+                  className="hover:text-gray-300"
+                >
+                  ▾
+                </button>
+              </div>
 
               {dashboardOpen && (
                 <div className="bg-[#01474f]">
