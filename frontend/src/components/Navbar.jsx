@@ -55,7 +55,7 @@ const Navbar = () => {
                 {dashboardOpen && (
                   <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden">
                     <Link
-                      to="/dashboard/list-record"
+                      to="/records"
                       className="block px-4 py-3 hover:bg-[#01474f]"
                       onClick={() => setDashboardOpen(false)}
                     >
@@ -63,7 +63,7 @@ const Navbar = () => {
                     </Link>
 
                     <Link
-                      to="/dashboard/add-record"
+                      to="/add-record"
                       className="block px-4 py-3 hover:bg-[#01474f]"
                       onClick={() => setDashboardOpen(false)}
                     >
