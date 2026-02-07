@@ -7,4 +7,6 @@ urlpatterns = [
     path('business-summary/', business_summary),
     path('monthly-summary/', monthly_summary),
     path('business-insights/', business_insights),
+    path('update-record/<int:id>/', update_record),
+    path('delete-record/<int:id>/', delete_record),
 ]
