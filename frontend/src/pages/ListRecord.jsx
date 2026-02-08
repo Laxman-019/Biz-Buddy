@@ -60,11 +60,12 @@ const ListRecords = () => {
     if (!window.confirm("Delete this record?")) return;
 
     try {
-      await axiosInstance.delete(`/api/delete-record/${id}/`);
-      toast.success("Record Deleted");
+      const res = await axiosInstance.delete(`/api/delete-record/${id}/`);
+      toast.success(res.message);
       fetchRecords();
-    } catch {
-      toast.error("Delete failed");
+    } catch (error){
+      toast.error(res.message);
+      console.log(error)
     }
   };
 
