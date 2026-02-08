@@ -144,8 +144,13 @@ def update_record(req, id):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_record(req):
-    record = BusinessRecord.objects.get(id=id, user=req.user)
-    record.delete()
+def delete_record(req, id):
 
-    return Response({"message": "Record deleted"})
+    try:
+        record = BusinessRecord.objects.get(id=id, user=req.user)
+        record.delete()
+
+        return Response({"message": "Record deleted"},status=200)
+
+    except BusinessRecord.DoesNotExist:
+        return Response({"message": "Record not found"},status=404)
