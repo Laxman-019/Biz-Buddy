@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users',
     'businesses',
-    # 'predictions',
+    'predictions',
 ]
 
 MIDDLEWARE = [
