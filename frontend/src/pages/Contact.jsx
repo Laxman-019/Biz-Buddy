@@ -1,7 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/Layout";
 
 const Contact = () => {
+  const [result, setResult] = useState("");
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    setResult("Sending...");
+
+    const formData = new FormData(e.target);
+    formData.append("access_key", "66e17234-6e81-4b0f-9f80-34418f942347");
+
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      setResult("Message Sent Successfully!");
+      e.target.reset(); // clear form
+    } else {
+      setResult("Something went wrong. Please try again!");
+    }
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-[#E8EEF5] px-6 py-14 text-[#2b2d42]">
@@ -22,14 +46,16 @@ const Contact = () => {
               Send Us a Message
             </h3>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={sendMessage}>
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Full Name
                 </label>
                 <input
                   type="text"
+                  name="name"
                   placeholder="Enter your name"
+                  required
                   className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#003C43]"
                 />
               </div>
@@ -40,7 +66,9 @@ const Contact = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   placeholder="Enter your email"
+                  required
                   className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#003C43]"
                 />
               </div>
@@ -51,9 +79,11 @@ const Contact = () => {
                 </label>
                 <textarea
                   rows="5"
+                  name="message"
                   placeholder="Write your message here..."
+                  required
                   className="w-full rounded-md px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#003C43]"
-                />
+                ></textarea>
               </div>
 
               <button
@@ -63,9 +93,8 @@ const Contact = () => {
                 Send Message
               </button>
 
-              <p className="text-xs text-center text-gray-600">
-                Your information is safe and will only be used to respond to
-                your inquiry.
+              <p className="text-center text-sm text-gray-600 font-medium">
+                {result}
               </p>
             </form>
           </div>
