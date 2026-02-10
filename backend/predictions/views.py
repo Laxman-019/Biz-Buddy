@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from predictions.model_manager import load_model
 from predictions.forecasting_engine import train_user_model
+from predictions.market_engine import calculate_market_metrics
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -32,3 +33,11 @@ def demand_forecast(request):
         'trend': trend
     })
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def market_analysis(req):
+    
+    metrics = calculate_market_metrics(req.user)
+    
+    return Response(metrics)
