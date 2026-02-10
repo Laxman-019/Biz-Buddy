@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from predictions.model_manager import load_model
 from predictions.forecasting_engine import train_user_model
 from predictions.market_engine import calculate_market_metrics
+from predictions.competitor_engine import analyze_competitor_position
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -41,3 +42,11 @@ def market_analysis(req):
     metrics = calculate_market_metrics(req.user)
     
     return Response(metrics)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def competitor_analysis(req):
+    result = analyze_competitor_position(req.user)
+
+    return Response(result)
