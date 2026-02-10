@@ -1,6 +1,8 @@
 from django.urls import path
-from predictions.views import demand_forecast
+from predictions.views import *
 
 urlpatterns = [
-    path('forecast/', demand_forecast ),
+    path('forecast/', demand_forecast),
+    path('market-analysis/', market_analysis),
+    path('competitor-analysis/', competitor_analysis),
 ]
