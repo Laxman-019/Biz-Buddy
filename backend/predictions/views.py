@@ -6,6 +6,7 @@ from predictions.model_manager import load_model
 from predictions.forecasting_engine import train_user_model
 from predictions.market_engine import calculate_market_metrics
 from predictions.competitor_engine import analyze_competitor_position
+from predictions.strategy_engine import generate_business_strategy
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -48,5 +49,12 @@ def market_analysis(req):
 @permission_classes([IsAuthenticated])
 def competitor_analysis(req):
     result = analyze_competitor_position(req.user)
+
+    return Response(result)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def business_strategy(req):
+    result = generate_business_strategy(req.user)
 
     return Response(result)

@@ -7,7 +7,7 @@ def train_user_model(user_id):
 
     records = BusinessRecord.objects.filter(user_id=user_id).order_by('date')
 
-    if records.count() < 2:
+    if records.count() < 5:
         return None
     
     df = pd.DataFrame(list(records.values('date','sales')))

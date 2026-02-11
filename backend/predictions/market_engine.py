@@ -7,13 +7,13 @@ def calculate_market_metrics(user):
     total_market_sales = BusinessRecord.objects.aggregate(total=Sum("sales"))['total'] or 0
     
     # User total sales
-    user_sales = BusinessRecord.objects,filter(user = user).aggregate(total=Sum("sales"))['total'] or 0
+    user_sales = BusinessRecord.objects.filter(user = user).aggregate(total=Sum("sales"))['total'] or 0
 
     # Market share
     market_share = (user_sales/total_market_sales)*100 if total_market_sales > 0 else 0
 
     # Market Growth Calculation
-    market_monthly = (BusinessRecord.objects.annotate(month=TruncMonth('date')).values('month').annotate(total_sales=sum('sales')).order_by('month'))
+    market_monthly = (BusinessRecord.objects.annotate(month=TruncMonth('date')).values('month').annotate(total_sales=Sum('sales')).order_by('month'))
 
     market_monthly = list(market_monthly)
 
@@ -26,7 +26,7 @@ def calculate_market_metrics(user):
         
 
     # User Growth        
-    user_monthly = (BusinessRecord.objects.filter(user=user).annotate(month = TruncMonth('date')).values('month').annotate(total_sales=sum('sales')).order_by('month'))
+    user_monthly = (BusinessRecord.objects.filter(user=user).annotate(month = TruncMonth('date')).values('month').annotate(total_sales=Sum('sales')).order_by('month'))
     
     user_monthly = list(user_monthly)
     
