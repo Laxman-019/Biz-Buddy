@@ -52,7 +52,11 @@ def build_business_features():
 
         user_map.append(user_id)
 
-    return np.array(feature_data),user_map
+        if len(feature_data) == 0:
+            return np.array([]), []
+
+    return np.array(feature_data), user_map
+
 
 
 # Train clustering

@@ -12,15 +12,23 @@ def generate_business_strategy(user):
     
     # Forcast Analysis
     model = load_model(user.id)
+    if not model:
+        model = train_user_model(user.id)
+
     if model:
-        furute = model.make_future_dataframe(periods = 30)
-        forcast = model.predict(furute)
-        trend = "increasing" if forcast['trend'].iloc[-1] > forcast['trend'].iloc[-30] else "declining"
+        future = model.make_future_dataframe(periods = 30)
+        forecast = model.predict(future)
+
+        if len(forecast) >= 30:
+            trend = "increasing" if forecast['trend'].iloc[-1] > forecast['trend'].iloc[-30] else "declining"
+        else:
+            trend = "stable"
+
         
         if trend == "increasing":
             strengths.append("Sales demand is expected to grow soon.")
             strategies.append("Increase inventory and prepare for higher customer demand.")
-        else:
+        elif trend == "declining":
             warnings.append("Demand trend show decline.") 
             strategies.append("Focus on marketing campaigns and customer retention.") 
     else:
@@ -28,41 +36,50 @@ def generate_business_strategy(user):
         
 
     # Market share analysis
-    
     market_data = calculate_market_metrics(user)
-    if market_data["share_status"] == "Gaining Market Share":
+
+    if market_data.get("share_status") == "Gaining Market Share":
+
         strengths.append("You are outperforming market growth.")
         strategies.append("Reinvest profits to scale operations.")
         
-    elif market_data["share_status"] == "Losing Market Share":
+    elif market_data.get("share_status") == "Losing Market Share":
+
         warnings.append("You are losing market competitivenes.")
         strategies.append("Improve marketing and differentiate your products.")
         
+
     # Competitor analysis
     competitor_data = analyze_competitor_position(user)
     cluster = competitor_data.get("user_cluster")
-    
-    if cluster == "High Performing Businesses":
-        strengths.append("You belong to top-performing business group.")
-        strategies.append("Expand business scale and explore new markets.")
-    
-    elif cluster == "Stable Businesses":
-        strategies.append("Improve efficiency and cost optimization to move into top-performing group.")
-    
-    elif cluster == "Developing Businesses":
-        warnings.append("Your business is below industry performance level.")     
-        strategies.append("Focus on improving profit margin and reducing costs.")
+
+    if cluster:
+
+        if cluster == "High Performing Businesses":
+
+            strengths.append("You belong to top-performing business group.")
+            strategies.append("Expand business scale and explore new markets.")
         
+        elif cluster == "Stable Businesses":
+
+            strategies.append("Improve efficiency and cost optimization to move into top-performing group.")
+        
+        elif cluster == "Developing Businesses":
+
+            warnings.append("Your business is below industry performance level.")     
+            strategies.append("Focus on improving profit margin and reducing costs.")
+
+
     # Finencial health check
-    
     records = BusinessRecord.objects.filter(user = user)
+
     total_sales = records.aggregate(total = Sum('sales'))['total'] or 0
     total_expenses = records.aggregate(total = Sum('expenses'))['total'] or 0
     total_profit = records.aggregate(total = Sum('profit'))['total'] or 0
     
     if total_sales > 0:
-        margin = total_profit/total_sales
-        expense_ratio = total_expenses/total_sales
+        margin = total_profit / total_sales
+        expense_ratio = total_expenses / total_sales
         
         if margin < 0.15:
             warnings.append("Profit margin is low.")
