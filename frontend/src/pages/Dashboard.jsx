@@ -8,13 +8,23 @@ const Dashboard = () => {
   const [monthlyData, setMonthlyData] = useState([]);
   const [insights, setInsights] = useState(null);
 
+  const [forecast, setForecast] = useState(null);
+  const [market, setMarket] = useState(null);
+  const [competitor, setCompetitor] = useState(null);
+  const [strategy, setStrategy] = useState(null);
+
+
   useEffect(() => {
     fetchSummary();
     fetchMonthly();
     fetchInsights();
+    fetchForecast();
+    fetchCompetitor();
+    fetchMarket();
+    fetchStrategy();
   }, []);
 
-
+  // Business data
   const fetchSummary = async () => {
     try {
       const res = await axiosInstance.get("/api/business-summary/")
@@ -41,6 +51,44 @@ const Dashboard = () => {
       console.log(err);
     }
   };
+
+  // AI calls
+  const fetchForecast = async () => {
+    try {
+      const res = await axiosInstance.get("api/forecast/");
+      setForecast(res.data);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  const fetchMarket = async () => {
+    try {
+      const res = await axiosInstance.get("api/market-analysis/");
+      setMarket(res.data);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  const fetchCompetitor = async () => {
+    try {
+      const res = await axiosInstance("api/competitor-analysis/")
+      setCompetitor(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  const fetchStrategy = async () => {
+    try {
+      const res = await axiosInstance("api/strategy/")
+      setStrategy(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
 
   return (
     <Layout>
@@ -117,6 +165,78 @@ const Dashboard = () => {
             </div>
           </div>
         )}
+
+        <div className="mt-10">
+
+          <h2 className="text-2xl font-bold mb-6">🤖 AI Business Intelligence</h2>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+
+            {forecast && (
+              <div className="bg-white p-6 rounded-xl shadow">
+                <h3 className="font-semibold mb-3">📈 Demand Forecast</h3>
+                <p className="text-xl font-bold">₹ {forecast.predicted_30_day_demand}</p>
+
+                <p className={`mt-2 font-semibold ${
+                  forecast.trend === "increasing"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}>
+                  Trend: {forecast.trend}
+                </p>
+              </div>
+            )}
+
+            {market && (
+              <div className="bg-white p-6 rounded-xl shadow">
+                <h3 className="font-semibold mb-3">📊 Market Position</h3>
+                <p>Market Share: {market.market_share_percent}%</p>
+                <p>Status: {market.share_status}</p>
+              </div>
+            )}
+
+            {competitor && (
+              <div className="bg-white p-6 rounded-xl shadow">
+                <h3 className="font-semibold mb-3">🏆 Competitor Position</h3>
+                <p>Category: {competitor.user_cluster}</p>
+                <p>Total Competitors: {competitor.total_competitors}</p>
+              </div>
+            )}
+
+          </div>
+
+          {/* STRATEGY ADVISOR */}
+          {strategy && (
+            <div className="bg-white p-6 rounded-xl shadow">
+
+              <h3 className="text-xl font-semibold mb-4">🧠 AI Growth Advisor</h3>
+
+              <div className="mb-4">
+                <h4 className="font-semibold text-green-700 mb-2">Strengths</h4>
+                {strategy.strengths?.map((s, i) => (
+                  <p key={i}>✔ {s}</p>
+                ))}
+              </div>
+
+              <div className="mb-4">
+                <h4 className="font-semibold text-red-600 mb-2">Warnings</h4>
+                {strategy.warnings?.map((w, i) => (
+                  <p key={i}>⚠ {w}</p>
+                ))}
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-blue-600 mb-2">Recommendations</h4>
+                {strategy.recommended_strategies?.map((r, i) => (
+                  <p key={i}>👉 {r}</p>
+                ))}
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
       </div>
     </Layout>
   );
