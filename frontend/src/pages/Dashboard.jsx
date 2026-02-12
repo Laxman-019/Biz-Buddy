@@ -13,105 +13,84 @@ const Dashboard = () => {
   const [competitor, setCompetitor] = useState(null);
   const [strategy, setStrategy] = useState(null);
 
-
   useEffect(() => {
     fetchSummary();
     fetchMonthly();
     fetchInsights();
     fetchForecast();
-    fetchCompetitor();
     fetchMarket();
+    fetchCompetitor();
     fetchStrategy();
   }, []);
 
-  // Business data
+  //  Business APIs 
+
   const fetchSummary = async () => {
-    try {
-      const res = await axiosInstance.get("/api/business-summary/")
-      setSummary(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await axiosInstance.get("/api/business-summary/");
+    setSummary(res.data);
   };
 
   const fetchMonthly = async () => {
-    try {
-      const res = await axiosInstance.get("/api/monthly-summary/")
-      setMonthlyData(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await axiosInstance.get("/api/monthly-summary/");
+    setMonthlyData(res.data);
   };
 
   const fetchInsights = async () => {
-    try {
-      const res = await axiosInstance.get("/api/business-insights/")
-      setInsights(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+    const res = await axiosInstance.get("/api/business-insights/");
+    setInsights(res.data);
   };
 
-  // AI calls
+  //  AI APIs 
+
   const fetchForecast = async () => {
-    try {
-      const res = await axiosInstance.get("api/forecast/");
-      setForecast(res.data);
-    } catch (error) {
-      console.log(error)
-    }
+    const res = await axiosInstance.get("/api/forecast/");
+    setForecast(res.data);
   };
 
   const fetchMarket = async () => {
-    try {
-      const res = await axiosInstance.get("api/market-analysis/");
-      setMarket(res.data);
-    } catch (error) {
-      console.log(error)
-    }
+    const res = await axiosInstance.get("/api/market-analysis/");
+    setMarket(res.data);
   };
 
   const fetchCompetitor = async () => {
-    try {
-      const res = await axiosInstance("api/competitor-analysis/")
-      setCompetitor(res.data)
-    } catch (error) {
-      console.log(error)
-    }
+    const res = await axiosInstance.get("/api/competitor-analysis/");
+    setCompetitor(res.data);
   };
 
   const fetchStrategy = async () => {
-    try {
-      const res = await axiosInstance("api/strategy/")
-      setStrategy(res.data)
-    } catch (error) {
-      console.log(error)
-    }
+    const res = await axiosInstance.get("/api/strategy/");
+    setStrategy(res.data);
   };
-
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#E3FEF7] text-[#283046] p-6">
-        {/* Title */}
-        <h1 className="text-3xl font-bold mb-6">Business Dashboard</h1>
+      <div className="min-h-screen bg-[#E8EEF5] p-8">
 
-        {/* SUMMARY CARDS */}
+        {/* HEADER */}
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Business Intelligence Dashboard
+          </h1>
+          <p className="text-gray-500">
+            AI insights to grow your business smarter
+          </p>
+        </div>
+
+        {/* KPI SECTION */}
         {summary && (
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
-            <Card title="Total Sales" value={`₹ ${summary.total_sales}`} color="bg-green-500" />
-
-            <Card title="Total Expenses" value={`₹ ${summary.total_expenses}`} color="bg-red-500" />
-
-            <Card title="Total Profit" value={`₹ ${summary.total_profit}`} color="bg-blue-500" />
-
-            <Card title="Total Records" value={summary.total_records} color="bg-purple-500" />
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
+            <ModernCard title="Total Sales" value={`₹ ${summary.total_sales}`} />
+            <ModernCard title="Expenses" value={`₹ ${summary.total_expenses}`} />
+            <ModernCard title="Profit" value={`₹ ${summary.total_profit}`} />
+            <ModernCard title="Records" value={summary.total_records} />
           </div>
         )}
 
-        {/* MONTHLY CHART */}
-        <div className="bg-white p-6 rounded-xl shadow mb-8">
-          <h2 className="text-xl font-semibold mb-4">Monthly Sales</h2>
+        {/* CHART */}
+        <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
+          <h2 className="text-xl font-semibold mb-6">
+            Monthly Sales Performance
+          </h2>
 
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyData}>
@@ -123,119 +102,128 @@ const Dashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* INSIGHTS */}
+        {/* BUSINESS INSIGHTS */}
         {insights && (
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-6">Business Insights</h2>
+          <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
+            <h2 className="text-xl font-semibold mb-6">
+              📊 Business Insights
+            </h2>
 
-            {/* STATUS BADGE */}
             <div className="mb-6">
-              <span
-                className={`px-4 py-1 rounded-full text-sm font-semibold
-          ${insights.status === "good" ? "bg-green-100 text-green-700" : insights.status === "warning" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}
-        `}
-              >
+              <span className={`px-4 py-1 rounded-full text-sm font-semibold
+                ${insights.status === "good"
+                  ? "bg-green-100 text-green-700"
+                  : insights.status === "warning"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+                }`}>
                 {insights.status.toUpperCase()}
               </span>
             </div>
 
-            {/* MESSAGES */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-800 mb-3">📊 Performance Messages</h3>
-              <div className="space-y-3">
-                {insights.messages?.map((msg, index) => (
-                  <div key={index} className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+            <div className="grid md:grid-cols-2 gap-8">
+
+              <div>
+                <h3 className="font-semibold mb-3">Performance Messages</h3>
+                {insights.messages?.map((msg, i) => (
+                  <div key={i} className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-3 rounded">
                     {msg}
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* SUGGESTIONS */}
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">💡 Suggestions</h3>
-
-              <div className="space-y-3">
-                {insights.suggestions?.map((sug, index) => (
-                  <div key={index} className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+              <div>
+                <h3 className="font-semibold mb-3">Suggestions</h3>
+                {insights.suggestions?.map((sug, i) => (
+                  <div key={i} className="bg-green-50 border-l-4 border-green-500 p-4 mb-3 rounded">
                     {sug}
                   </div>
                 ))}
               </div>
+
             </div>
           </div>
         )}
 
-        <div className="mt-10">
+        {/* AI INTELLIGENCE */}
+        <div className="bg-linear-to-r from-indigo-50 to-purple-50 p-8 rounded-2xl border mb-12">
+          <h2 className="text-xl font-semibold mb-6">
+            🤖 AI Intelligence
+          </h2>
 
-          <h2 className="text-2xl font-bold mb-6">🤖 AI Business Intelligence</h2>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid md:grid-cols-3 gap-6">
 
             {forecast && (
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-3">📈 Demand Forecast</h3>
-                <p className="text-xl font-bold">₹ {forecast.predicted_30_day_demand}</p>
-
-                <p className={`mt-2 font-semibold ${
-                  forecast.trend === "increasing"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}>
-                  Trend: {forecast.trend}
-                </p>
-              </div>
+              <AICard
+                title="Demand Forecast"
+                value={`₹ ${forecast.predicted_30_day_demand}`}
+                subtitle={`Trend: ${forecast.trend}`}
+              />
             )}
 
             {market && (
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-3">📊 Market Position</h3>
-                <p>Market Share: {market.market_share_percent}%</p>
-                <p>Status: {market.share_status}</p>
-              </div>
+              <AICard
+                title="Market Share"
+                value={`${market.market_share_percent}%`}
+                subtitle={market.share_status}
+              />
             )}
 
             {competitor && (
-              <div className="bg-white p-6 rounded-xl shadow">
-                <h3 className="font-semibold mb-3">🏆 Competitor Position</h3>
-                <p>Category: {competitor.user_cluster}</p>
-                <p>Total Competitors: {competitor.total_competitors}</p>
-              </div>
+              <AICard
+                title="Competitor Category"
+                value={competitor.user_cluster}
+                subtitle={`Competitors: ${competitor.total_competitors}`}
+              />
             )}
 
           </div>
+        </div>
 
-          {/* STRATEGY ADVISOR */}
-          {strategy && (
-            <div className="bg-white p-6 rounded-xl shadow">
+        {/* AI STRATEGY */}
+        {strategy && (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border">
 
-              <h3 className="text-xl font-semibold mb-4">🧠 AI Growth Advisor</h3>
+            <h2 className="text-xl font-semibold mb-6">
+              🧠 AI Growth Strategy
+            </h2>
 
-              <div className="mb-4">
-                <h4 className="font-semibold text-green-700 mb-2">Strengths</h4>
-                {strategy.strengths?.map((s, i) => (
-                  <p key={i}>✔ {s}</p>
-                ))}
-              </div>
+            <div className="grid md:grid-cols-2 gap-10">
 
-              <div className="mb-4">
-                <h4 className="font-semibold text-red-600 mb-2">Warnings</h4>
-                {strategy.warnings?.map((w, i) => (
-                  <p key={i}>⚠ {w}</p>
+              <div>
+                <h3 className="text-green-600 font-semibold mb-3">
+                  Strengths
+                </h3>
+
+                {strategy.strengths.map((s, i) => (
+                  <p key={i} className="text-gray-600 mb-2">✔ {s}</p>
                 ))}
               </div>
 
               <div>
-                <h4 className="font-semibold text-blue-600 mb-2">Recommendations</h4>
-                {strategy.recommended_strategies?.map((r, i) => (
-                  <p key={i}>👉 {r}</p>
+                <h3 className="text-red-500 font-semibold mb-3">
+                  Risks
+                </h3>
+
+                {strategy.warnings.map((w, i) => (
+                  <p key={i} className="text-gray-600 mb-2">⚠ {w}</p>
                 ))}
               </div>
 
             </div>
-          )}
 
-        </div>
+            <div className="mt-8">
+              <h3 className="text-indigo-600 font-semibold mb-3">
+                Recommendations
+              </h3>
+
+              {strategy.recommended_strategies.map((r, i) => (
+                <p key={i} className="text-gray-700 mb-2">→ {r}</p>
+              ))}
+            </div>
+
+          </div>
+        )}
 
       </div>
     </Layout>
@@ -244,11 +232,18 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-const Card = ({ title, value, color }) => {
-  return (
-    <div className={`${color} text-white p-6 rounded-xl shadow`}>
-      <h3 className="text-lg">{title}</h3>
-      <p className="text-2xl font-bold">{value}</p>
-    </div>
-  );
-};
+
+const ModernCard = ({ title, value }) => (
+  <div className="bg-white p-6 rounded-2xl shadow-sm border">
+    <p className="text-gray-500 text-sm">{title}</p>
+    <p className="text-2xl font-bold text-gray-800 mt-2">{value}</p>
+  </div>
+);
+
+const AICard = ({ title, value, subtitle }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border">
+    <p className="text-gray-500 text-sm">{title}</p>
+    <p className="text-xl font-bold mt-2">{value}</p>
+    <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
+  </div>
+);
