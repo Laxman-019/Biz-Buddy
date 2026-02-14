@@ -1,10 +1,25 @@
 from businesses.models import BusinessRecord
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
+from ml.benchmark_engine import calculate_industry_growth
+from django.conf import settings
+import pandas as pd
+import os
+
+DATA_PATH = os.path.join(
+    settings.BASE_DIR,
+    "ml",
+    "datasets",
+    "indian_ecommerce.csv"
+)
+
+def get_industry_market_size():
+    df = pd.read_csv(DATA_PATH)
+    return df["revenue"].sum()
 
 def calculate_market_metrics(user):
     # Total market sales(all user)
-    total_market_sales = BusinessRecord.objects.aggregate(total=Sum("sales"))['total'] or 0
+    total_market_sales = get_industry_market_size()
     
     # User total sales
     user_sales = BusinessRecord.objects.filter(user = user).aggregate(total=Sum("sales"))['total'] or 0
