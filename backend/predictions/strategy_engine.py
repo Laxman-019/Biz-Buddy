@@ -1,47 +1,107 @@
+from predictions.intelligence_engine import generate_intelligence
 from businesses.models import BusinessRecord
 from django.db.models import Sum
-from predictions.intelligence_engine import generate_intelligence
+
 
 def generate_business_strategy(user):
+
     data = generate_intelligence(user)
+
     strategies = []
     warnings = []
     strengths = []
-    
+
     trend = data["forecast"]["trend"]
     performance_gap = data["industry"]["performance_gap"]
-    cluster = data["competitor"].get("user_cluster")
+    market_data = data.get("market", {})
+    competitor_data = data.get("competitor", {})
 
-    # forcast_logic
-    if trend == "increasing":
-        strengths.append("Sales demand is expected to grow soon.")
+
+    records = BusinessRecord.objects.filter(user=user)
+
+    total_sales = records.aggregate(total=Sum('sales'))['total'] or 0
+    total_expenses = records.aggregate(total=Sum('expenses'))['total'] or 0
+    total_profit = records.aggregate(total=Sum('profit'))['total'] or 0
+
+    if total_sales > 0:
+        profit_margin = total_profit / total_sales
+        expense_ratio = total_expenses / total_sales
+
+        if total_profit < 0:
+            warnings.append("Your business is currently running at a loss.")
+            strategies.append("Reduce unnecessary expenses and improve pricing strategy.")
+
+        elif profit_margin < 0.15:
+            warnings.append("Profit margin is relatively low.")
+            strategies.append("Improve pricing strategy and reduce operational costs.")
+
+        if expense_ratio > 0.7:
+            warnings.append("Expenses are consuming a large portion of revenue.")
+            strategies.append("Optimize operational and supply chain costs.")
+
+        if total_profit > 0 and profit_margin >= 0.2:
+            strengths.append("Your profit margin is healthy.")
+
+
+    if trend == "declining":
+        warnings.append("Demand trend is declining.")
+        strategies.append("Focus on marketing campaigns and customer retention.")
+
+    elif trend == "increasing":
+        strengths.append("Sales demand is expected to grow.")
         strategies.append("Increase inventory and prepare for higher customer demand.")
-    elif trend == "declining":
-        warnings.append("Demand trend show decline.") 
-        strategies.append("Focus on marketing campaigns and customer retention.") 
 
-    # industry_comparision
-    if performance_gap>0:
-        strengths.append("You are outperforming industry growth.")
     else:
-        warnings.append("You are below industry growth level.")
-        strategies.append("Improve operational efficiency.")
+        strengths.append("Demand trend is stable.")
 
-    # cluster analysis
+
+    if trend == "declining":
+        # Context-aware messaging
+        if performance_gap > 0:
+            strengths.append(
+                "Although demand is declining, you are performing better than the industry average."
+            )
+        else:
+            warnings.append(
+                "You are declining faster than industry average."
+            )
+            strategies.append("Re-evaluate product positioning and pricing strategy.")
+
+    else:
+        if performance_gap > 0:
+            strengths.append("You are outperforming industry growth.")
+        else:
+            warnings.append("You are below industry growth level.")
+            strategies.append("Improve operational efficiency and market positioning.")
+
+    
+
+    share_status = market_data.get("share_status")
+
+    if share_status == "Gaining Market Share":
+        strengths.append("You are gaining market share.")
+    elif share_status == "Losing Market Share":
+        warnings.append("You are losing market share.")
+        strategies.append("Strengthen marketing and improve product differentiation.")
+
+
+    cluster = competitor_data.get("user_cluster")
+
     if cluster == "High Performing Businesses":
+        strengths.append("You belong to a high-performing business group.")
+        strategies.append("Explore expansion opportunities and scale operations.")
 
-        strengths.append("You belong to top-performing business group.")
-        strategies.append("Expand business scale and explore new markets.")
-    
     elif cluster == "Developing Businesses":
+        warnings.append("Your business performance is below top-performing group.")
+        strategies.append("Focus on improving margins and cost control.")
 
-        warnings.append("Your business is below industry performance level.")     
-        strategies.append("Focus on improving profit margin and reducing costs.")
 
+    strengths = list(dict.fromkeys(strengths))
+    warnings = list(dict.fromkeys(warnings))
+    strategies = list(dict.fromkeys(strategies))
 
-    
     return {
-        "strengths" : strengths,
-        "warnings" : warnings,
-        "recommended_strategies" : strategies
+        "strengths": strengths,
+        "warnings": warnings,
+        "recommended_strategies": strategies
     }

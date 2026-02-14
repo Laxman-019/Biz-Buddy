@@ -8,7 +8,7 @@ DATA_PATH = os.path.join(
     settings.BASE_DIR,
     "ml",
     "datasets",
-    "indian_ecommerce.csv"
+    "indian_ecommerce.csv" 
 
 )
 

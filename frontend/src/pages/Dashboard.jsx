@@ -65,7 +65,6 @@ const Dashboard = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-[#E8EEF5] p-8">
-
         {/* HEADER */}
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -79,8 +78,14 @@ const Dashboard = () => {
         {/* KPI SECTION */}
         {summary && (
           <div className="grid md:grid-cols-4 gap-6 mb-12">
-            <ModernCard title="Total Sales" value={`₹ ${summary.total_sales}`} />
-            <ModernCard title="Expenses" value={`₹ ${summary.total_expenses}`} />
+            <ModernCard
+              title="Total Sales"
+              value={`₹ ${summary.total_sales}`}
+            />
+            <ModernCard
+              title="Expenses"
+              value={`₹ ${summary.total_expenses}`}
+            />
             <ModernCard title="Profit" value={`₹ ${summary.total_profit}`} />
             <ModernCard title="Records" value={summary.total_records} />
           </div>
@@ -105,28 +110,31 @@ const Dashboard = () => {
         {/* BUSINESS INSIGHTS */}
         {insights && (
           <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
-            <h2 className="text-xl font-semibold mb-6">
-              📊 Business Insights
-            </h2>
+            <h2 className="text-xl font-semibold mb-6">📊 Business Insights</h2>
 
             <div className="mb-6">
-              <span className={`px-4 py-1 rounded-full text-sm font-semibold
-                ${insights.status === "good"
-                  ? "bg-green-100 text-green-700"
-                  : insights.status === "warning"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
-                }`}>
+              <span
+                className={`px-4 py-1 rounded-full text-sm font-semibold
+                ${
+                  insights.status === "good"
+                    ? "bg-green-100 text-green-700"
+                    : insights.status === "warning"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                }`}
+              >
                 {insights.status.toUpperCase()}
               </span>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-
               <div>
                 <h3 className="font-semibold mb-3">Performance Messages</h3>
                 {insights.messages?.map((msg, i) => (
-                  <div key={i} className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-3 rounded">
+                  <div
+                    key={i}
+                    className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-3 rounded"
+                  >
                     {msg}
                   </div>
                 ))}
@@ -135,29 +143,28 @@ const Dashboard = () => {
               <div>
                 <h3 className="font-semibold mb-3">Suggestions</h3>
                 {insights.suggestions?.map((sug, i) => (
-                  <div key={i} className="bg-green-50 border-l-4 border-green-500 p-4 mb-3 rounded">
+                  <div
+                    key={i}
+                    className="bg-green-50 border-l-4 border-green-500 p-4 mb-3 rounded"
+                  >
                     {sug}
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
         )}
 
         {/* AI INTELLIGENCE */}
         <div className="bg-linear-to-r from-indigo-50 to-purple-50 p-8 rounded-2xl border mb-12">
-          <h2 className="text-xl font-semibold mb-6">
-            🤖 AI Intelligence
-          </h2>
+          <h2 className="text-xl font-semibold mb-6">🤖 AI Intelligence</h2>
 
           <div className="grid md:grid-cols-3 gap-6">
-
-            {forecast && (
+            {forecast?.forecast && (
               <AICard
                 title="Demand Forecast"
-                value={`₹ ${forecast.predicted_30_day_demand}`}
-                subtitle={`Trend: ${forecast.trend}`}
+                value={`₹ ${forecast.forecast.predicted_30_day_demand}`}
+                subtitle={`Trend: ${forecast.forecast.trend}`}
               />
             )}
 
@@ -176,40 +183,36 @@ const Dashboard = () => {
                 subtitle={`Competitors: ${competitor.total_competitors}`}
               />
             )}
-
           </div>
         </div>
 
         {/* AI STRATEGY */}
         {strategy && (
           <div className="bg-white p-8 rounded-2xl shadow-sm border">
-
             <h2 className="text-xl font-semibold mb-6">
               🧠 AI Growth Strategy
             </h2>
 
             <div className="grid md:grid-cols-2 gap-10">
-
               <div>
-                <h3 className="text-green-600 font-semibold mb-3">
-                  Strengths
-                </h3>
+                <h3 className="text-green-600 font-semibold mb-3">Strengths</h3>
 
                 {strategy.strengths.map((s, i) => (
-                  <p key={i} className="text-gray-600 mb-2">✔ {s}</p>
+                  <p key={i} className="text-gray-600 mb-2">
+                    ✔ {s}
+                  </p>
                 ))}
               </div>
 
               <div>
-                <h3 className="text-red-500 font-semibold mb-3">
-                  Risks
-                </h3>
+                <h3 className="text-red-500 font-semibold mb-3">Risks</h3>
 
                 {strategy.warnings.map((w, i) => (
-                  <p key={i} className="text-gray-600 mb-2">⚠ {w}</p>
+                  <p key={i} className="text-gray-600 mb-2">
+                    ⚠ {w}
+                  </p>
                 ))}
               </div>
-
             </div>
 
             <div className="mt-8">
@@ -218,13 +221,13 @@ const Dashboard = () => {
               </h3>
 
               {strategy.recommended_strategies.map((r, i) => (
-                <p key={i} className="text-gray-700 mb-2">→ {r}</p>
+                <p key={i} className="text-gray-700 mb-2">
+                  → {r}
+                </p>
               ))}
             </div>
-
           </div>
         )}
-
       </div>
     </Layout>
   );
