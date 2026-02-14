@@ -25,17 +25,5 @@ def train_user_model(user_id):
     save_model(model, user_id)
 
 
-    industry_growth = calculate_industry_growth()
 
-    # Calculate user growth
-    df["growth"] = df["y"].pct_change()
-    user_growth = df["growth"].mean()
-
-    performance_gap = user_growth - industry_growth
-
-    return {
-        "model": model,
-        "industry_growth": float(industry_growth),
-        "user_growth": float(user_growth),
-        "performance_gap": float(performance_gap)
-    }
+    return model
