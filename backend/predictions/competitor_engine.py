@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from sklearn.cluster import KMeans
 from businesses.models import BusinessRecord
 from django.db.models import Sum
@@ -77,7 +76,11 @@ def analyze_competitor_position(user):
     model, label_map = cluster_businesses()
 
     if not model:
-        return {'message':'Not enough businesses to compare'}
+        return {
+            "user_cluster":"Not enough data",
+            "cluster_distribution":{},
+            "total_competitors":0
+        }
     
     user_cluster = label_map.get(user.id)
 
@@ -97,7 +100,7 @@ def analyze_competitor_position(user):
     }
 
     return {
-        "user_cluster":cluster_names.get(user_cluster,"Unknown"),
+        "user_cluster":cluster_names.get(user_cluster,"Developing Bussinesses"),
         "cluster_distribution":cluster_counts,
         "total_competitors":total
     }
