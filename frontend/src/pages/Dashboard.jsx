@@ -1,7 +1,29 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import Layout from "../components/Layout";
+
+// FORMAT HELPERS
+const formatCurrency = (num) => {
+  if (!num && num !== 0) return "-";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(num);
+};
+
+const formatPercent = (num) => {
+  if (!num && num !== 0) return "-";
+  return `${(num * 100).toFixed(1)}%`;
+};
 
 const Dashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -23,7 +45,7 @@ const Dashboard = () => {
     fetchStrategy();
   }, []);
 
-  //  Business APIs 
+  //  Business APIs
 
   const fetchSummary = async () => {
     const res = await axiosInstance.get("/api/business-summary/");
@@ -40,7 +62,7 @@ const Dashboard = () => {
     setInsights(res.data);
   };
 
-  //  AI APIs 
+  //  AI APIs
 
   const fetchForecast = async () => {
     const res = await axiosInstance.get("/api/forecast/");
@@ -80,13 +102,16 @@ const Dashboard = () => {
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             <ModernCard
               title="Total Sales"
-              value={`₹ ${summary.total_sales}`}
+              value={formatCurrency(summary.total_sales)}
             />
             <ModernCard
               title="Expenses"
-              value={`₹ ${summary.total_expenses}`}
+              value={formatCurrency(summary.total_expenses)}
             />
-            <ModernCard title="Profit" value={`₹ ${summary.total_profit}`} />
+            <ModernCard
+              title="Profit"
+              value={formatCurrency(summary.total_profit)}
+            />
             <ModernCard title="Records" value={summary.total_records} />
           </div>
         )}
@@ -97,12 +122,12 @@ const Dashboard = () => {
             Monthly Sales Performance
           </h2>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={320}>
             <BarChart data={monthlyData}>
               <XAxis dataKey="month" />
               <YAxis />
-              <Tooltip />
-              <Bar dataKey="total_sales" />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Bar dataKey="total_sales" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -156,15 +181,22 @@ const Dashboard = () => {
         )}
 
         {/* AI INTELLIGENCE */}
-        <div className="bg-linear-to-r from-indigo-50 to-purple-50 p-8 rounded-2xl border mb-12">
+        <div className="bg-linear-to-r from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-2xl border mb-12">
           <h2 className="text-xl font-semibold mb-6">🤖 AI Intelligence</h2>
 
           <div className="grid md:grid-cols-3 gap-6">
             {forecast?.forecast && (
               <AICard
-                title="Demand Forecast"
-                value={`₹ ${forecast.forecast.predicted_30_day_demand}`}
-                subtitle={`Trend: ${forecast.forecast.trend}`}
+                title="30-Day Demand Forecast"
+                value={formatCurrency(
+                  forecast.forecast.predicted_30_day_demand,
+                )}
+                subtitle={`Trend: ${forecast.forecast.trend} | Growth: ${formatPercent(
+                  forecast.forecast.user_growth,
+                )}`}
+                highlight={
+                  forecast.forecast.trend === "declining" ? "danger" : "success"
+                }
               />
             )}
 
@@ -172,15 +204,22 @@ const Dashboard = () => {
               <AICard
                 title="Market Share"
                 value={`${market.market_share_percent}%`}
-                subtitle={market.share_status}
+                subtitle={`Status: ${market.share_status}`}
+                highlight={
+                  market.share_status === "Gaining Market Share"
+                    ? "success"
+                    : market.share_status === "Losing Market Share"
+                      ? "danger"
+                      : null
+                }
               />
             )}
 
             {competitor && (
               <AICard
-                title="Competitor Category"
+                title="Business Category"
                 value={competitor.user_cluster}
-                subtitle={`Competitors: ${competitor.total_competitors}`}
+                subtitle={`Total Competitors: ${competitor.total_competitors}`}
               />
             )}
           </div>
@@ -235,18 +274,27 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-
 const ModernCard = ({ title, value }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border">
+  <div className="bg-white p-6 rounded-2xl shadow-sm border hover:shadow-md transition duration-300">
     <p className="text-gray-500 text-sm">{title}</p>
     <p className="text-2xl font-bold text-gray-800 mt-2">{value}</p>
   </div>
 );
 
-const AICard = ({ title, value, subtitle }) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm border">
+const AICard = ({ title, value, subtitle, highlight }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition duration-300">
     <p className="text-gray-500 text-sm">{title}</p>
-    <p className="text-xl font-bold mt-2">{value}</p>
+    <p
+      className={`text-xl font-bold mt-2 ${
+        highlight === "danger"
+          ? "text-red-600"
+          : highlight === "success"
+            ? "text-green-600"
+            : "text-gray-800"
+      }`}
+    >
+      {value}
+    </p>
     <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
   </div>
 );
