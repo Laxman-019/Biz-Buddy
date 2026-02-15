@@ -2,7 +2,6 @@ import pandas as pd
 from prophet import Prophet
 from businesses.models import BusinessRecord
 from predictions.model_manager import save_model
-from ml.benchmark_engine import calculate_industry_growth
 
 
 def train_user_model(user_id):
@@ -18,10 +17,16 @@ def train_user_model(user_id):
     df.columns = ['ds', 'y']
 
     df['ds'] = pd.to_datetime(df['ds'])
+    df = df.sort_values("ds")
 
-    model = Prophet()
+    # improved prophet config
+    model = Prophet(
+        daily_seasonality = True,
+        weekly_seasonality = True,
+        yearly_seasonality = True
+    )
+
     model.fit(df)
-
     save_model(model, user_id)
 
 
