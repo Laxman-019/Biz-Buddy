@@ -1,11 +1,12 @@
 from predictions.intelligence_engine import generate_intelligence
 from businesses.models import BusinessRecord
 from django.db.models import Sum
-
+from ml.industry_intelligence_engine import load_industry_metrics
 
 def generate_business_strategy(user):
 
     data = generate_intelligence(user)
+    industry_data = load_industry_metrics()
 
     strategies = []
     warnings = []
@@ -94,6 +95,55 @@ def generate_business_strategy(user):
     elif cluster == "Developing Businesses":
         warnings.append("Your business performance is below top-performing group.")
         strategies.append("Focus on improving margins and cost control.")
+        
+    # Industry Intelligence Strategy  layer
+    discount_corr = industry_data["discount_intelligence"]["correlation"]   
+    festival_lift = industry_data["festival_intelligence"]["festival_lift_percent"]
+    competition_drop  = industry_data["competiton_intelligence"]["revenue_drop_high_competition_percent"]
+    inventory_effect = industry_data["inventory_intelligence"]["inventory_pressure_revenue_change_percent"]
+    top_categories = industry_data["category_intelligence"]["top_categories"]
+    
+    # Discount Intelligence 
+    
+    if discount_corr > 0.3:
+        strategies.append("Industry data shows strong revenue response to discounting. Consider strategic promotional pricing." )
+    
+    elif discount_corr < -0.1:
+        warnings.append("Heavy discount may reduce revenue effectiveness in current market conditions.") 
+        
+        
+    # Festival Opportunity
+    
+    if festival_lift > 10:
+        strategies.append(
+            f"Industry revenue increases approximately {festival_lift}% during festival events. Plan targeted seasonal campaigns."
+        )
+
+    # Competition Sensitivity
+    
+    if competition_drop > 15:
+        warnings.append(
+            "High competition significantly impacts revenue in the industry."
+        )
+        strategies.append(
+            "Strengthen brand positioning and improve customer retention strategies."
+        )
+
+    # Inventory Pressure Effect
+    
+    if inventory_effect < 0:
+        warnings.append(
+            "High inventory pressure may compress margins."
+        )
+        strategies.append(
+            "Optimize inventory turnover and avoid overstocking."
+        )
+
+    # Category Intelligence
+    
+    strategies.append(
+        f"Top performing industry categories include: {', '.join(top_categories)}. Evaluate your competitive positioning accordingly."
+    )
 
 
     strengths = list(dict.fromkeys(strengths))
