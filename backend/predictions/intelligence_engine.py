@@ -4,10 +4,12 @@ from predictions.market_engine import calculate_market_metrics
 from predictions.competitor_engine import analyze_competitor_position
 from predictions.diagnostic_engine import generate_diagnostics
 from ml.benchmark_engine import calculate_industry_growth
+from predictions.risk_engine import calculate_business_risk
 
 
 def generate_intelligence(user):
     model = load_model(user.id)
+    competitor_data = analyze_competitor_position(user)
 
     if not model:
         model = train_user_model(user.id)
@@ -55,6 +57,19 @@ def generate_intelligence(user):
         }
     })
 
+    core_data = {
+        "forecast": {
+            "user_growth": user_growth
+        },
+        "industry":{
+            "performance_gap": performance_gap
+        },
+        "market": market_data,
+        "competitor": competitor_data
+    }
+
+    risk_data = calculate_business_risk(user,core_data)
+
     return {
         "forecast": {
             "predicted_30_day_demand": round(user_prediction, 2),
@@ -71,4 +86,5 @@ def generate_intelligence(user):
         "market": market_data,
         "competitor": competitor_data,
         "diagnostics": diagnostic_data,
+        "risk": risk_data
     }
