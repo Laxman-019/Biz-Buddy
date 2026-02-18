@@ -39,15 +39,18 @@ def build_industry_metrics():
     )["revenue"].mean().idxmax()
     
     metrics["discount_intelligence"] = {
-        "correaltion" : round(float(correlation),4),
+        "correlation" : round(float(correlation),4),
         "elasticity_coefficient" : round(float(elasticity),4),
         "optimal_discount_range" : str(optimal_discount)
     }
     
     # Festival lift
     
-    festival_avg = df[df["seles_event"] != "Normal"]["revenue"].mean()
-    normal_avg = df[df["seles_event"] == "Normal"]["revenue"].mean()
+    festival_avg = df[df["sales_event"] != "Normal"]["revenue"].mean()
+    normal_avg = df[df["sales_event"] == "Normal"]["revenue"].mean()
+
+    
+
     
     if normal_avg > 0:
         festival_lift = ((festival_avg - normal_avg) / normal_avg) * 100

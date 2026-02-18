@@ -1,0 +1,23 @@
+{
+    "discount_intelligence": {
+        "correlation": -0.0071,
+        "elasticity_coefficient": -35.9505,
+        "optimal_discount_range": "(26.006, 39.004]"
+    },
+    "festival_intelligence": {
+        "festival_lift_percent": 59.71
+    },
+    "competition_intelligence": {
+        "revenue_drop_high_competition_percent": 1.79
+    },
+    "inventory_intelligence": {
+        "inventory_pressure_revenue_change_percent": 1.69
+    },
+    "category_intelligence": {
+        "top_categories": [
+            "Premium Lifestyle",
+            "Electronics",
+            "Sports & Fitness"
+        ]
+    }
+}
