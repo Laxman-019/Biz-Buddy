@@ -99,7 +99,7 @@ def generate_business_strategy(user):
     # Industry Intelligence Strategy  layer
     discount_corr = industry_data["discount_intelligence"]["correlation"]   
     festival_lift = industry_data["festival_intelligence"]["festival_lift_percent"]
-    competition_drop  = industry_data["competiton_intelligence"]["revenue_drop_high_competition_percent"]
+    competition_drop = industry_data["competition_intelligence"]["revenue_drop_high_competition_percent"]
     inventory_effect = industry_data["inventory_intelligence"]["inventory_pressure_revenue_change_percent"]
     top_categories = industry_data["category_intelligence"]["top_categories"]
     

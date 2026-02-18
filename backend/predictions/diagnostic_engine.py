@@ -1,12 +1,10 @@
 from django.db.models import Avg,Sum
 from businesses.models import BusinessRecord
 from ml.industry_intelligence_engine import load_industry_metrics
-from predictions.intelligence_engine import *
 
 
-def generate_diagnostics(user):
+def generate_diagnostics(user,intelligence):
     industry = load_industry_metrics()
-    intelligence = generate_intelligence(user)
 
     diagnostics = []
     risks = []
@@ -95,7 +93,7 @@ def generate_diagnostics(user):
     strengths = list(dict.fromkeys(strengths))
 
     return {
-        'diagnostics': diagnostics,
+        "diagnostics": diagnostics,
         'risks' : risks,
         'strengths': strengths
     }
