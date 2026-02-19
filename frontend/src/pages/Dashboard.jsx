@@ -38,6 +38,7 @@ const Dashboard = () => {
     fetchStrategy();
   }, []);
 
+
   //  Business APIs
 
   const fetchSummary = async () => {
@@ -150,7 +151,7 @@ const Dashboard = () => {
         <div className="bg-linear-to-r from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-2xl border mb-12">
           <h2 className="text-xl font-semibold mb-6">🤖 AI Intelligence</h2>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             {forecast?.forecast && (
               <AICard
                 title="30-Day Demand Forecast"
@@ -174,6 +175,29 @@ const Dashboard = () => {
             )}
 
             {competitor && <AICard title="Business Category" value={competitor.user_cluster} subtitle={`Total Competitors: ${competitor.total_competitors}`} />}
+
+            {forecast?.risk && (
+              <AICard
+                title="Business Risk Score"
+                value={`${forecast.risk.risk_score}/100`}
+                subtitle={forecast.risk.risk_level}
+                highlight={forecast.risk.risk_level === "Low Risk" ? "success" : forecast.risk.risk_level === "Moderate Risk" ? null : "danger"}
+              >
+                <div className="mt-3">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      forecast.risk.risk_level === "Low Risk"
+                        ? "bg-green-100 text-green-700"
+                        : forecast.risk.risk_level === "Moderate Risk"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {forecast.risk.risk_level}
+                  </span>
+                </div>
+              </AICard>
+            )}
           </div>
         </div>
 
