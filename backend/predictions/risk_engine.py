@@ -1,23 +1,25 @@
 from businesses.models import BusinessRecord
 from django.db.models import Sum
-from ml.industry_intelligence_engine import load_industry_metrics
+import numpy as np
 
 
 def calculate_business_risk(user,intelligence):
 
-    industry = load_industry_metrics()
-    risk_score = 0
 
-    # Forecast risk
+    # Growth Risk
 
-    user_growth = intelligence["forecast"]["user_growth"] 
-    performance_gap = intelligence["industry"]["performance_gap"] 
+    user_growth = intelligence["forecast"].get("user_growth", 0) 
+    performance_gap = intelligence["industry"].get("performance_gap", 0) 
+    
+    growth_risk = 0
     
     if user_growth < 0:
-        risk_score += 20
+        growth_risk += min(abs(user_growth) * 2 , 50)
 
     if performance_gap < 0:
-        risk_score += 10
+        growth_risk += min(abs(performance_gap) * 1.5 , 50)
+        
+    growth_risk = min(100, growth_risk)    
 
     # Financial Risk
 
@@ -34,57 +36,90 @@ def calculate_business_risk(user,intelligence):
     else:
         profit_margin = 0
         expense_ratio = 1
+        
+    financial_risk = 0    
+    
+    # Profit margin risk
 
     if profit_margin < 0:
-        risk_score += 25
+        financial_risk += 60
 
-    elif profit_margin < 0.15:
-        risk_score += 15
+    elif profit_margin < 0.05:
+        financial_risk += 40
+    elif expense_ratio > 0.20:
+        financial_risk += 20
+        
+    # Expense Ratio risk
+    
+    if expense_ratio > 0.8:
+        financial_risk += 40
+    elif expense_ratio > 0.6:
+        financial_risk += 20
+        
+    financial_risk = min(100 , financial_risk)               
 
-    if expense_ratio > 0.7:
-        risk_score += 15
-
-    # market share risk
+    # market risk
 
     share_status = intelligence["market"].get("share_status")
+    
+    market_risk = 0
 
     if share_status == "Losing Market Share":
-        risk_score += 15
+        market_risk = 70
+        
+    elif share_status == "Stable Position":
+        market_risk = 30
+    elif share_status == "Growing Market Share":
+        market_risk = 10
+    else:
+        market_risk = 50    
 
-    # competitor cluster risk
+    # competitive  risk
 
     cluster = intelligence["competitor"].get("user_cluster")
+    competition_pressure = intelligence["industry"].get("competition_pressure" ,0)
+    
+    competitive_risk = 0
 
     if cluster == "Developing Businesses":
-        risk_score += 10
+        competitive_risk += 40
+    elif cluster == "High Growth Businesses":
+        competitive_risk += 20
+        
+    competitive_risk += min(competition_pressure, 60)    
+    
+    competitive_risk = min(100, competitive_risk)    
 
-    # industry_competitor_sensitivity
-
-    comp_drop = industry["competition_intelligence"]["revenue_drop_high_competition_percent"]
-
-    if comp_drop > 15:
-        risk_score += 10
-
-    # cap and categorize
-
-    risk_score = min(100,risk_score)
-
-    # risk catagory
-
-    if risk_score <= 30:
+    # Final Weighted Score
+    
+    final_risk = (
+        growth_risk * 0.30 +
+        financial_risk * 0.30 +
+        market_risk * 0.20 +
+        competitive_risk * 0.20
+    )
+    
+    final_risk = round(min(100, final_risk) , 2)
+    
+    # Categorization
+ 
+    if final_risk <= 25:
         level = "Low Risk"
-    elif risk_score <= 60:
+    elif final_risk <= 50:
         level = "Moderate Risk"
-    elif risk_score <= 80:
+    elif final_risk <= 75:
         level = "High Risk"
     else:
         level = "Critical Risk"
 
     return {
-        "risk_score": risk_score,
+        "risk_score": final_risk,
         "risk_level": level,
+        "breakdown": {
+            "growth_risk" : growth_risk,
+            "financial_risk" : financial_risk,
+            "market_risk" : market_risk,
+            "competitive_risk" : competitive_risk
+        }
 
     }
-
-
-
