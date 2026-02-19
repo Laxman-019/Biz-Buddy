@@ -3,9 +3,10 @@ import axiosInstance from "../utils/axiosInstance";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import Layout from "../components/Layout";
 
-// FORMAT HELPERS
+// ================== FORMAT HELPERS ==================
+
 const formatCurrency = (num) => {
-  if (!num && num !== 0) return "-";
+  if (num === null || num === undefined) return "-";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -14,9 +15,11 @@ const formatCurrency = (num) => {
 };
 
 const formatPercent = (num) => {
-  if (!num && num !== 0) return "-";
+  if (num === null || num === undefined) return "-";
   return `${(num * 100).toFixed(1)}%`;
 };
+
+// ================== DASHBOARD ==================
 
 const Dashboard = () => {
   const [summary, setSummary] = useState(null);
@@ -28,55 +31,49 @@ const Dashboard = () => {
   const [competitor, setCompetitor] = useState(null);
   const [strategy, setStrategy] = useState(null);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetchSummary();
-    fetchMonthly();
-    fetchInsights();
-    fetchForecast();
-    fetchMarket();
-    fetchCompetitor();
-    fetchStrategy();
+    loadDashboard();
   }, []);
 
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
 
-  //  Business APIs
+      const [summaryRes, monthlyRes, insightsRes, forecastRes, marketRes, competitorRes, strategyRes] = await Promise.all([
+        axiosInstance.get("/api/business-summary/"),
+        axiosInstance.get("/api/monthly-summary/"),
+        axiosInstance.get("/api/business-insights/"),
+        axiosInstance.get("/api/forecast/"),
+        axiosInstance.get("/api/market-analysis/"),
+        axiosInstance.get("/api/competitor-analysis/"),
+        axiosInstance.get("/api/strategy/"),
+      ]);
 
-  const fetchSummary = async () => {
-    const res = await axiosInstance.get("/api/business-summary/");
-    setSummary(res.data);
+      setSummary(summaryRes.data);
+      setMonthlyData(monthlyRes.data);
+      setInsights(insightsRes.data);
+      setForecast(forecastRes.data);
+      setMarket(marketRes.data);
+      setCompetitor(competitorRes.data);
+      setStrategy(strategyRes.data);
+    } catch (error) {
+      console.error("Dashboard Load Error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchMonthly = async () => {
-    const res = await axiosInstance.get("/api/monthly-summary/");
-    setMonthlyData(res.data);
-  };
-
-  const fetchInsights = async () => {
-    const res = await axiosInstance.get("/api/business-insights/");
-    setInsights(res.data);
-  };
-
-  //  AI APIs
-
-  const fetchForecast = async () => {
-    const res = await axiosInstance.get("/api/forecast/");
-    setForecast(res.data);
-  };
-
-  const fetchMarket = async () => {
-    const res = await axiosInstance.get("/api/market-analysis/");
-    setMarket(res.data);
-  };
-
-  const fetchCompetitor = async () => {
-    const res = await axiosInstance.get("/api/competitor-analysis/");
-    setCompetitor(res.data);
-  };
-
-  const fetchStrategy = async () => {
-    const res = await axiosInstance.get("/api/strategy/");
-    setStrategy(res.data);
-  };
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-gray-500 text-lg">Loading Dashboard...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -116,19 +113,10 @@ const Dashboard = () => {
           <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
             <h2 className="text-xl font-semibold mb-6">📊 Business Insights</h2>
 
-            <div className="mb-6">
-              <span
-                className={`px-4 py-1 rounded-full text-sm font-semibold
-                ${insights.status === "good" ? "bg-green-100 text-green-700" : insights.status === "warning" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}
-              >
-                {insights.status.toUpperCase()}
-              </span>
-            </div>
-
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h3 className="font-semibold mb-3">Performance Messages</h3>
-                {insights.messages?.map((msg, i) => (
+                {insights?.messages?.map((msg, i) => (
                   <div key={i} className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-3 rounded">
                     {msg}
                   </div>
@@ -137,7 +125,7 @@ const Dashboard = () => {
 
               <div>
                 <h3 className="font-semibold mb-3">Suggestions</h3>
-                {insights.suggestions?.map((sug, i) => (
+                {insights?.suggestions?.map((sug, i) => (
                   <div key={i} className="bg-green-50 border-l-4 border-green-500 p-4 mb-3 rounded">
                     {sug}
                   </div>
@@ -147,9 +135,14 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* AI INTELLIGENCE */}
+        {/* AI SECTION */}
         <div className="bg-linear-to-r from-indigo-100 via-purple-100 to-pink-100 p-8 rounded-2xl border mb-12">
           <h2 className="text-xl font-semibold mb-6">🤖 AI Intelligence</h2>
+
+          {/* Insufficient Data */}
+          {forecast?.status === "insufficient_data" && (
+            <div className="bg-yellow-100 text-yellow-800 p-4 rounded-xl mb-6">Add at least {forecast.required_records} business records to activate AI insights.</div>
+          )}
 
           <div className="grid md:grid-cols-4 gap-6">
             {forecast?.forecast && (
@@ -165,14 +158,7 @@ const Dashboard = () => {
               </AICard>
             )}
 
-            {market && (
-              <AICard
-                title="Market Share"
-                value={`${market.market_share_percent}%`}
-                subtitle={`Status: ${market.share_status}`}
-                highlight={market.share_status === "Gaining Market Share" ? "success" : market.share_status === "Losing Market Share" ? "danger" : null}
-              />
-            )}
+            {market && <AICard title="Market Share" value={`${market.market_share_percent}%`} subtitle={`Status: ${market.share_status}`} />}
 
             {competitor && <AICard title="Business Category" value={competitor.user_cluster} subtitle={`Total Competitors: ${competitor.total_competitors}`} />}
 
@@ -181,36 +167,21 @@ const Dashboard = () => {
                 title="Business Risk Score"
                 value={`${forecast.risk.risk_score}/100`}
                 subtitle={forecast.risk.risk_level}
-                highlight={forecast.risk.risk_level === "Low Risk" ? "success" : forecast.risk.risk_level === "Moderate Risk" ? null : "danger"}
-              >
-                <div className="mt-3">
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      forecast.risk.risk_level === "Low Risk"
-                        ? "bg-green-100 text-green-700"
-                        : forecast.risk.risk_level === "Moderate Risk"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {forecast.risk.risk_level}
-                  </span>
-                </div>
-              </AICard>
+                highlight={forecast.risk.risk_level === "High Risk" ? "danger" : forecast.risk.risk_level === "Low Risk" ? "success" : null}
+              />
             )}
           </div>
         </div>
 
-        {/* AI STRATEGY */}
+        {/* STRATEGY */}
         {strategy && (
-          <div className="bg-white p-8 rounded-2xl shadow-sm border">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
             <h2 className="text-xl font-semibold mb-6">🧠 AI Growth Strategy</h2>
 
             <div className="grid md:grid-cols-2 gap-10">
               <div>
                 <h3 className="text-green-600 font-semibold mb-3">Strengths</h3>
-
-                {strategy.strengths.map((s, i) => (
+                {strategy?.strengths?.map((s, i) => (
                   <p key={i} className="text-gray-600 mb-2">
                     ✔ {s}
                   </p>
@@ -219,8 +190,7 @@ const Dashboard = () => {
 
               <div>
                 <h3 className="text-red-500 font-semibold mb-3">Risks</h3>
-
-                {strategy.warnings.map((w, i) => (
+                {strategy?.warnings?.map((w, i) => (
                   <p key={i} className="text-gray-600 mb-2">
                     ⚠ {w}
                   </p>
@@ -230,8 +200,7 @@ const Dashboard = () => {
 
             <div className="mt-8">
               <h3 className="text-indigo-600 font-semibold mb-3">Recommendations</h3>
-
-              {strategy.recommended_strategies.map((r, i) => (
+              {strategy?.recommended_strategies?.map((r, i) => (
                 <p key={i} className="text-gray-700 mb-2">
                   → {r}
                 </p>
@@ -242,24 +211,30 @@ const Dashboard = () => {
 
         {/* AI DIAGNOSTICS */}
         {forecast?.diagnostics && (
-          <div className="bg-white p-8 rounded-2xl mt-3 shadow-sm border mb-12">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border mb-12">
             <h2 className="text-xl font-semibold mb-6">🔬 AI Diagnostic Analysis</h2>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {/* Diagnostics */}
+              {/* Observations */}
               <div>
                 <h3 className="font-semibold mb-3 text-indigo-600">Key Observations</h3>
-                {forecast.diagnostics.diagnostics.map((d, i) => (
-                  <p key={i} className="text-gray-600 mb-2">
-                    • {d}
-                  </p>
-                ))}
+
+                {forecast?.diagnostics?.diagnostics?.length > 0 ? (
+                  forecast.diagnostics.diagnostics.map((d, i) => (
+                    <p key={i} className="text-gray-600 mb-2">
+                      • {d}
+                    </p>
+                  ))
+                ) : (
+                  <p className="text-gray-400">No observations available</p>
+                )}
               </div>
 
-              {/* Risks */}
+              {/* Risk Factors */}
               <div>
                 <h3 className="font-semibold mb-3 text-red-600">Risk Factors</h3>
-                {forecast.diagnostics.risks.length > 0 ? (
+
+                {forecast?.diagnostics?.risks?.length > 0 ? (
                   forecast.diagnostics.risks.map((r, i) => (
                     <p key={i} className="text-gray-600 mb-2">
                       ⚠ {r}
@@ -270,10 +245,11 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {/* Strengths */}
+              {/* Strategic Strengths */}
               <div>
                 <h3 className="font-semibold mb-3 text-green-600">Strategic Strengths</h3>
-                {forecast.diagnostics.strengths.length > 0 ? (
+
+                {forecast?.diagnostics?.strengths?.length > 0 ? (
                   forecast.diagnostics.strengths.map((s, i) => (
                     <p key={i} className="text-gray-600 mb-2">
                       ✔ {s}

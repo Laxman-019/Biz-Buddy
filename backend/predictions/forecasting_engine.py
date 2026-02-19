@@ -19,8 +19,8 @@ def train_user_model(user_id):
     if total_records < MIN_RECORDS_REQUIRED:
         return {
             "status" : "insufficient_data",
-            "requored" : MIN_RECORDS_REQUIRED,
-            "avaliable" : total_records
+            "required" : MIN_RECORDS_REQUIRED,
+            "available" : total_records
         }
 
   
