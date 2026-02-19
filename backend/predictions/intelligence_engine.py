@@ -1,4 +1,3 @@
-from predictions.model_manager import load_model
 from predictions.forecasting_engine import train_user_model
 from predictions.market_engine import calculate_market_metrics
 from predictions.competitor_engine import analyze_competitor_position
@@ -8,46 +7,35 @@ from predictions.risk_engine import calculate_business_risk
 
 
 def generate_intelligence(user):
-    model = load_model(user.id)
-    competitor_data = analyze_competitor_position(user)
 
-    if not model:
-        model = train_user_model(user.id)
+    # forecast
 
-    forecast_trend = "stable"
-    user_prediction = 0
-    user_growth = 0
-    confidence_score = 0.5
+    forecast_result = train_user_model(user.id)
 
-    if model:
-        future = model.make_future_dataframe(periods=30)
-        forecast = model.predict(future)
+    if forecast_result["status"] == "insufficient_data":
+        return {
+            "status":"insufficient_data",
+            "required_records": forecast_result.get("required",60),
+            "available_records": forecast_result.get("available",0)
+        }
+    
+    user_growth = forecast_result["trend_value"]
+    forecast_trend = forecast_result["trend"]
+    confidence_score = forecast_result["confidence"]
+    user_prediction = forecast_result["forecast_total"]
 
-        next_30 = forecast.tail(30).copy()
-        next_30["yhat"] = next_30["yhat"].clip(lower=0)
-        user_prediction = float(next_30["yhat"].sum())
-
-        # compare last 30 days vs next 30 days
-        previous_30 = forecast.iloc[-60:-30]["yhat"].clip(lower=0).sum()
-
-        if previous_30 > 0:
-            user_growth = (user_prediction - previous_30) / previous_30
-        else:
-            user_growth = 0
-
-        # Volatility based confidence score
-        volatility = forecast["yhat"].std() / (forecast["yhat"].mean() + 1)
-        confidence_score = max(0.3, min(1, 1 - volatility))
-
-        forecast_trend = "increasing" if user_growth > 0 else "declining"
+    #industry comparision
 
     industry_growth = float(calculate_industry_growth())
     performance_gap = user_growth - industry_growth
 
+    #market + competitor
+
     market_data = calculate_market_metrics(user)
     competitor_data = analyze_competitor_position(user)
 
-    # New Dignostics engine integration
+    #diagnostics
+
     diagnostic_data = generate_diagnostics(user, {
         "forecast": {
             "user_growth": user_growth
@@ -68,14 +56,17 @@ def generate_intelligence(user):
         "competitor": competitor_data
     }
 
+    # risk
+
     risk_data = calculate_business_risk(user,core_data)
 
     return {
+        "status": "success",
         "forecast": {
             "predicted_30_day_demand": round(user_prediction, 2),
             "trend": forecast_trend,
             "user_growth": round(user_growth, 4),
-            "confidence_score": round(confidence_score, 2),
+            "confidence_score": confidence_score,
 
         },
         "industry": {
