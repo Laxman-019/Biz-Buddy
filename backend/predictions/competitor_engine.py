@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 from businesses.models import BusinessRecord
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
@@ -35,10 +36,9 @@ def build_business_features():
         
         monthly = list(monthly)
 
-        if len(monthly) >= 2:
-            prev = monthly[-2]['total_sales']
-            curr = monthly[-1]['total_sales']
-            growth = ((curr - prev) / prev) if prev > 0 else 0
+        if len(monthly) >= 3:
+            last_3 = [m["total_sales"] for m in monthly[-3:]]
+            growth = (last_3[-1] - np.mean(last_3[:-1])) / (np.mean(last_3[:-1]) + 1)
         else:
             growth = 0
 
@@ -51,53 +51,63 @@ def build_business_features():
 
         user_map.append(user_id)
 
-        if len(feature_data) == 0:
-            return np.array([]), []
+    if len(feature_data) == 0:
+        return np.array([]), []
 
     return np.array(feature_data), user_map
-
-
+    
 
 # Train clustering
 def cluster_businesses():
     X, user_map = build_business_features()
 
     if len(X) < 3:
-        return None,None
+        return None,None,None
     
-    model = KMeans(n_clusters=3,random_state=42)
-    labels = model.fit_predict(X)
+    # Feature scaling
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    model = KMeans(n_clusters=3,random_state=42,n_init=10)
+    labels = model.fit_predict(X_scaled)
 
-    return model, dict(zip(user_map,labels))
+    return model, dict(zip(user_map,labels)), X_scaled
 
 
 # Analyze user position
 def analyze_competitor_position(user):
-    model, label_map = cluster_businesses()
 
-    if not model:
+    model, label_map, X_scaled = cluster_businesses()
+
+    if model is None or label_map is None:
         return {
-            "user_cluster":"Not enough data",
-            "cluster_distribution":{},
-            "total_competitors":0
+            "user_cluster": "Not enough data",
+            "cluster_distribution": {},
+            "total_competitors": 0
         }
-    
+
     user_cluster = label_map.get(user.id)
 
-    # Count Businesses in each cluster
+    # Count cluster sizes
     cluster_counts = {}
 
     for label in label_map.values():
-        cluster_counts[label] = cluster_counts.get(label,0) + 1
+        cluster_counts[label] = cluster_counts.get(label, 0) + 1
 
     total = sum(cluster_counts.values())
 
-    # Determine cluster quality
-    cluster_names = {
-        0:"Developing Businesses",
-        1:"Stable Businesses",
-        2:"High Performing Businesses"
-    }
+    # Dynamic cluster ranking
+    # Rank cluster by centroid avg
+    centroids = model.cluster_centers_
+    centroids_scores = centroids.mean(axis=1) 
+
+    ranked_clusters = np.argsort(centroids_scores)
+
+    cluster_names = {}
+     
+    cluster_names[ranked_clusters[0]] = "Developing Businesses"
+    cluster_names[ranked_clusters[1]] = "Stable Businesses"
+    cluster_names[ranked_clusters[2]] = "High Performing Businesses"
 
     return {
         "user_cluster":cluster_names.get(user_cluster,"Developing Bussinesses"),

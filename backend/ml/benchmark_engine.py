@@ -22,10 +22,7 @@ def calculate_industry_growth():
 
     monthly = df.groupby(
         pd.Grouper(key= "order_date",freq= "ME")
-    ).agg({
-        "revenue": "sum",
-
-    }).reset_index()
+    ).agg({"revenue": "sum",}).reset_index()
 
     monthly["growth"] = monthly["revenue"].pct_change()
     return monthly["growth"].mean()

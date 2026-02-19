@@ -20,12 +20,39 @@ OUTPUT_PATH = os.path.join(
 
 def build_industry_metrics():
     df = pd.read_csv(DATA_PATH)
-    df["order_date"] = pd.to_datetime(df["order_date"],dayfirst=True)
-    metrics = {}
+
+    # Data validation
+    required_columns = [
+        "order_date",
+        "discount_percent",
+        "revenue",
+        "sales_event",
+        "competition_intensity",
+        "inventory_pressure",
+        "category"
+    ]
     
-    # Discount elasticity
+    for col in required_columns:
+        if col not in df.columns:
+            raise ValueError(f"Missing required column - {col}.")
+    
+    df["order_date"] = pd.to_datetime(df["order_date"],dayfirst=True)
+    df = df.dropna(subset=["discount_percent","revenue"])
+
+    metrics = {}
+
+    # Discount Intelligence
     
     correlation = df["discount_percent"].corr(df["revenue"])
+
+    # Use quantile bins insted of fixed bins
+    df["discount_bin"] = pd.qcut(df["discount_percent"],q=5,duplicates="drop")
+    optimal_discount = (
+        df.groupby("discount_bin")["revenue"].mean().idxmax()
+    )
+
+    # Multivariable regression
+
     X = df[["discount_percent"]]
     y = df["revenue"]
     
@@ -34,9 +61,6 @@ def build_industry_metrics():
     
     elasticity = model.coef_[0]
     
-    optimal_discount = df.groupby(
-        pd.cut(df["discount_percent"],bins=5)
-    )["revenue"].mean().idxmax()
     
     metrics["discount_intelligence"] = {
         "correlation" : round(float(correlation),4),
@@ -49,14 +73,12 @@ def build_industry_metrics():
     festival_avg = df[df["sales_event"] != "Normal"]["revenue"].mean()
     normal_avg = df[df["sales_event"] == "Normal"]["revenue"].mean()
 
-    
 
+    festival_lift = (
+        ((festival_avg - normal_avg) / normal_avg) * 100
+        if normal_avg > 0 else 0
+    )
     
-    if normal_avg > 0:
-        festival_lift = ((festival_avg - normal_avg) / normal_avg) * 100
-        
-    else:
-        festival_lift = 0
         
     metrics["festival_intelligence"] = {
         "festival_lift_percent" : round(float(festival_lift),2)
@@ -75,7 +97,8 @@ def build_industry_metrics():
         competition_drop = 0
         
     metrics["competition_intelligence"] = {
-        "revenue_drop_high_competition_percent" : round(float(competition_drop), 2)
+        "revenue_drop_high_competition_percent" : round(float(competition_drop), 2),
+        "competition_pressure" : round(float(competition_drop / 2), 2),
     }      
     
     # Inventory Pressure effect
@@ -104,12 +127,24 @@ def build_industry_metrics():
         category_group["mean"] + 1
     )
     
-    top_categories = category_group.sort_values(
-        by= "mean" , ascending=False
-    ).head(3)
+    top_categories = (
+            category_group.sort_values(
+            by = "mean" , ascending=False
+        ).head(3)['category'].tolist()
+    )
+
     
     metrics["category_intelligence"] = {
-        "top_categories" : top_categories["category"].tolist()
+        "top_categories" : top_categories
+    }
+
+    # Dataset & Meta Info
+    metrics['meta'] = {
+        "total_records": int(len(df)),
+        "date_range":{
+            "start":str(df['order_date'].min()),
+            "end" :str(df['order_date'].max())
+        }
     }
     
     # Save metrics 
@@ -124,6 +159,6 @@ def build_industry_metrics():
 def load_industry_metrics():
     if not os.path.exists(OUTPUT_PATH):
         return build_industry_metrics()
-    
-    with open(OUTPUT_PATH , "r") as f:
+
+    with open(OUTPUT_PATH, "r") as f:
         return json.load(f)
