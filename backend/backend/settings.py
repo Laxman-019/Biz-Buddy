@@ -1,8 +1,17 @@
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ml model directory 
+ML_MODELS_DIR = os.path.join(BASE_DIR, 'ml_models') 
+ML_DATASETS_DIR = os.path.join(BASE_DIR, 'ml', 'datasets')
+
+# ensure directories exist
+os.makedirs(ML_MODELS_DIR, exist_ok= True)
+os.makedirs(ML_DATASETS_DIR, exist_ok= True)
 
 
 # Quick-start development settings - unsuitable for production

@@ -20,7 +20,7 @@ def get_recent_industry_market_size():
     
     df["date"] = pd.to_datetime(df["date"])
     latest_data = df["date"].max()
-    one_month_before = latest_data - pd.DateOffsetate(months = 1)
+    one_month_before = latest_data - pd.DateOffset(months = 1)
     recent_df = df[df["date"] >= one_month_before]
     return recent_df["revenue"].sum()
 
