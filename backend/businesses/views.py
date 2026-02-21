@@ -154,3 +154,78 @@ def delete_record(req, id):
 
     except BusinessRecord.DoesNotExist:
         return Response({"message": "Record not found"},status=404)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_records(req):
+    records = BusinessRecord.objects.filter(user=req.user)
+    serializer = BusinessRecordSerializer(records, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def business_insights_by_name(request):
+    try:
+        business_name = request.GET.get('business_name')
+        if not business_name:
+            return Response({
+                "error": "business_name parameter is required"
+            }, status=400)
+        
+        records = BusinessRecord.objects.filter(
+            user=request.user,
+            business_name=business_name
+        )
+
+        if not records.exists():
+            return Response({
+                "status": "info",
+                "messages": [f"No data available for {business_name}"],
+                "suggestions": [f"Start adding sales and expenses for {business_name}"]
+            })
+
+        summary = records.aggregate(
+            total_sales=Sum('sales'),
+            total_expenses=Sum('expenses'),
+            total_profit=Sum('profit'),
+        )
+
+        sales = summary['total_sales'] or 0
+        expenses = summary['total_expenses'] or 0
+        profit = summary['total_profit'] or 0
+
+        messages = []
+        suggestions = []
+        status = "good"
+
+        if profit < 0:
+            status = "danger"
+            messages.append(f"{business_name} is running at a loss")
+            suggestions.append(f"Reduce unnecessary expenses for {business_name}")
+
+        elif sales > 0 and expenses > 0.7 * sales:
+            status = "warning"
+            messages.append(f"{business_name} has very high expenses compared to sales")
+            suggestions.append(f"Optimize operational costs for {business_name}")
+
+        elif sales > 0 and profit / sales < 0.2:
+            status = "warning"
+            messages.append(f"{business_name} profit margin is low")
+            suggestions.append(f"Increase sales or adjust pricing for {business_name}")
+
+        if not messages:
+            messages.append(f"{business_name} is performing well")
+            suggestions.append(f"Keep tracking {business_name} data")
+
+        return Response({
+            "status": status,
+            "messages": messages,
+            "suggestions": suggestions
+        })
+        
+    except Exception as e:
+        return Response({
+            "error": str(e)
+        }, status=500)
