@@ -34,8 +34,8 @@ def dashboard_overview(request):
         # get last 30 days record
         thirty_days_ago = datetime.now().date() - timedelta(days=30)
         recent_records = records.filter(date__gte = thirty_days_ago)
-        recent_sales = recent_records.aaggregate(total = Sum('sales'))["total"] or 0
-        recent_profit = recent_records.aaggregate(total = Sum('profit'))["total"] or 0
+        recent_sales = recent_records.aggregate(total = Sum('sales'))["total"] or 0
+        recent_profit = recent_records.aggregate(total = Sum('profit'))["total"] or 0
 
         # get unique business name
         business_names = records.values_list("business_name", flat=True).distinct()

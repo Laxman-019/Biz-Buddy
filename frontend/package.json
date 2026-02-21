@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.4",
+    "lucide-react": "^0.575.0",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-csv": "^2.2.2",
