@@ -27,7 +27,7 @@ def add_record(req):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_records(req):
-    records = BusinessRecord.objects.filter(user=req.user)
+    records = BusinessRecord.objects.filter(user=req.user).order_by('-date')
     serializer = BusinessRecordSerializer(records, many=True)
     return Response(serializer.data)
 
