@@ -46,15 +46,18 @@ def generate_intelligence(user):
     })
 
     core_data = {
-        "forecast": {
-            "user_growth": user_growth
-        },
-        "industry":{
-            "performance_gap": performance_gap
-        },
-        "market": market_data,
-        "competitor": competitor_data
-    }
+    "forecast": {
+        "user_growth": user_growth,
+        "predicted_30_day_demand": user_prediction,
+        "trend": forecast_trend,
+        "confidence_score": confidence_score
+    },
+    "industry": {
+        "performance_gap": performance_gap
+    },
+    "market": market_data,
+    "competitor": competitor_data
+}
 
     # risk
 
