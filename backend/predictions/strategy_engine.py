@@ -25,8 +25,9 @@ def generate_business_strategy(user):
     warnings = []
     strengths = []
 
-    trend = data["forecast"]["trend"]
-    performance_gap = data["industry"]["performance_gap"]
+    trend = data.get("forecast", {}).get("trend", "stable")
+    user_growth = data.get("forecast", {}).get("user_growth", 0)
+    performance_gap = data.get("industry", {}).get("performance_gap", 0)
     market_data = data.get("market", {})
     competitor_data = data.get("competitor", {})
 
@@ -41,7 +42,6 @@ def generate_business_strategy(user):
         expense_ratio = total_expenses / total_sales
 
         if total_profit < 0:
-            
             warnings.append(("High", "Your business is currently running at a loss."))
             strategies.append(("High", "Immediately reduce non-essential expenses and review pricing strategy."))
 
@@ -55,6 +55,10 @@ def generate_business_strategy(user):
 
         if profit_margin >= 0.2:
             strengths.append("Your profit margin is healthy.")
+
+    else:
+        profit_margin = 0
+        expense_ratio = 0
 
     # Trend + Industry
     if trend == "declining":
@@ -88,19 +92,33 @@ def generate_business_strategy(user):
         warnings.append(("Medium", "Performance below top competitor group."))
         strategies.append(("Medium", "Focus on margin improvement and operational efficiency."))
 
-    # Industry Intelligence
+    # Discount Intelligence
     discount_corr = industry_data["discount_intelligence"]["correlation"]
-    festival_lift = industry_data["festival_intelligence"]["festival_lift_percent"]
 
     if discount_corr > 0.3:
         strategies.append(("Low", "Industry data suggests discounts can boost revenue when applied strategically."))
 
-    if festival_lift > 10:
-        strategies.append(
-            ("Low", f"Industry revenue increases approximately {festival_lift}% during festivals. Plan seasonal campaigns.")
-        )
+    # Festival Intelligence
+    festival_lift = industry_data["festival_intelligence"]["festival_lift_percent"]
 
-    # Sort by priority map, not alphabetically
+    if festival_lift > 10:
+        if user_growth < 0 or performance_gap < 0 or trend == "declining":
+            strategies.append((
+                "High",
+                f"Industry revenue rises ~{festival_lift:.2f}% during festivals, but your growth is lagging — prioritize seasonal campaigns now."
+            ))
+        elif profit_margin >= 0.2 and performance_gap >= 0 and trend != "declining":
+            strategies.append((
+                "Low",
+                f"Industry revenue rises ~{festival_lift:.2f}% during festivals. You are well-positioned — scale up seasonal campaigns to maximize gains."
+            ))
+        else:
+            strategies.append((
+                "Medium",
+                f"Industry revenue rises ~{festival_lift:.2f}% during festivals. Plan targeted seasonal campaigns to capture demand."
+            ))
+
+    # Sort by priority
     strategies = sorted(strategies, key=lambda x: PRIORITY_ORDER.get(x[0], 99))
     warnings = sorted(warnings, key=lambda x: PRIORITY_ORDER.get(x[0], 99))
 
