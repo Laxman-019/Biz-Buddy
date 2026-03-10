@@ -1,23 +1,155 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { Link } from "react-router-dom";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  LineChart, Line, CartesianGrid, Area, AreaChart,
+} from "recharts";
 import Layout from "../components/Layout";
-import { TrendingUp, TrendingDown, AlertTriangle, Lightbulb, Target, Shield, Calendar, RefreshCw } from "lucide-react";
+import {
+  TrendingUp, TrendingDown, AlertTriangle, Lightbulb,
+  Target, Shield, Calendar, RefreshCw, BarChart2,
+  Brain, Zap, ChevronRight, ArrowUpRight, ArrowDownRight,
+  Building2, CheckCircle2, XCircle, ArrowLeft, Sparkles,
+} from "lucide-react";
 
+// ─── Formatters ───────────────────────────────────────────────────────────────
 const formatCurrency = (num) => {
-  if (num === null || num === undefined) return "-";
+  if (num === null || num === undefined) return "—";
   return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
+    style: "currency", currency: "INR", maximumFractionDigits: 0,
   }).format(num);
 };
-
 const formatPercent = (num) => {
-  if (num === null || num === undefined) return "-";
+  if (num === null || num === undefined) return "—";
   return `${Number(num).toFixed(1)}%`;
 };
 
+// ─── Custom Tooltip ───────────────────────────────────────────────────────────
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-gray-100 shadow-xl rounded-xl px-4 py-3">
+      <p className="text-xs text-gray-400 font-medium mb-1">{label}</p>
+      {payload.map((p, i) => (
+        <p key={i} className="text-sm font-bold" style={{ color: p.color }}>
+          {formatCurrency(p.value)}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+const KPICard = ({ title, value, subtitle, icon, gradient, trend }) => (
+  <div className={`relative overflow-hidden rounded-2xl p-6 text-white ${gradient} shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}>
+    <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10" />
+    <div className="absolute -bottom-4 -right-2 w-16 h-16 rounded-full bg-white/5" />
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-white/70 text-xs font-semibold uppercase tracking-widest">{title}</span>
+        <div className="p-2 bg-white/15 rounded-xl backdrop-blur-sm">{icon}</div>
+      </div>
+      <p className="text-3xl font-black tracking-tight mb-1">{value}</p>
+      {subtitle && (
+        <p className="text-white/60 text-xs font-medium flex items-center gap-1">
+          {trend === "up" && <ArrowUpRight className="w-3 h-3 text-white/80" />}
+          {trend === "down" && <ArrowDownRight className="w-3 h-3 text-white/80" />}
+          {subtitle}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
+// ─── AI Metric Card ───────────────────────────────────────────────────────────
+const AIMetricCard = ({ title, value, subtitle, icon, color = "blue" }) => {
+  const palette = {
+    blue: { card: "bg-blue-50 border-blue-100", icon: "bg-blue-100 text-blue-600", val: "text-blue-900", sub: "text-blue-500" },
+    green: { card: "bg-green-50 border-green-100", icon: "bg-green-100 text-green-600", val: "text-green-900", sub: "text-green-500" },
+    red: { card: "bg-red-50 border-red-100", icon: "bg-red-100 text-red-600", val: "text-red-900", sub: "text-red-500" },
+    yellow: { card: "bg-amber-50 border-amber-100", icon: "bg-amber-100 text-amber-600", val: "text-amber-900", sub: "text-amber-500" },
+  };
+  const p = palette[color] || palette.blue;
+  return (
+    <div className={`rounded-2xl border p-5 ${p.card} hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}>
+      <div className="flex items-start justify-between mb-4">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest">{title}</p>
+        <div className={`p-2 rounded-xl ${p.icon}`}>{icon}</div>
+      </div>
+      <p className={`text-2xl font-black ${p.val} mb-1`}>{value}</p>
+      {subtitle && <p className={`text-xs font-medium ${p.sub}`}>{subtitle}</p>}
+    </div>
+  );
+};
+
+// ─── Insufficient Data Card ───────────────────────────────────────────────────
+const InsufficientDataCard = ({ remaining, message }) => (
+  <div className="bg-linear-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-10 text-center shadow-sm">
+    <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <AlertTriangle className="w-8 h-8 text-amber-500" />
+    </div>
+    <h3 className="text-xl font-bold text-amber-900 mb-2">Insufficient Data</h3>
+    <p className="text-amber-700 mb-5 max-w-md mx-auto text-sm leading-relaxed">{message}</p>
+    {remaining > 0 && (
+      <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-200 px-5 py-2.5 rounded-xl">
+        <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+        <p className="text-amber-800 font-semibold text-sm">
+          {remaining} more {remaining === 1 ? "record" : "records"} needed
+        </p>
+      </div>
+    )}
+  </div>
+);
+
+// ─── Section Heading ──────────────────────────────────────────────────────────
+const SectionHeading = ({ icon, title, subtitle, badge }) => (
+  <div className="flex items-start justify-between mb-6">
+    <div className="flex items-center gap-3">
+      {icon && <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">{icon}</div>}
+      <div>
+        <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+        {subtitle && <p className="text-gray-400 text-xs mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+    {badge}
+  </div>
+);
+
+// ─── Pill Tag ─────────────────────────────────────────────────────────────────
+const Pill = ({ color = "indigo", children }) => {
+  const c = {
+    indigo: "bg-indigo-50 text-indigo-700 border-indigo-100",
+    green: "bg-green-50 text-green-700 border-green-100",
+    red: "bg-red-50 text-red-700 border-red-100",
+    amber: "bg-amber-50 text-amber-700 border-amber-100",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${c[color]}`}>
+      {children}
+    </span>
+  );
+};
+
+// ─── Diagnostic Row ───────────────────────────────────────────────────────────
+const DiagRow = ({ text, type }) => {
+  const styles = {
+    obs: { bg: "bg-indigo-50 border-indigo-100", dot: "bg-indigo-500", icon: "•", text: "text-indigo-800" },
+    risk: { bg: "bg-red-50 border-red-100", dot: "bg-red-500", icon: "⚠", text: "text-red-800" },
+    strength: { bg: "bg-green-50 border-green-100", dot: "bg-green-500", icon: "✓", text: "text-green-800" },
+  };
+  const s = styles[type] || styles.obs;
+  return (
+    <div className={`flex items-start gap-3 p-3 rounded-xl border ${s.bg} mb-2 last:mb-0`}>
+      <span className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold shrink-0 ${s.dot}`}>
+        {s.icon}
+      </span>
+      <p className={`text-sm ${s.text} leading-relaxed`}>{text}</p>
+    </div>
+  );
+};
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = () => {
   const [overview, setOverview] = useState(null);
   const [intelligence, setIntelligence] = useState(null);
@@ -30,58 +162,34 @@ const Dashboard = () => {
   const [selectedBusiness, setSelectedBusiness] = useState("all");
   const [filteredRecords, setFilteredRecords] = useState(null);
 
-  const filterDataByBusiness = (businessName) => {
-    if (businessName === "all" || !overview) {
-      setFilteredRecords(null);
-      return;
-    }
-
-    fetchBusinessData(businessName);
-  };
-
   const fetchBusinessData = async (businessName) => {
     try {
       const response = await axiosInstance.get("/api/list/");
       const allRecords = response.data;
-
-      const businessRecords = allRecords.filter((record) => record.business_name === businessName);
-
-      const total_sales = businessRecords.reduce((sum, r) => sum + r.sales, 0);
-      const total_expenses = businessRecords.reduce((sum, r) => sum + r.expenses, 0);
-      const total_profit = businessRecords.reduce((sum, r) => sum + r.profit, 0);
-
+      const businessRecords = allRecords.filter((r) => r.business_name === businessName);
+      const total_sales = businessRecords.reduce((s, r) => s + r.sales, 0);
+      const total_expenses = businessRecords.reduce((s, r) => s + r.expenses, 0);
+      const total_profit = businessRecords.reduce((s, r) => s + r.profit, 0);
       const monthlyData = {};
       businessRecords.forEach((record) => {
         const month = record.date.substring(0, 7);
-        if (!monthlyData[month]) {
-          monthlyData[month] = { sales: 0, profit: 0 };
-        }
+        if (!monthlyData[month]) monthlyData[month] = { sales: 0, profit: 0 };
         monthlyData[month].sales += record.sales;
         monthlyData[month].profit += record.profit;
       });
-
       const monthly_trend = Object.keys(monthlyData)
-        .map((month) => ({
-          month,
-          sales: monthlyData[month].sales,
-          profit: monthlyData[month].profit,
-        }))
+        .map((m) => ({ month: m, sales: monthlyData[m].sales, profit: monthlyData[m].profit }))
         .sort((a, b) => a.month.localeCompare(b.month));
-
       let businessInsightsData = null;
       try {
-        const insightsRes = await axiosInstance.get(`/api/business-insights/by-name/?business_name=${encodeURIComponent(businessName)}`);
-        businessInsightsData = insightsRes.data;
-        // console.log("Business insights:", businessInsightsData);
-      } catch (error) {
-        console.error("Error fetching business insights:", error);
-      }
-
+        const res = await axiosInstance.get(
+          `/api/business-insights/by-name/?business_name=${encodeURIComponent(businessName)}`
+        );
+        businessInsightsData = res.data;
+      } catch (e) { console.error(e); }
       setFilteredRecords({
         overview: {
-          total_sales,
-          total_expenses,
-          total_profit,
+          total_sales, total_expenses, total_profit,
           total_records: businessRecords.length,
           profit_margin: total_sales > 0 ? (total_profit / total_sales) * 100 : 0,
           avg_daily_sales: total_sales / businessRecords.length,
@@ -89,82 +197,72 @@ const Dashboard = () => {
         monthly_trend,
         insights: businessInsightsData,
       });
-    } catch (error) {
-      console.error("Error fetching business data:", error);
-    }
+    } catch (e) { console.error(e); }
   };
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  useEffect(() => { loadDashboardData(); }, []);
 
   const loadDashboardData = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
+      setLoading(true); setError(null);
       const insightsRes = await axiosInstance.get("/api/business-insights/");
       setBusinessInsights(insightsRes.data);
-
       const statusRes = await axiosInstance.get("/api/intelligence/status/");
       setStatus(statusRes.data);
-
       const overviewRes = await axiosInstance.get("/api/dashboard/overview/");
       setOverview(overviewRes.data);
-
       if (statusRes.data.has_enough_data) {
         const intelligenceRes = await axiosInstance.get("/api/intelligence/");
         setIntelligence(intelligenceRes.data);
       }
-    } catch (error) {
-      console.error("Dashboard Load Error:", error);
-      console.error("Error response:", error.response);
-      console.error("Error config:", error.config);
-
-      if (error.response?.status === 404) {
-        setError(`API endpoint not found: ${error.config.url}. Please check backend configuration.`);
-      } else if (error.response?.status === 401) {
-        setError("Authentication failed. Please login again.");
-      } else {
-        setError(error.response?.data?.message || "Failed to load dashboard data");
-      }
+    } catch (err) {
+      if (err.response?.status === 404) setError(`API endpoint not found: ${err.config.url}`);
+      else if (err.response?.status === 401) setError("Authentication failed. Please login again.");
+      else setError(err.response?.data?.message || "Failed to load dashboard data");
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoading(false); setRefreshing(false);
     }
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadDashboardData();
-  };
+  const handleRefresh = () => { setRefreshing(true); loadDashboardData(); };
 
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading && !refreshing) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-500 text-lg">Loading your business intelligence...</p>
+            <div className="relative w-16 h-16 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-100" />
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+              <div className="absolute inset-3 rounded-full bg-indigo-50 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-indigo-600" />
+              </div>
+            </div>
+            <h3 className="text-gray-800 font-semibold text-lg">Loading Intelligence</h3>
+            <p className="text-gray-400 text-sm mt-1">Crunching your business data…</p>
           </div>
         </div>
       </Layout>
     );
   }
 
+  // ── Error ────────────────────────────────────────────────────────────────────
   if (error) {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center bg-red-50 p-8 rounded-xl max-w-md">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-red-800 mb-2">Error Loading Dashboard</h3>
-            <p className="text-red-600 mb-4">{error}</p>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+          <div className="bg-white rounded-2xl border border-red-100 shadow-xl p-8 max-w-md w-full text-center">
+            <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <XCircle className="w-7 h-7 text-red-500" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Failed to Load</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">{error}</p>
             <div className="space-y-3">
-              <button onClick={handleRefresh} className="w-full bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+              <button onClick={handleRefresh} className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
                 Try Again
               </button>
-              <button onClick={() => (window.location.href = "/dashboard")} className="w-full bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+              <button onClick={() => (window.location.href = "/dashboard")} className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
                 Refresh Page
               </button>
             </div>
@@ -174,449 +272,530 @@ const Dashboard = () => {
     );
   }
 
+  const currentData = filteredRecords ? filteredRecords.overview : overview?.overview;
+  const currentTrend = filteredRecords ? filteredRecords.monthly_trend : overview?.monthly_trend;
+  const currentBizInsights = selectedBusiness !== "all" ? filteredRecords?.insights : businessInsights;
+
+  const TABS = [
+    { id: "overview", label: "Overview", icon: <BarChart2 className="w-4 h-4" /> },
+    { id: "insights", label: "AI Insights", icon: <Brain className="w-4 h-4" />, dot: status?.has_enough_data },
+    { id: "strategy", label: "Growth Strategy", icon: <Zap className="w-4 h-4" />, dot: status?.has_enough_data },
+  ];
+
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Business Intelligence Dashboard</h1>
-            <p className="text-gray-600 mt-1">AI-powered insights to grow your business smarter</p>
-          </div>
-          <button onClick={handleRefresh} disabled={refreshing} className="flex items-center px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
-        {/* Selected Business Indicator */}
-        {selectedBusiness !== "all" && (
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <i className="fa-solid fa-store text-indigo-600 mr-2"></i>
-              <span className="text-indigo-800 font-medium">Showing data for: </span>
-              <span className="ml-2 px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-semibold">{selectedBusiness}</span>
-            </div>
-          </div>
-        )}
+      <div className="min-h-screen bg-gray-50/80">
 
-        {status && !status.has_enough_data && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-            <div className="flex items-start">
-              <Calendar className="w-6 h-6 text-blue-600 mt-0.5 mr-4 shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-blue-900 mb-2">Unlock AI-Powered Insights</h3>
-                <p className="text-blue-700 mb-3">{status.message}</p>
-                <div className="w-full bg-blue-200 rounded-full h-3">
-                  <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: `${status.percentage}%` }}></div>
-                </div>
-                <div className="flex justify-between text-sm text-blue-600 mt-2">
-                  <span>{status.current_records} records</span>
-                  <span>{status.required_records} required</span>
-                </div>
+        {/* ── Sticky Top Header ────────────────────────────────────────────── */}
+        <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
+          <div className="px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900 leading-tight">Business Intelligence</h1>
+                <p className="text-gray-400 text-xs">AI-powered insights to grow smarter</p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/doc"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all"
+              >
+                Documentation
+              </Link>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                {refreshing ? "Refreshing…" : "Refresh"}
+              </button>
+            </div>
           </div>
-        )}
 
-        <div className="flex space-x-4 mb-8 border-b bg-white px-4 rounded-t-lg">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`px-4 py-3 font-medium transition-colors relative ${activeTab === "overview" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-600 hover:text-indigo-600"}`}
-          >
-            <i className="fa-solid fa-square-poll-vertical"></i> Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("insights")}
-            className={`px-4 py-3 font-medium transition-colors relative ${activeTab === "insights" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-600 hover:text-indigo-600"}`}
-          >
-            <i className="fa-solid fa-robot"></i> AI Insights
-            {status?.has_enough_data && <span className="absolute -top-1 -right-2 w-2 h-2 bg-green-500 rounded-full"></span>}
-          </button>
-          <button
-            onClick={() => setActiveTab("strategy")}
-            className={`px-4 py-3 font-medium transition-colors relative ${activeTab === "strategy" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-600 hover:text-indigo-600"}`}
-          >
-            <i className="fa-solid fa-chart-line"></i> Growth Strategy
-            {status?.has_enough_data && <span className="absolute -top-1 -right-2 w-2 h-2 bg-green-500 rounded-full"></span>}
-          </button>
+          {/* Tab Bar */}
+          <div className="px-4 flex gap-1">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${activeTab === t.id
+                    ? "text-indigo-600 border-indigo-600"
+                    : "text-gray-500 border-transparent hover:text-indigo-500"
+                  }`}
+              >
+                {t.icon}
+                {t.label}
+                {t.dot && <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {activeTab === "overview" && overview && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <KPICard title="Total Sales" value={formatCurrency(filteredRecords ? filteredRecords.overview.total_sales : overview.overview?.total_sales)} icon="" />
-              <KPICard title="Total Expenses" value={formatCurrency(filteredRecords ? filteredRecords.overview.total_expenses : overview.overview?.total_expenses)} icon="" />
-              <KPICard
-                title="Total Profit"
-                value={formatCurrency(filteredRecords ? filteredRecords.overview.total_profit : overview.overview?.total_profit)}
-                subtitle={`Margin: ${formatPercent(filteredRecords ? filteredRecords.overview.profit_margin / 100 : overview.overview?.profit_margin / 100)}`}
-                icon=""
-              />
-              <KPICard
-                title="Total Records"
-                value={filteredRecords ? filteredRecords.overview.total_records : overview.overview?.total_records}
-                subtitle={`Avg: ${formatCurrency(filteredRecords ? filteredRecords.overview.avg_daily_sales : overview.overview?.avg_daily_sales)}/day`}
-                icon=""
-              />
-            </div>
+        {/* ── Page Content ─────────────────────────────────────────────────── */}
+        <div className="py-5 px-4 space-y-6">
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Monthly Sales Chart */}
-
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 className="text-lg font-semibold mb-4">{selectedBusiness !== "all" ? `${selectedBusiness} - ` : ""}Monthly Sales Performance</h2>
-                {(filteredRecords ? filteredRecords.monthly_trend : overview.monthly_trend)?.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={filteredRecords ? filteredRecords.monthly_trend : overview.monthly_trend}>
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
-                      <Bar dataKey="sales" fill="#4F46E5" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-75 flex items-center justify-center text-gray-400">No monthly data available</div>
-                )}
+          {/* Selected Business Banner */}
+          {selectedBusiness !== "all" && (
+            <div className="flex items-center justify-between bg-indigo-600 text-white rounded-2xl px-5 py-3 shadow-md shadow-indigo-200">
+              <div className="flex items-center gap-3">
+                <Building2 className="w-5 h-5 text-indigo-200" />
+                <span className="text-sm text-indigo-100">Viewing:</span>
+                <span className="font-bold text-white">{selectedBusiness}</span>
               </div>
+              <button
+                onClick={() => { setSelectedBusiness("all"); setFilteredRecords(null); }}
+                className="flex items-center gap-1.5 text-xs text-indigo-200 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg"
+              >
+                <ArrowLeft className="w-3 h-3" /> All Businesses
+              </button>
+            </div>
+          )}
 
-              {/* Monthly Profit Chart */}
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 className="text-lg font-semibold mb-4">{selectedBusiness !== "all" ? `${selectedBusiness} - ` : ""}Monthly Profit Trend</h2>
-                {(filteredRecords ? filteredRecords.monthly_trend : overview.monthly_trend)?.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={filteredRecords ? filteredRecords.monthly_trend : overview.monthly_trend}>
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
-                      <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-75 flex items-center justify-center text-gray-400">No profit data available</div>
-                )}
+          {/* Data Progress Banner */}
+          {status && !status.has_enough_data && (
+            <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-blue-100 rounded-xl shrink-0">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-blue-900 mb-1">Unlock AI-Powered Insights</h3>
+                  <p className="text-blue-600 text-sm mb-4">{status.message}</p>
+                  <div className="relative w-full bg-blue-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="h-full bg-linear-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700"
+                      style={{ width: `${status.percentage}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-blue-500 font-medium mt-2">
+                    <span>{status.current_records} records</span>
+                    <span>{status.percentage}% complete</span>
+                    <span>{status.required_records} required</span>
+                  </div>
+                </div>
               </div>
             </div>
+          )}
 
+          {/* ══════════════════════════════════════════════════
+              TAB: OVERVIEW
+          ══════════════════════════════════════════════════ */}
+          {activeTab === "overview" && overview && (
+            <div className="space-y-6">
 
-            {(selectedBusiness !== "all" ? filteredRecords?.insights : businessInsights) && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border mb-8">
-                <h2 className="text-lg font-semibold mb-4">
-                  <i className="fa-solid fa-chart-simple mr-2"></i>
-                  {selectedBusiness !== "all" ? `${selectedBusiness} - ` : ""}Business Health
-                </h2>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-medium text-indigo-600 mb-3">Performance</h3>
-                    {(selectedBusiness !== "all" ? filteredRecords?.insights?.messages : businessInsights?.messages)?.map((msg, i) => {
-                      // Determine background color based on status
-                      let bgColor = "bg-green-50";
-                      const status = selectedBusiness !== "all" ? filteredRecords?.insights?.status : businessInsights?.status;
+              {/* KPI Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <KPICard
+                  title="Total Sales"
+                  value={formatCurrency(currentData?.total_sales)}
+                  icon={<TrendingUp className="w-5 h-5 text-white" />}
+                  gradient="bg-linear-to-br from-indigo-500 to-indigo-700"
+                  trend="up"
+                />
+                <KPICard
+                  title="Total Expenses"
+                  value={formatCurrency(currentData?.total_expenses)}
+                  icon={<TrendingDown className="w-5 h-5 text-white" />}
+                  gradient="bg-linear-to-br from-rose-500 to-rose-700"
+                />
+                <KPICard
+                  title="Total Profit"
+                  value={formatCurrency(currentData?.total_profit)}
+                  subtitle={`Margin: ${formatPercent(currentData?.profit_margin / 100)}`}
+                  icon={<Target className="w-5 h-5 text-white" />}
+                  gradient="bg-linear-to-br from-emerald-500 to-teal-600"
+                  trend="up"
+                />
+                <KPICard
+                  title="Total Records"
+                  value={currentData?.total_records ?? "—"}
+                  subtitle={`Avg: ${formatCurrency(currentData?.avg_daily_sales)}/day`}
+                  icon={<BarChart2 className="w-5 h-5 text-white" />}
+                  gradient="bg-linear-to-br from-violet-500 to-purple-700"
+                />
+              </div>
 
-                      if (status === "danger") bgColor = "bg-red-50";
-                      else if (status === "warning") bgColor = "bg-yellow-50";
+              {/* Charts Row */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Monthly Sales */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <SectionHeading
+                    title={`${selectedBusiness !== "all" ? selectedBusiness + " – " : ""}Monthly Sales`}
+                    subtitle="Revenue performance over time"
+                    icon={<BarChart2 className="w-4 h-4" />}
+                  />
+                  {currentTrend?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <BarChart data={currentTrend} barSize={28}>
+                        <defs>
+                          <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#4F46E5" stopOpacity={1} />
+                            <stop offset="100%" stopColor="#818cf8" stopOpacity={0.7} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar dataKey="sales" fill="url(#salesGrad)" radius={[6, 6, 0, 0]} name="Sales" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-60 flex flex-col items-center justify-center text-gray-300 gap-2">
+                      <BarChart2 className="w-10 h-10" />
+                      <p className="text-sm">No monthly data available</p>
+                    </div>
+                  )}
+                </div>
 
-                      return (
-                        <div key={i} className={`${bgColor} p-3 rounded-lg mb-2`}>
-                          <i className="fa-solid fa-arrow-trend-up text-blue-600 mr-2"></i> {msg}
+                {/* Profit Trend */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <SectionHeading
+                    title={`${selectedBusiness !== "all" ? selectedBusiness + " – " : ""}Profit Trend`}
+                    subtitle="Net profit movement"
+                    icon={<TrendingUp className="w-4 h-4" />}
+                  />
+                  {currentTrend?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <AreaChart data={currentTrend}>
+                        <defs>
+                          <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10B981" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area
+                          type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={2.5}
+                          fill="url(#profitGrad)"
+                          dot={{ fill: "#10B981", r: 4, strokeWidth: 2, stroke: "#fff" }}
+                          name="Profit"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-60 flex flex-col items-center justify-center text-gray-300 gap-2">
+                      <TrendingUp className="w-10 h-10" />
+                      <p className="text-sm">No profit data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Business Health */}
+              {currentBizInsights && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <SectionHeading
+                    title={`${selectedBusiness !== "all" ? selectedBusiness + " – " : ""}Business Health`}
+                    subtitle="AI-assessed performance & suggestions"
+                    icon={<Zap className="w-4 h-4" />}
+                    badge={
+                      <Pill color={currentBizInsights?.status === "danger" ? "red" : currentBizInsights?.status === "warning" ? "amber" : "green"}>
+                        {currentBizInsights?.status === "danger" ? "⚠ Needs Attention" : currentBizInsights?.status === "warning" ? "⚡ Watch Closely" : "✓ On Track"}
+                      </Pill>
+                    }
+                  />
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">Performance</p>
+                      {currentBizInsights?.messages?.map((msg, i) => {
+                        const s = currentBizInsights?.status;
+                        return (
+                          <DiagRow key={i} text={msg}
+                            type={s === "danger" ? "risk" : s === "warning" ? "obs" : "strength"}
+                          />
+                        );
+                      })}
+                      {!currentBizInsights?.messages?.length && (
+                        <p className="text-sm text-gray-400">No performance data yet.</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Suggestions</p>
+                      {currentBizInsights?.suggestions?.map((sug, i) => (
+                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 mb-2 last:mb-0">
+                          <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                          <p className="text-sm text-amber-800 leading-relaxed">{sug}</p>
                         </div>
+                      ))}
+                      {!currentBizInsights?.suggestions?.length && (
+                        <p className="text-sm text-gray-400">No suggestions yet.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Business List */}
+              {overview.business_names?.length > 0 && (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <SectionHeading
+                    title="Your Businesses"
+                    subtitle={`${overview.business_names.length} active ${overview.business_names.length === 1 ? "business" : "businesses"}`}
+                    icon={<Building2 className="w-4 h-4" />}
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {overview.business_names.map((name, i) => {
+                      const isActive = selectedBusiness === name;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => { setSelectedBusiness(name); fetchBusinessData(name); }}
+                          className={`group w-full text-left p-4 rounded-xl border transition-all duration-200 ${isActive
+                              ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
+                              : "bg-gray-50 border-gray-100 text-gray-700 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm"
+                            }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${isActive ? "bg-white/20 text-white" : "bg-indigo-100 text-indigo-700"}`}>
+                                {name[0]?.toUpperCase()}
+                              </div>
+                              <p className={`font-semibold text-sm truncate max-w-30 ${isActive ? "text-white" : "text-gray-800"}`}>{name}</p>
+                            </div>
+                            <ChevronRight className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${isActive ? "text-white/70" : "text-gray-300"}`} />
+                          </div>
+                          {isActive && (
+                            <div className="mt-2 flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+                              <span className="text-xs text-indigo-200">Currently viewing</span>
+                            </div>
+                          )}
+                        </button>
                       );
                     })}
                   </div>
-                  <div>
-                    <h3 className="font-medium text-green-600 mb-3">Suggestions</h3>
-                    {(selectedBusiness !== "all" ? filteredRecords?.insights?.suggestions : businessInsights?.suggestions)?.map((sug, i) => (
-                      <div key={i} className="bg-blue-50 p-3 rounded-lg mb-2">
-                        <i className="fa-solid fa-lightbulb text-yellow-400 mr-2"></i> {sug}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* BUSINESS LIST */}
-            {overview.business_names?.length > 0 && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 className="text-lg font-semibold mb-4">Your Businesses</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {overview.business_names.map((name, index) => (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        setSelectedBusiness(name);
-                        fetchBusinessData(name);
-                      }}
-                      className={`p-4 rounded-lg border transition-all cursor-pointer ${
-                        selectedBusiness === name ? "ring-2 ring-indigo-500 bg-indigo-50 border-indigo-200" : "bg-gray-50 hover:shadow-md hover:border-indigo-200"
-                      }`}
+                  {selectedBusiness !== "all" && (
+                    <button
+                      onClick={() => { setSelectedBusiness("all"); setFilteredRecords(null); }}
+                      className="mt-5 text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1.5 transition-colors"
                     >
-                      <div className="flex justify-between items-center">
-                        <p className="font-medium text-gray-800 truncate">{name}</p>
-                        {selectedBusiness === name && <span className="text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded whitespace-nowrap ml-2">Viewing</span>}
-                      </div>
-                    </div>
-                  ))}
+                      <ArrowLeft className="w-4 h-4" /> View All Businesses
+                    </button>
+                  )}
                 </div>
+              )}
+            </div>
+          )}
 
-                {selectedBusiness !== "all" && (
-                  <button
-                    onClick={() => {
-                      setSelectedBusiness("all");
-                      setFilteredRecords(null);
-                    }}
-                    className="mt-6 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center"
-                  >
-                    <i className="fa-solid fa-arrow-left mr-2"></i> View All Businesses
-                  </button>
-                )}
-              </div>
-            )}
-          </>
-        )}
+          {/* ══════════════════════════════════════════════════
+              TAB: AI INSIGHTS
+          ══════════════════════════════════════════════════ */}
+          {activeTab === "insights" && (
+            <div className="space-y-6">
+              {!status?.has_enough_data ? (
+                <InsufficientDataCard
+                  remaining={status?.remaining}
+                  message="Add more records to unlock AI-powered insights about your business performance, market position, and growth opportunities."
+                />
+              ) : (
+                <>
+                  {/* AI Metric Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <AIMetricCard
+                      title="Forecast Trend"
+                      value={intelligence?.intelligence?.forecast?.trend?.toUpperCase() || "N/A"}
+                      icon={intelligence?.intelligence?.forecast?.trend === "declining"
+                        ? <TrendingDown className="w-5 h-5" />
+                        : <TrendingUp className="w-5 h-5" />}
+                      color={
+                        intelligence?.intelligence?.forecast?.trend === "growing" ? "green"
+                          : intelligence?.intelligence?.forecast?.trend === "declining" ? "red"
+                            : "yellow"
+                      }
+                    />
+                    <AIMetricCard
+                      title="30-Day Forecast"
+                      value={formatCurrency(intelligence?.intelligence?.forecast?.predicted_30_day_demand)}
+                      subtitle={`${intelligence?.intelligence?.forecast?.confidence_score || 0}% confidence`}
+                      icon={<Target className="w-5 h-5" />}
+                      color="blue"
+                    />
+                    <AIMetricCard
+                      title="Market Share"
+                      value={`${intelligence?.intelligence?.market?.market_share_percent || 0}%`}
+                      subtitle={intelligence?.intelligence?.market?.share_status || "Unknown"}
+                      icon={<Shield className="w-5 h-5" />}
+                      color="blue"
+                    />
+                    <AIMetricCard
+                      title="Risk Score"
+                      value={`${intelligence?.intelligence?.risk?.risk_score || 0}/100`}
+                      subtitle={intelligence?.intelligence?.risk?.risk_level || "Unknown"}
+                      icon={<AlertTriangle className="w-5 h-5" />}
+                      color={
+                        intelligence?.intelligence?.risk?.risk_level === "Low Risk" ? "green"
+                          : intelligence?.intelligence?.risk?.risk_level === "Moderate Risk" ? "yellow"
+                            : intelligence?.intelligence?.risk?.risk_level === "High Risk" ? "red"
+                              : "blue"
+                      }
+                    />
+                  </div>
 
-        {/* AI INSIGHTS TAB */}
-        {activeTab === "insights" && (
-          <div className="space-y-6">
-            {!status?.has_enough_data ? (
-              <InsufficientDataCard
-                remaining={status?.remaining}
-                message="Add more records to unlock AI-powered insights about your business performance, market position, and growth opportunities."
-              />
-            ) : (
-              <>
-                {/* AI Metrics Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <AIMetricCard
-                    title="Forecast Trend"
-                    value={intelligence?.intelligence?.forecast?.trend?.toUpperCase() || "N/A"}
-                    icon={intelligence?.intelligence?.forecast?.trend === "declining" ? <TrendingDown className="w-5 h-5" /> : <TrendingUp className="w-5 h-5" />}
-                    color={intelligence?.intelligence?.forecast?.trend === "growing" ? "green" : intelligence?.intelligence?.forecast?.trend === "declining" ? "red" : "yellow"}
-                  />
-                  <AIMetricCard
-                    title="30-Day Forecast"
-                    value={formatCurrency(intelligence?.intelligence?.forecast?.predicted_30_day_demand)}
-                    subtitle={`${intelligence?.intelligence?.forecast?.confidence_score || 0}% confidence`}
-                    icon={<Target className="w-5 h-5" />}
-                  />
-                  <AIMetricCard
-                    title="Market Share"
-                    value={`${intelligence?.intelligence?.market?.market_share_percent || 0}%`}
-                    subtitle={intelligence?.intelligence?.market?.share_status || "Unknown"}
-                    icon={<Shield className="w-5 h-5" />}
-                  />
-                  <AIMetricCard
-                    title="Risk Score"
-                    value={`${intelligence?.intelligence?.risk?.risk_score || 0}/100`}
-                    subtitle={intelligence?.intelligence?.risk?.risk_level || "Unknown"}
-                    icon={<AlertTriangle className="w-5 h-5" />}
-                    color={
-                      intelligence?.intelligence?.risk?.risk_level === "Low Risk"
-                        ? "green"
-                        : intelligence?.intelligence?.risk?.risk_level === "Moderate Risk"
-                          ? "yellow"
-                          : intelligence?.intelligence?.risk?.risk_level === "High Risk"
-                            ? "red"
-                            : "blue"
-                    }
-                  />
-                </div>
-
-                {/* Diagnostics */}
-                {intelligence?.intelligence?.diagnostics && (
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 className="font-semibold text-lg mb-4">Diagnostic Analysis</h3>
-
-                    <div className="grid md:grid-cols-3 gap-6">
-                      {/* Observations */}
-                      <div>
-                        <h4 className="font-medium text-indigo-600 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                          Key Observations
-                        </h4>
-                        <div className="space-y-2">
+                  {/* Diagnostics */}
+                  {intelligence?.intelligence?.diagnostics && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                      <SectionHeading
+                        title="Diagnostic Analysis"
+                        subtitle="Deep-dive into what's driving your results"
+                        icon={<Brain className="w-4 h-4" />}
+                      />
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div>
+                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">Key Observations</p>
                           {intelligence.intelligence.diagnostics.diagnostics?.map((d, i) => (
-                            <p key={i} className="text-gray-600 text-sm bg-indigo-50 p-2 rounded">
-                              • {d}
-                            </p>
+                            <DiagRow key={i} text={d} type="obs" />
                           ))}
-                          {!intelligence.intelligence.diagnostics.diagnostics?.length && <p className="text-gray-400 text-sm">No observations available</p>}
+                          {!intelligence.intelligence.diagnostics.diagnostics?.length && (
+                            <p className="text-sm text-gray-400">No observations available</p>
+                          )}
                         </div>
-                      </div>
-
-                      {/* Risks */}
-                      <div>
-                        <h4 className="font-medium text-red-600 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                          Risk Factors
-                        </h4>
-                        <div className="space-y-2">
+                        <div>
+                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">Risk Factors</p>
                           {intelligence.intelligence.diagnostics.risks?.map((r, i) => (
-                            <p key={i} className="text-gray-600 text-sm bg-red-50 p-2 rounded">
-                              ⚠ {r}
-                            </p>
+                            <DiagRow key={i} text={r} type="risk" />
                           ))}
-                          {!intelligence.intelligence.diagnostics.risks?.length && <p className="text-gray-400 text-sm">No major risks detected</p>}
+                          {!intelligence.intelligence.diagnostics.risks?.length && (
+                            <p className="text-sm text-gray-400">No major risks detected</p>
+                          )}
                         </div>
-                      </div>
-
-                      {/* Strengths */}
-                      <div>
-                        <h4 className="font-medium text-green-600 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                          Strengths
-                        </h4>
-                        <div className="space-y-2">
+                        <div>
+                          <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">Strengths</p>
                           {intelligence.intelligence.diagnostics.strengths?.map((s, i) => (
-                            <p key={i} className="text-gray-600 text-sm bg-green-50 p-2 rounded">
-                              ✓ {s}
-                            </p>
+                            <DiagRow key={i} text={s} type="strength" />
                           ))}
-                          {!intelligence.intelligence.diagnostics.strengths?.length && <p className="text-gray-400 text-sm">No strengths identified yet</p>}
+                          {!intelligence.intelligence.diagnostics.strengths?.length && (
+                            <p className="text-sm text-gray-400">No strengths identified yet</p>
+                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Competitor Analysis */}
-                {intelligence?.intelligence?.competitor && (
-                  <div className="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 className="font-semibold text-lg mb-4">Competitive Position</h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-purple-50 p-4 rounded-lg">
-                        <p className="text-purple-600 text-sm mb-1">Your Business Cluster</p>
-                        <p className="text-2xl font-bold text-purple-900">{intelligence.intelligence.competitor.user_cluster}</p>
+                  {/* Competitor Analysis */}
+                  {intelligence?.intelligence?.competitor && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                      <SectionHeading
+                        title="Competitive Position"
+                        subtitle="How you compare in the broader market"
+                        icon={<Shield className="w-4 h-4" />}
+                      />
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="bg-linear-to-br from-violet-50 to-purple-50 border border-violet-100 p-5 rounded-2xl">
+                          <p className="text-violet-500 text-xs font-bold uppercase tracking-widest mb-2">Your Business Cluster</p>
+                          <p className="text-3xl font-black text-violet-900">{intelligence.intelligence.competitor.user_cluster}</p>
+                        </div>
+                        <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-2xl">
+                          <p className="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2">Competitors in Analysis</p>
+                          <p className="text-3xl font-black text-blue-900">{intelligence.intelligence.competitor.total_competitors}</p>
+                        </div>
                       </div>
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <p className="text-blue-600 text-sm mb-1">Competitors in Analysis</p>
-                        <p className="text-2xl font-bold text-blue-900">{intelligence.intelligence.competitor.total_competitors}</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════
+              TAB: STRATEGY
+          ══════════════════════════════════════════════════ */}
+          {activeTab === "strategy" && (
+            <div className="space-y-6">
+              {!status?.has_enough_data ? (
+                <InsufficientDataCard
+                  remaining={status?.remaining}
+                  message="Add more records to get personalized AI growth strategies tailored specifically to your business."
+                />
+              ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+                  <SectionHeading
+                    title="AI-Generated Growth Strategy"
+                    subtitle="Personalized action plan based on your data"
+                    icon={<Lightbulb className="w-4 h-4" />}
+                    badge={<Pill color="indigo"><Sparkles className="w-3 h-3" /> AI Powered</Pill>}
+                  />
+
+                  <div className="space-y-6">
+                    {/* Strengths */}
+                    {intelligence?.strategies?.strengths?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4" /> Your Strengths
+                        </p>
+                        <div className="bg-linear-to-br from-green-50 to-emerald-50 border border-green-100 p-5 rounded-2xl space-y-2">
+                          {intelligence.strategies.strengths.map((s, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</span>
+                              <p className="text-green-800 text-sm leading-relaxed">{s}</p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                    )}
 
-        {/* STRATEGY TAB */}
-        {activeTab === "strategy" && (
-          <div className="space-y-6">
-            {!status?.has_enough_data ? (
-              <InsufficientDataCard
-                remaining={status?.remaining}
-                message="Add more records to get personalized growth strategies tailored to your business."
-                icon={<Lightbulb className="w-12 h-12" />}
-              />
-            ) : (
-              <div className="bg-white p-8 rounded-xl shadow-sm border">
-                <h2 className="text-2xl font-semibold mb-6 flex items-center">
-                  <Lightbulb className="w-6 h-6 text-yellow-500 mr-2" />
-                  AI-Generated Growth Strategy
-                </h2>
-
-                {/* Strengths */}
-                {intelligence?.strategies?.strengths?.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-green-600 font-semibold mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      Your Strengths
-                    </h3>
-                    <div className="bg-green-50 p-4 rounded-lg space-y-2">
-                      {intelligence.strategies.strengths.map((s, i) => (
-                        <p key={i} className="text-green-800">
-                          ✓ {s}
+                    {/* Warnings */}
+                    {intelligence?.strategies?.warnings?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" /> Areas to Address
                         </p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div className="bg-linear-to-br from-red-50 to-rose-50 border border-red-100 p-5 rounded-2xl space-y-2">
+                          {intelligence.strategies.warnings.map((w, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-red-500 text-white text-xs flex items-center justify-center font-bold">⚠</span>
+                              <p className="text-red-800 text-sm leading-relaxed">{w}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {/* Warnings/Risks */}
-                {intelligence?.strategies?.warnings?.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-red-600 font-semibold mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
-                      Areas to Address
-                    </h3>
-                    <div className="bg-red-50 p-4 rounded-lg space-y-2">
-                      {intelligence.strategies.warnings.map((w, i) => (
-                        <p key={i} className="text-red-800">
-                          ⚠ {w}
+                    {/* Recommendations */}
+                    {intelligence?.strategies?.recommended_strategies?.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <Zap className="w-4 h-4" /> Recommended Actions
                         </p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div className="bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-5 rounded-2xl space-y-3">
+                          {intelligence.strategies.recommended_strategies.map((r, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
+                                {i + 1}
+                              </span>
+                              <p className="text-indigo-800 text-sm leading-relaxed">{r}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {/* Recommendations */}
-                {intelligence?.strategies?.recommended_strategies?.length > 0 && (
-                  <div>
-                    <h3 className="text-indigo-600 font-semibold mb-3 flex items-center">
-                      <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                      Recommended Actions
-                    </h3>
-                    <div className="bg-indigo-50 p-4 rounded-lg space-y-2">
-                      {intelligence.strategies.recommended_strategies.map((r, i) => (
-                        <p key={i} className="text-indigo-800">
-                          → {r}
-                        </p>
-                      ))}
-                    </div>
+                    {/* Empty state */}
+                    {!intelligence?.strategies?.strengths?.length &&
+                      !intelligence?.strategies?.warnings?.length &&
+                      !intelligence?.strategies?.recommended_strategies?.length && (
+                        <div className="text-center py-8 text-gray-400">
+                          <Lightbulb className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No strategies generated yet. Check back soon.</p>
+                        </div>
+                      )}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
     </Layout>
   );
 };
 
 export default Dashboard;
-
-const KPICard = ({ title, value, subtitle, icon }) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-all">
-    <div className="flex justify-between items-start">
-      <p className="text-gray-500 text-sm">{title}</p>
-      <span className="text-2xl">{icon}</span>
-    </div>
-    <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
-    {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
-  </div>
-);
-
-const AIMetricCard = ({ title, value, subtitle, icon, color = "blue" }) => {
-  const colors = {
-    blue: "bg-blue-50 text-blue-700 border-blue-200",
-    green: "bg-green-50 text-green-700 border-green-200",
-    red: "bg-red-50 text-red-700 border-red-200",
-    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
-  };
-
-  return (
-    <div className={`p-6 rounded-xl border ${colors[color] || colors.blue}`}>
-      <div className="flex items-center mb-3">
-        <div className={`p-2 rounded-lg bg-white bg-opacity-50`}>{icon}</div>
-        <p className="text-sm font-medium ml-2 opacity-75">{title}</p>
-      </div>
-      <p className="text-2xl font-bold">{value}</p>
-      {subtitle && <p className="text-sm opacity-75 mt-1">{subtitle}</p>}
-    </div>
-  );
-};
-
-const InsufficientDataCard = ({ remaining, message, icon }) => (
-  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
-    {icon || <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />}
-    <h3 className="text-xl font-semibold text-yellow-800 mb-2">Insufficient Data</h3>
-    <p className="text-yellow-600 mb-4 max-w-md mx-auto">{message}</p>
-    {remaining > 0 && (
-      <div className="inline-block bg-yellow-100 px-4 py-2 rounded-lg">
-        <p className="text-yellow-800 font-medium">
-          {remaining} more {remaining === 1 ? "record" : "records"} needed
-        </p>
-      </div>
-    )}
-  </div>
-);
