@@ -36,7 +36,7 @@ def generate_diagnostics(user, intelligence):
     if performance_gap < 0:
         diagnostics.append("You are underperforming relative to industry growth.")
         risks.append("Competitive positioning may need improvement.")
-    else:
+    elif performance_gap > 0.1 and trend == "growing" and user_growth > 0:
         strengths.append("You are outperforming industry growth.")
 
     # Profitability Diagnosis
