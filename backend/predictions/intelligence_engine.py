@@ -8,37 +8,34 @@ from predictions.risk_engine import calculate_business_risk
 
 def generate_intelligence(user):
 
-    # forecast
-
+    # Forecast
     forecast_result = train_user_model(user.id)
 
     if forecast_result["status"] == "insufficient_data":
         return {
-            "status":"insufficient_data",
-            "required_records": forecast_result.get("required",60),
-            "available_records": forecast_result.get("available",0)
+            "status": "insufficient_data",
+            "required_records": forecast_result.get("required", 60),
+            "available_records": forecast_result.get("available", 0)
         }
-    
+
     user_growth = forecast_result["trend_value"]
     forecast_trend = forecast_result["trend"]
     confidence_score = forecast_result["confidence"]
     user_prediction = forecast_result["forecast_total"]
 
-    #industry comparision
-
+    # Industry Comparison
     industry_growth = float(calculate_industry_growth())
     performance_gap = user_growth - industry_growth
 
-    #market + competitor
-
+    # Market + Competitor
     market_data = calculate_market_metrics(user)
     competitor_data = analyze_competitor_position(user)
 
-    #diagnostics
-
+    # Diagnostics — trend is now passed correctly
     diagnostic_data = generate_diagnostics(user, {
         "forecast": {
-            "user_growth": user_growth
+            "user_growth": user_growth,
+            "trend": forecast_trend
         },
         "industry": {
             "performance_gap": performance_gap
@@ -46,22 +43,21 @@ def generate_intelligence(user):
     })
 
     core_data = {
-    "forecast": {
-        "user_growth": user_growth,
-        "predicted_30_day_demand": user_prediction,
-        "trend": forecast_trend,
-        "confidence_score": confidence_score
-    },
-    "industry": {
-        "performance_gap": performance_gap
-    },
-    "market": market_data,
-    "competitor": competitor_data
-}
+        "forecast": {
+            "user_growth": user_growth,
+            "predicted_30_day_demand": user_prediction,
+            "trend": forecast_trend,
+            "confidence_score": confidence_score
+        },
+        "industry": {
+            "performance_gap": performance_gap
+        },
+        "market": market_data,
+        "competitor": competitor_data
+    }
 
-    # risk
-
-    risk_data = calculate_business_risk(user,core_data)
+    # Risk
+    risk_data = calculate_business_risk(user, core_data)
 
     return {
         "status": "success",
@@ -70,12 +66,10 @@ def generate_intelligence(user):
             "trend": forecast_trend,
             "user_growth": round(user_growth, 4),
             "confidence_score": confidence_score,
-
         },
         "industry": {
             "industry_growth": round(industry_growth, 4),
             "performance_gap": round(performance_gap, 4),
-
         },
         "market": market_data,
         "competitor": competitor_data,
