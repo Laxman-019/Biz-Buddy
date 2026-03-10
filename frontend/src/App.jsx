@@ -11,6 +11,7 @@ import AddRecord from './pages/AddRecord'
 import ListRecords from './pages/ListRecord'
 import About from './pages/About'
 import Contact from './pages/Contact'
+import Documentation from './pages/Documentation'
 
 
 
@@ -28,6 +29,7 @@ const App = () => {
       <Route path="/disclaimer" element={<Disclaimer />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/doc" element={< Documentation/>} />
     </Routes>
   )
 }
