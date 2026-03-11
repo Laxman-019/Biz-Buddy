@@ -75,7 +75,7 @@ const AddRecord = () => {
 
           <input
             type="number"
-            min="1"
+            min="0"
             name="sales"
             placeholder="Sales"
             value={formData.sales}
@@ -86,7 +86,7 @@ const AddRecord = () => {
 
           <input
             type="number"
-            min="1"
+            min="0"
             name="expenses"
             placeholder="Expenses"
             value={formData.expenses}

@@ -76,7 +76,7 @@ const ListRecords = () => {
     if (!window.confirm("Delete this record?")) return;
     try {
       const res = await axiosInstance.delete(`/api/delete-record/${id}/`);
-      toast.success(res.message);
+      toast.success(res.data.message);
       // If deleting the last record on the current page, go back one page
       if (paginatedRecords.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);

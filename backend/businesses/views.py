@@ -133,7 +133,10 @@ def business_insights(req):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_record(req, id):
-    record = BusinessRecord.objects.get(id=id, user=req.user)
+    try:
+        record = BusinessRecord.objects.get(id=id, user=req.user)
+    except BusinessRecord.DoesNotExist:
+        return Response({"message": "Record not found"}, status=404)
     serializer = BusinessRecordSerializer(record, data=req.data)
     serializer.is_valid(raise_exception=True)
 
@@ -154,14 +157,6 @@ def delete_record(req, id):
 
     except BusinessRecord.DoesNotExist:
         return Response({"message": "Record not found"},status=404)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def list_records(req):
-    records = BusinessRecord.objects.filter(user=req.user)
-    serializer = BusinessRecordSerializer(records, many=True)
-    return Response(serializer.data)
 
 
 @api_view(['GET'])

@@ -1,7 +1,7 @@
 import pandas as pd
 from businesses.models import BusinessRecord
 
-MIN_RECORDS_REQUIRED = 60
+MIN_RECORDS_REQUIRED = 14
 
 
 def train_user_model(user_id):
@@ -30,13 +30,6 @@ def train_user_model(user_id):
 
     df = df.sort_values("ds")
 
-    # last 30 days average
-    recent_30 = df.tail(30)
-
-    avg_daily_profit = recent_30["y"].mean()
-
-    forecast_total = avg_daily_profit * 30
-
     # monthly trend
     monthly = df.resample("ME", on="ds").sum()["y"]
 
@@ -62,19 +55,37 @@ def train_user_model(user_id):
         percent_change = 0
         trend = "stable"
 
+    # Weighted moving average forecast
+    recent_30 = df.tail(30)
+    weights = range(1, len(recent_30) + 1)
+    weighted_avg = sum(w * v for w, v in zip(weights, recent_30["y"])) / sum(weights)
+
+    # Trend multiplier so forecast aligns with trend direction
+    if percent_change > 10:
+        trend_multiplier = min(1.2, 1 + (percent_change / 100) * 0.3)
+    elif percent_change < -10:
+        trend_multiplier = max(0.8, 1 + (percent_change / 100) * 0.3)
+    else:
+        trend_multiplier = 1.0
+
+    forecast_total = weighted_avg * 30 * trend_multiplier
 
     # confidence
     volatility = recent_30["y"].std()
 
-    if avg_daily_profit > 0:
-        confidence = max(20, min(90, 80 - (volatility/avg_daily_profit)*40))
+    if weighted_avg > 0:
+        confidence = max(20, min(90, 80 - (volatility/weighted_avg)*40))
     else:
         confidence = 20
+    
+    # If business is in loss, confidence should be low
+    if weighted_avg < 0:
+        confidence = min(confidence, 30)
 
     return {
         "status":"success",
         "trend":trend,
-        "trend_value":0,
+        "trend_value": round(float(percent_change), 4),
         "forecast_total":round(forecast_total,2),
         "confidence":round(confidence,2)
     }

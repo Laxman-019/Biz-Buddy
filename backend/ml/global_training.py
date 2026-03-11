@@ -19,25 +19,33 @@ MODEL_PATH = os.path.join(
 )
 
 def train_global_industry_model():
-    df = pd.read_csv(DATA_PATH)
-    df["order_date"] = pd.to_datetime(df["order_date"])
+    try:
+        df = pd.read_csv(DATA_PATH)
+        df["order_date"] = pd.to_datetime(df["order_date"])
 
-    # aggregate monthly revenue
+        # aggregate monthly revenue
 
-    monthly = df.groupby(
-        pd.Grouper(key='order_date',freq='ME')
-    ).agg({
-        "revenue": "sum",
+        monthly = df.groupby(
+            pd.Grouper(key='order_date',freq='ME')
+        ).agg({
+            "revenue": "sum",
 
-    }).reset_index()
+        }).reset_index()
 
-    monthly.columns = ["ds","y"]
-    model = Prophet()
-    model.fit(monthly)
+        monthly.columns = ["ds","y"]
+        model = Prophet()
+        model.fit(monthly)
 
-    if not os.path.exists(os.path.dirname(MODEL_PATH)):
-        os.makedirs(os.path.dirname(MODEL_PATH))
+        if not os.path.exists(os.path.dirname(MODEL_PATH)):
+            os.makedirs(os.path.dirname(MODEL_PATH))
 
-    joblib.dump(model,MODEL_PATH)
-    print("global industry model trained successfully")
-    return model
+        joblib.dump(model,MODEL_PATH)
+        print("global industry model trained successfully")
+        return model
+    
+    except FileNotFoundError:
+        print(f"Dataset not found at {DATA_PATH}")
+        return None
+    except Exception as e:
+        print(f"Error training global industry model: {str(e)}")
+        return None
