@@ -82,9 +82,9 @@ def complete_business_intelligence(req):
         response_data = {
             'status': 'success',
             'record_count': record_count,
-            'required_records': 60,
-            'progress': min(100, int((record_count / 60) * 100)),
-            'has_enough_data': record_count >= 60,
+            'required_records': 14,
+            'progress': min(100, int((record_count / 14) * 100)),
+            'has_enough_data': record_count >= 14,
         }
 
         intelligence = generate_intelligence(user)
@@ -92,11 +92,11 @@ def complete_business_intelligence(req):
         if intelligence.get('status') == "insufficient_data":
             response_data.update({
                 'data_sufficient': False,
-                'message': f"Need {intelligence.get('required_records', 60)} records. You have {record_count}.",
+                'message': f"Need {intelligence.get('required_records', 14)} records. You have {record_count}.",
                 'intelligence': None,
                 'strategies': {
                     'strengths': [],
-                    'warnings': [f"Insufficient data ({record_count}/60 records). Add more records to unlock AI Insights."],
+                    'warnings': [f"Insufficient data ({record_count}/14 records). Add more records to unlock AI Insights."],
                     'recommended_strategies': ['Continue tracking your daily business data to unlock personalized AI insights.']
                 }
             })
@@ -124,7 +124,7 @@ def intelligence_status(req):
     try:
         user = req.user
         record_count = BusinessRecord.objects.filter(user=user).count()
-        required = 60
+        required = 14
 
         intelligence = generate_intelligence(user)
 

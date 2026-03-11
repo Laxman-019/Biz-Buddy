@@ -17,8 +17,10 @@ def calculate_market_metrics(user):
     if competitor_sales == 0:
         simulated_market = user_sales * 8   # assume user holds ~12% share
         total_market_sales = simulated_market
+        is_simulated = True
     else:
         total_market_sales = competitor_sales + user_sales
+        is_simulated = False
 
     market_share = (
         (user_sales / total_market_sales) * 100
@@ -75,5 +77,6 @@ def calculate_market_metrics(user):
         "market_share_percent": market_share,
         "market_growth_percent": round(market_growth, 2),
         "user_growth_percent": round(user_growth, 2),
-        "share_status": share_status
+        "share_status": share_status,
+        "is_simulated": is_simulated
     }

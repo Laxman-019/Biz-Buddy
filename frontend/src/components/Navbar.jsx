@@ -48,7 +48,7 @@ const Navbar = () => {
                 </button>
 
                 {dashboardOpen && (
-                  <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden">
+                  <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden z-50">
                     <Link to="/records" className="block px-4 py-3 hover:bg-[#01474f]" onClick={() => setDashboardOpen(false)}>
                       List Record
                     </Link>

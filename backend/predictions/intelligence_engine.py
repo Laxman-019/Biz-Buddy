@@ -12,16 +12,13 @@ def generate_intelligence(user):
     forecast_result = train_user_model(user.id)
 
     if forecast_result["status"] == "insufficient_data":
-        return {
-            "status": "insufficient_data",
-            "required_records": forecast_result.get("required", 60),
-            "available_records": forecast_result.get("available", 0)
-        }
+        market_data = calculate_market_metrics(user)
+        competitor_data = analyze_competitor_position(user)
 
-    user_growth = forecast_result["trend_value"]
-    forecast_trend = forecast_result["trend"]
-    confidence_score = forecast_result["confidence"]
-    user_prediction = forecast_result["forecast_total"]
+    user_growth = forecast_result.get("trend_value", 0)
+    forecast_trend = forecast_result.get("trend", "stable")
+    confidence_score = forecast_result.get("confidence", 0)
+    user_prediction = forecast_result.get("forecast_total", 0)
 
     # Industry Comparison
     industry_growth = float(calculate_industry_growth())
@@ -74,5 +71,10 @@ def generate_intelligence(user):
         "market": market_data,
         "competitor": competitor_data,
         "diagnostics": diagnostic_data,
-        "risk": risk_data
+        "risk": risk_data,
+        "status": "success",
+        "required_records": forecast_result.get("required", 14),
+        "available_records": forecast_result.get("available", 0),
+        "market": market_data,
+        "competitor": competitor_data
     }

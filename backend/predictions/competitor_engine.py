@@ -70,7 +70,7 @@ def cluster_businesses():
     model = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
     labels = model.fit_predict(X_scaled)
 
-    return model, dict(zip(user_map, labels)), X_scaled
+    return model, {int(k): int(v) for k, v in zip(user_map, labels)}, X_scaled
 
 
 def analyze_competitor_position(user):
@@ -84,6 +84,13 @@ def analyze_competitor_position(user):
         }
 
     user_cluster = label_map.get(user.id)
+
+    if user_cluster is None:
+        return {
+            "user_cluster": "Developing Businesses",
+            "cluster_distribution": {},
+            "total_competitors": 0
+        }
 
     cluster_counts = {}
     for label in label_map.values():
