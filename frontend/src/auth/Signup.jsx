@@ -47,35 +47,77 @@ const Signup = () => {
     setBusinessType(type);
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
+ const handleSignup = async (e) => {
+   e.preventDefault();
 
-    const submitData = {
-      ...formData,
-      business_type: businessType,
-      industry: formData.industry === "other" ? formData.other_industry : formData.industry,
-    };
+   if (formData.password !== formData.confirmPassword) {
+     toast.error("Passwords do not match!");
+     return;
+   }
 
-    delete submitData.other_industry;
+   const submitData = {
+     user_name: formData.user_name,
+     email: formData.email,
+     password: formData.password,
+     confirmPassword: formData.confirmPassword, 
+     phone_number: formData.phone_number || "",
 
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/register/`, submitData);
+     business_type: businessType,
 
-      toast.success(res.data.message);
-      setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+     industry:
+       formData.industry === "other"
+         ? formData.other_industry
+         : formData.industry,
+   };
 
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
-      console.log(error);
-    }
-  };
+   if (businessType === "startup") {
+     submitData.startup_name = formData.startup_name || "";
+     submitData.funding_stage = formData.funding_stage || "";
+     submitData.team_size = formData.team_size
+       ? parseInt(formData.team_size)
+       : null;
+   } else {
+     submitData.company_name = formData.company_name || "";
+     submitData.registration_number = formData.registration_number || "";
+     submitData.year_established = formData.year_established
+       ? parseInt(formData.year_established)
+       : null;
+     submitData.employee_count = formData.employee_count
+       ? parseInt(formData.employee_count)
+       : null;
+     submitData.annual_revenue = formData.annual_revenue || "";
+     submitData.website = formData.website || "";
+   }
+
+   delete submitData.other_industry;
+
+   console.log("Submitting data:", submitData);
+
+   try {
+     const res = await axios.post(
+       `${import.meta.env.VITE_API_URL}/api/register/`,
+       submitData,
+     );
+
+     console.log("Response:", res.data); 
+     toast.success(res.data.message);
+
+     setTimeout(() => {
+       navigate("/login");
+     }, 3000);
+   } catch (error) {
+     console.log("Error response:", error.response?.data);
+     console.log("Error status:", error.response?.status);
+
+     if (error.response?.data?.errors) {
+       const errors = error.response.data.errors;
+       const firstError = Object.values(errors)[0];
+       toast.error(firstError || "Registration failed");
+     } else {
+       toast.error(error.response?.data?.message || "Registration failed");
+     }
+   }
+ };
 
   return (
     <Layout>
