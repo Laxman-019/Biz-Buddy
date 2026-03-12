@@ -13,7 +13,6 @@ import {
   Building2, CheckCircle2, XCircle, ArrowLeft, Sparkles,
 } from "lucide-react";
 
-// ─── Formatters ───────────────────────────────────────────────────────────────
 const formatCurrency = (num) => {
   if (num === null || num === undefined) return "—";
   return new Intl.NumberFormat("en-IN", {
@@ -25,7 +24,6 @@ const formatPercent = (num) => {
   return `${Number(num).toFixed(1)}%`;
 };
 
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -40,7 +38,6 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
 const KPICard = ({ title, value, subtitle, icon, gradient, trend }) => (
   <div className={`relative overflow-hidden rounded-2xl p-6 text-white ${gradient} shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}>
     <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10" />
@@ -62,7 +59,6 @@ const KPICard = ({ title, value, subtitle, icon, gradient, trend }) => (
   </div>
 );
 
-// ─── AI Metric Card ───────────────────────────────────────────────────────────
 const AIMetricCard = ({ title, value, subtitle, icon, color = "blue" }) => {
   const palette = {
     blue: { card: "bg-blue-50 border-blue-100", icon: "bg-blue-100 text-blue-600", val: "text-blue-900", sub: "text-blue-500" },
@@ -83,7 +79,6 @@ const AIMetricCard = ({ title, value, subtitle, icon, color = "blue" }) => {
   );
 };
 
-// ─── Insufficient Data Card ───────────────────────────────────────────────────
 const InsufficientDataCard = ({ remaining, message }) => (
   <div className="bg-linear-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-10 text-center shadow-sm">
     <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -102,7 +97,6 @@ const InsufficientDataCard = ({ remaining, message }) => (
   </div>
 );
 
-// ─── Section Heading ──────────────────────────────────────────────────────────
 const SectionHeading = ({ icon, title, subtitle, badge }) => (
   <div className="flex items-start justify-between mb-6">
     <div className="flex items-center gap-3">
@@ -116,7 +110,6 @@ const SectionHeading = ({ icon, title, subtitle, badge }) => (
   </div>
 );
 
-// ─── Pill Tag ─────────────────────────────────────────────────────────────────
 const Pill = ({ color = "indigo", children }) => {
   const c = {
     indigo: "bg-indigo-50 text-indigo-700 border-indigo-100",
@@ -131,7 +124,6 @@ const Pill = ({ color = "indigo", children }) => {
   );
 };
 
-// ─── Diagnostic Row ───────────────────────────────────────────────────────────
 const DiagRow = ({ text, type }) => {
   const styles = {
     obs: { bg: "bg-indigo-50 border-indigo-100", dot: "bg-indigo-500", icon: "•", text: "text-indigo-800" },
@@ -149,7 +141,6 @@ const DiagRow = ({ text, type }) => {
   );
 };
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = () => {
   const [overview, setOverview] = useState(null);
   const [intelligence, setIntelligence] = useState(null);
@@ -226,7 +217,6 @@ const Dashboard = () => {
 
   const handleRefresh = () => { setRefreshing(true); loadDashboardData(); };
 
-  // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading && !refreshing) {
     return (
       <Layout>
@@ -247,7 +237,6 @@ const Dashboard = () => {
     );
   }
 
-  // ── Error ────────────────────────────────────────────────────────────────────
   if (error) {
     return (
       <Layout>
@@ -286,7 +275,6 @@ const Dashboard = () => {
     <Layout>
       <div className="min-h-screen bg-gray-50/80">
 
-        {/* ── Sticky Top Header ────────────────────────────────────────────── */}
         <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
           <div className="px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -335,10 +323,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* ── Page Content ─────────────────────────────────────────────────── */}
         <div className="py-5 px-4 space-y-6">
 
-          {/* Selected Business Banner */}
           {selectedBusiness !== "all" && (
             <div className="flex items-center justify-between bg-indigo-600 text-white rounded-2xl px-5 py-3 shadow-md shadow-indigo-200">
               <div className="flex items-center gap-3">
@@ -355,7 +341,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Data Progress Banner */}
           {status && !status.has_enough_data && (
             <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
               <div className="flex items-start gap-4">
@@ -381,9 +366,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* ══════════════════════════════════════════════════
-              TAB: OVERVIEW
-          ══════════════════════════════════════════════════ */}
           {activeTab === "overview" && overview && (
             <div className="space-y-6">
 
@@ -419,9 +401,7 @@ const Dashboard = () => {
                 />
               </div>
 
-              {/* Charts Row */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Monthly Sales */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
                     title={`${selectedBusiness !== "all" ? selectedBusiness + " – " : ""}Monthly Sales`}
@@ -452,7 +432,6 @@ const Dashboard = () => {
                   )}
                 </div>
 
-                {/* Profit Trend */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
                     title={`${selectedBusiness !== "all" ? selectedBusiness + " – " : ""}Profit Trend`}
@@ -489,7 +468,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Business Health */}
               {currentBizInsights && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
@@ -533,7 +511,6 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {/* Business List */}
               {overview.business_names?.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
@@ -585,9 +562,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* ══════════════════════════════════════════════════
-              TAB: AI INSIGHTS
-          ══════════════════════════════════════════════════ */}
           {activeTab === "insights" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (
@@ -597,7 +571,6 @@ const Dashboard = () => {
                 />
               ) : (
                 <>
-                  {/* AI Metric Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     <AIMetricCard
                       title="Forecast Trend"
@@ -639,7 +612,6 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  {/* Diagnostics */}
                   {intelligence?.intelligence?.diagnostics && (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <SectionHeading
@@ -679,7 +651,6 @@ const Dashboard = () => {
                     </div>
                   )}
 
-                  {/* Competitor Analysis */}
                   {intelligence?.intelligence?.competitor && (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <SectionHeading
@@ -704,9 +675,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* ══════════════════════════════════════════════════
-              TAB: STRATEGY
-          ══════════════════════════════════════════════════ */}
           {activeTab === "strategy" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (
@@ -724,7 +692,6 @@ const Dashboard = () => {
                   />
 
                   <div className="space-y-6">
-                    {/* Strengths */}
                     {intelligence?.strategies?.strengths?.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -741,7 +708,6 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    {/* Warnings */}
                     {intelligence?.strategies?.warnings?.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -758,7 +724,6 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    {/* Recommendations */}
                     {intelligence?.strategies?.recommended_strategies?.length > 0 && (
                       <div>
                         <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -777,7 +742,6 @@ const Dashboard = () => {
                       </div>
                     )}
 
-                    {/* Empty state */}
                     {!intelligence?.strategies?.strengths?.length &&
                       !intelligence?.strategies?.warnings?.length &&
                       !intelligence?.strategies?.recommended_strategies?.length && (
