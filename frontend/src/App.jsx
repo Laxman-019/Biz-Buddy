@@ -13,7 +13,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import Documentation from './pages/Documentation'
 import NewDoc from './pages/NewDoc'
-
+import StartupDashboard from './pages/StartupDashboard'
 
 
 const App = () => {
@@ -32,6 +32,7 @@ const App = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/doc" element={< Documentation/>} />
       <Route path="/newdoc" element={< NewDoc/>} />
+      <Route path="/startup/dashboard" element={<StartupDashboard />} />
     </Routes>
   )
 }
