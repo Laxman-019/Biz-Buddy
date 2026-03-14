@@ -7,16 +7,38 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("access");
+    const role = localStorage.getItem("userRole");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    
     setIsLoggedIn(!!token);
+    
+    const userRoleValue = role || user?.business_type || user?.role;
+    setUserRole(userRoleValue);
+    
+    console.log("User role:", userRoleValue);
   }, []);
+
+  const getDashboardLink = () => {
+    if (userRole === 'startup') {
+      return "/startup/dashboard";
+    }
+    return "/dashboard";
+  };
+
+  const isExistingBusiness = () => {
+    return userRole && userRole !== 'startup';
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("user");
     setIsLoggedIn(false);
     setDashboardOpen(false);
     navigate("/login");
@@ -31,7 +53,6 @@ const Navbar = () => {
           <span className="font-bold text-2xl tracking-wide">BizBuddy</span>
         </Link>
 
-        {/* DESKTOP MENU */}
         <div className="hidden md:flex gap-10 text-lg items-center">
           <Link to="/" className="hover:text-gray-300">
             Home
@@ -39,26 +60,29 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
-              <Link to="/dashboard" className="block px-4 py-3">
+              <Link to={getDashboardLink()} className="hover:text-gray-300">
                 Dashboard
               </Link>
-              <div className="relative">
-                <button onClick={() => setDashboardOpen(!dashboardOpen)} className="hover:text-gray-300">
-                  Manage ▾
-                </button>
+              
+              {isExistingBusiness() && (
+                <div className="relative">
+                  <button onClick={() => setDashboardOpen(!dashboardOpen)} className="hover:text-gray-300">
+                    Manage ▾
+                  </button>
 
-                {dashboardOpen && (
-                  <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden z-50">
-                    <Link to="/records" className="block px-4 py-3 hover:bg-[#01474f]" onClick={() => setDashboardOpen(false)}>
-                      List Record
-                    </Link>
+                  {dashboardOpen && (
+                    <div className="absolute top-10 left-0 bg-[#002b30] rounded-lg shadow-lg w-44 overflow-hidden z-50">
+                      <Link to="/records" className="block px-4 py-3 hover:bg-[#01474f]" onClick={() => setDashboardOpen(false)}>
+                        List Record
+                      </Link>
 
-                    <Link to="/add-record" className="block px-4 py-3 hover:bg-[#01474f]" onClick={() => setDashboardOpen(false)}>
-                      Add Record
-                    </Link>
-                  </div>
-                )}
-              </div>
+                      <Link to="/add-record" className="block px-4 py-3 hover:bg-[#01474f]" onClick={() => setDashboardOpen(false)}>
+                        Add Record
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <button onClick={handleLogout} className="bg-red-500 px-4 py-1 rounded-md cursor-pointer hover:bg-red-400">
                 Logout
@@ -76,13 +100,11 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* MOBILE MENU BUTTON */}
         <button className="md:hidden text-3xl" onClick={() => setOpen(!open)}>
           {open ? <HiX /> : <HiMenu />}
         </button>
       </div>
 
-      {/* MOBILE DROPDOWN */}
       {open && (
         <div className="md:hidden bg-[#002b30] mt-3 divide-y divide-gray-700 rounded-xl overflow-hidden">
           <Link to="/" onClick={() => setOpen(false)} className="block py-4 text-center hover:bg-[#01474f]">
@@ -91,40 +113,46 @@ const Navbar = () => {
 
           {isLoggedIn ? (
             <>
-              {/* Dashboard */}
-              <Link to="/dashboard" onClick={() => setOpen(false)} className="block py-4 text-center hover:bg-[#01474f]">
+              <Link 
+                to={getDashboardLink()} 
+                onClick={() => setOpen(false)} 
+                className="block py-4 text-center hover:bg-[#01474f]"
+              >
                 Dashboard
               </Link>
 
-              {/* Manage Dropdown */}
-              <button onClick={() => setDashboardOpen(!dashboardOpen)} className="block w-full py-4 text-center hover:bg-[#01474f]">
-                Manage ▾
-              </button>
+              {isExistingBusiness() && (
+                <>
+                  <button onClick={() => setDashboardOpen(!dashboardOpen)} className="block w-full py-4 text-center hover:bg-[#01474f]">
+                    Manage ▾
+                  </button>
 
-              {dashboardOpen && (
-                <div className="bg-[#01474f]">
-                  <Link
-                    to="/records"
-                    onClick={() => {
-                      setOpen(false);
-                      setDashboardOpen(false);
-                    }}
-                    className="block py-3 text-center text-sm hover:bg-[#01606a]"
-                  >
-                    List Record
-                  </Link>
+                  {dashboardOpen && (
+                    <div className="bg-[#01474f]">
+                      <Link
+                        to="/records"
+                        onClick={() => {
+                          setOpen(false);
+                          setDashboardOpen(false);
+                        }}
+                        className="block py-3 text-center text-sm hover:bg-[#01606a]"
+                      >
+                        List Record
+                      </Link>
 
-                  <Link
-                    to="/add-record"
-                    onClick={() => {
-                      setOpen(false);
-                      setDashboardOpen(false);
-                    }}
-                    className="block py-3 text-center text-sm hover:bg-[#01606a]"
-                  >
-                    Add Record
-                  </Link>
-                </div>
+                      <Link
+                        to="/add-record"
+                        onClick={() => {
+                          setOpen(false);
+                          setDashboardOpen(false);
+                        }}
+                        className="block py-3 text-center text-sm hover:bg-[#01606a]"
+                      >
+                        Add Record
+                      </Link>
+                    </div>
+                  )}
+                </>
               )}
 
               <button
