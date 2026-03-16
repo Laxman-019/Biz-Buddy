@@ -252,7 +252,7 @@ const IdeaValidation = () => {
 
   const fetchIdeas = async () => {
     try {
-      const res = await axiosInstance.get('/api/startups/ideas/')
+      const res = await axiosInstance.get('/api/ideas/')
       setIdeas(res.data)
     } catch {
       toast.error('Failed to load ideas')
@@ -269,7 +269,7 @@ const IdeaValidation = () => {
     }
     setSubmitting(true)
     try {
-      const res = await axiosInstance.post('/api/startups/ideas/submit/', formData)
+      const res = await axiosInstance.post('/api/ideas/submit/', formData)
       setIdeas([res.data, ...ideas])
       setFormData({ idea_title: '', idea_description: '' })
       setShowForm(false)
@@ -284,7 +284,7 @@ const IdeaValidation = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this analysis?')) return
     try {
-      await axiosInstance.delete(`/api/startups/ideas/${id}/`)
+      await axiosInstance.delete(`/api/ideas/${id}/`)
       setIdeas(ideas.filter(i => i.id !== id))
       toast.success('Deleted')
     } catch {
