@@ -6,5 +6,5 @@ urlpatterns = [
     path('api/', include('users.urls')),
     path('api/', include('businesses.urls')),
     path('api/', include('predictions.urls')),
-    path('api/', include('startups.urls')),
+    # path('api/', include('startups.urls')),
 ]

@@ -32,3 +32,4 @@ stanio==0.5.1
 threadpoolctl==3.6.0
 tqdm==4.67.3
 tzdata==2025.3
+google-generativeai 
