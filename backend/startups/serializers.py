@@ -46,3 +46,4 @@ class IdeaValidationSerializer(serializers.ModelSerializer):
 class IdeaSubmitSerializer(serializers.Serializer):
     idea_title       = serializers.CharField(max_length=255)
     idea_description = serializers.CharField(min_length=50)
+
