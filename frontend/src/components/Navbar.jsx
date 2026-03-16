@@ -20,7 +20,7 @@ const Navbar = () => {
     const userRoleValue = role || user?.business_type || user?.role;
     setUserRole(userRoleValue);
     
-    console.log("User role:", userRoleValue);
+    // console.log("User role:", userRoleValue);
   }, []);
 
   const getDashboardLink = () => {
