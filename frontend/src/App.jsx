@@ -14,7 +14,7 @@ import Contact from './pages/Contact'
 import Documentation from './pages/Documentation'
 import NewDoc from './pages/NewDoc'
 import StartupDashboard from './pages/StartupDashboard'
-
+import IdeaValidation from './pages/IdeaValidation'
 
 const App = () => {
   return (
@@ -32,7 +32,8 @@ const App = () => {
       <Route path="/contact" element={<Contact />} />
       <Route path="/doc" element={< Documentation/>} />
       <Route path="/newdoc" element={< NewDoc/>} />
-      <Route path="/startup/dashboard" element={<StartupDashboard />} />
+      <Route path="/startup/dashboard" element={<StartupDashboard/>} />
+      <Route path="/idea/validation" element={<IdeaValidation/>} />
     </Routes>
   )
 }
