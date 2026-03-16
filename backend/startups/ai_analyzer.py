@@ -1,17 +1,19 @@
 import os
 import json
-import google.generativeai as genai
-
+import re
+from google import genai
 
 def analyze_idea(idea_title: str, idea_description: str, user) -> dict:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
-    # Build user context from their profile
-    industry      = user.get_effective_industry() or "Not specified"
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise Exception("GEMINI_API_KEY not found in environment variables")
+    
+    client = genai.Client(api_key=api_key)
+    
+    industry = user.get_effective_industry() or "Not specified"
     funding_stage = user.get_funding_stage_display() if user.funding_stage else "Not specified"
-    team_size     = user.team_size or "Not specified"
-    startup_name  = user.startup_name or "Not specified"
+    team_size = user.team_size or "Not specified"
+    startup_name = user.startup_name or "Not specified"
 
     prompt = f"""
 You are an expert startup analyst with 20 years of experience evaluating startup ideas.
@@ -40,58 +42,58 @@ Then give an overall verdict.
 ## Return ONLY valid JSON in this exact format, no extra text, no markdown, no code blocks:
 
 {{
-  "overall_score": <float 0-100>,
-  "verdict": "<one of: strong_go | go | caution | no_go | pivot>",
-  "verdict_summary": "<2-3 sentence overall assessment>",
+  "overall_score": 75.5,
+  "verdict": "go",
+  "verdict_summary": "This is a promising idea with strong market potential...",
 
   "market_demand": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of market demand for this idea>"
+    "score": 82,
+    "analysis": "The market demand is high because..."
   }},
   "competition": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of competitive landscape>"
+    "score": 65,
+    "analysis": "Competition is moderate with a few key players..."
   }},
   "profit_potential": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of revenue and margin potential>"
+    "score": 78,
+    "analysis": "Profit margins could be healthy due to..."
   }},
   "scalability": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of how scalable this business is>"
+    "score": 71,
+    "analysis": "The business can scale through..."
   }},
   "entry_barriers": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of barriers — regulatory, capital, technical>"
+    "score": 45,
+    "analysis": "Entry barriers are relatively low because..."
   }},
   "founder_fit": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of how well this fits the founder profile>"
+    "score": 88,
+    "analysis": "The founder's background aligns well because..."
   }},
   "timing_factor": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of market timing and tailwinds>"
+    "score": 79,
+    "analysis": "Market timing is favorable due to..."
   }},
   "funding_readiness": {{
-    "score": <float 0-100>,
-    "analysis": "<specific analysis of investor interest and capital requirements>"
+    "score": 62,
+    "analysis": "The idea is moderately ready for funding..."
   }},
 
   "key_risks": [
-    "<specific risk 1>",
-    "<specific risk 2>",
-    "<specific risk 3>"
+    "Risk 1: ...",
+    "Risk 2: ...",
+    "Risk 3: ..."
   ],
   "opportunities": [
-    "<specific opportunity 1>",
-    "<specific opportunity 2>",
-    "<specific opportunity 3>"
+    "Opportunity 1: ...",
+    "Opportunity 2: ...",
+    "Opportunity 3: ..."
   ],
   "next_steps": [
-    "<concrete actionable step 1>",
-    "<concrete actionable step 2>",
-    "<concrete actionable step 3>",
-    "<concrete actionable step 4>"
+    "Step 1: ...",
+    "Step 2: ...",
+    "Step 3: ...",
+    "Step 4: ..."
   ]
 }}
 
@@ -100,43 +102,92 @@ Score honestly — a bad idea should score low.
 Return ONLY the JSON object. No explanation before or after.
 """
 
-    response = model.generate_content(prompt)
-    raw_response = response.text.strip()
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=prompt
+        )
+        
+        raw_response = response.text.strip()
+        # print("Raw Gemini Response:", raw_response)
+        
+        if raw_response.startswith("```"):
+            lines = raw_response.split('\n')
 
-    # Strip markdown code blocks if Gemini adds them
-    if raw_response.startswith("```"):
-        raw_response = raw_response.split("```")[1]
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            raw_response = '\n'.join(lines).strip()
+        
         if raw_response.startswith("json"):
-            raw_response = raw_response[4:]
-        raw_response = raw_response.strip()
+            raw_response = raw_response[4:].strip()
+        
+        # Parse JSON
+        try:
+            data = json.loads(raw_response)
 
-    data = json.loads(raw_response)
+        except json.JSONDecodeError as json_err:
+            # print(f"JSON Parse Error: {json_err}")
 
-    return {
-        "raw":                     raw_response,
-        "overall_score":           data.get("overall_score"),
-        "verdict":                 data.get("verdict"),
-        "verdict_summary":         data.get("verdict_summary", ""),
+            json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
 
-        "score_market_demand":     data["market_demand"]["score"],
-        "score_competition":       data["competition"]["score"],
-        "score_profit_potential":  data["profit_potential"]["score"],
-        "score_scalability":       data["scalability"]["score"],
-        "score_entry_barriers":    data["entry_barriers"]["score"],
-        "score_founder_fit":       data["founder_fit"]["score"],
-        "score_timing_factor":     data["timing_factor"]["score"],
-        "score_funding_readiness": data["funding_readiness"]["score"],
+            if json_match:
+                data = json.loads(json_match.group())
 
-        "market_demand_analysis":  data["market_demand"]["analysis"],
-        "competition_analysis":    data["competition"]["analysis"],
-        "profit_analysis":         data["profit_potential"]["analysis"],
-        "scalability_analysis":    data["scalability"]["analysis"],
-        "entry_barriers_analysis": data["entry_barriers"]["analysis"],
-        "founder_fit_analysis":    data["founder_fit"]["analysis"],
-        "timing_analysis":         data["timing_factor"]["analysis"],
-        "funding_analysis":        data["funding_readiness"]["analysis"],
+            else:
+                
+                # print("Could not parse JSON, using default response")
+                data = {
+                    "overall_score": 50,
+                    "verdict": "caution",
+                    "verdict_summary": "Unable to analyze properly. Please try again.",
+                    "market_demand": {"score": 50, "analysis": "Analysis unavailable"},
+                    "competition": {"score": 50, "analysis": "Analysis unavailable"},
+                    "profit_potential": {"score": 50, "analysis": "Analysis unavailable"},
+                    "scalability": {"score": 50, "analysis": "Analysis unavailable"},
+                    "entry_barriers": {"score": 50, "analysis": "Analysis unavailable"},
+                    "founder_fit": {"score": 50, "analysis": "Analysis unavailable"},
+                    "timing_factor": {"score": 50, "analysis": "Analysis unavailable"},
+                    "funding_readiness": {"score": 50, "analysis": "Analysis unavailable"},
+                    "key_risks": ["Unable to analyze risks"],
+                    "opportunities": ["Unable to analyze opportunities"],
+                    "next_steps": ["Please try submitting again"]
+                }
+        
 
-        "key_risks":               data.get("key_risks", []),
-        "opportunities":           data.get("opportunities", []),
-        "next_steps":              data.get("next_steps", []),
-    }
+        return {
+            "raw": raw_response,
+            "overall_score": float(data.get("overall_score", 50)),
+            "verdict": data.get("verdict", "caution"),
+            "verdict_summary": data.get("verdict_summary", ""),
+            
+            "score_market_demand": float(data.get("market_demand", {}).get("score", 50)),
+            "score_competition": float(data.get("competition", {}).get("score", 50)),
+            "score_profit_potential": float(data.get("profit_potential", {}).get("score", 50)),
+            "score_scalability": float(data.get("scalability", {}).get("score", 50)),
+            "score_entry_barriers": float(data.get("entry_barriers", {}).get("score", 50)),
+            "score_founder_fit": float(data.get("founder_fit", {}).get("score", 50)),
+            "score_timing_factor": float(data.get("timing_factor", {}).get("score", 50)),
+            "score_funding_readiness": float(data.get("funding_readiness", {}).get("score", 50)),
+            
+            "market_demand_analysis": data.get("market_demand", {}).get("analysis", ""),
+            "competition_analysis": data.get("competition", {}).get("analysis", ""),
+            "profit_analysis": data.get("profit_potential", {}).get("analysis", ""),
+            "scalability_analysis": data.get("scalability", {}).get("analysis", ""),
+            "entry_barriers_analysis": data.get("entry_barriers", {}).get("analysis", ""),
+            "founder_fit_analysis": data.get("founder_fit", {}).get("analysis", ""),
+            "timing_analysis": data.get("timing_factor", {}).get("analysis", ""),
+            "funding_analysis": data.get("funding_readiness", {}).get("analysis", ""),
+            
+            "key_risks": data.get("key_risks", []),
+            "opportunities": data.get("opportunities", []),
+            "next_steps": data.get("next_steps", []),
+        }
+        
+    except Exception as e:
+        print(f"Error in analyze_idea: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise Exception(f"AI analysis failed: {str(e)}")
