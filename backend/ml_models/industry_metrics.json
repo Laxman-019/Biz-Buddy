@@ -8,7 +8,8 @@
         "festival_lift_percent": 59.71
     },
     "competition_intelligence": {
-        "revenue_drop_high_competition_percent": 1.79
+        "revenue_drop_high_competition_percent": 1.79,
+        "competition_pressure": 0.9
     },
     "inventory_intelligence": {
         "inventory_pressure_revenue_change_percent": 1.69
@@ -19,5 +20,13 @@
             "Electronics",
             "Sports & Fitness"
         ]
+    },
+    "meta": {
+        "total_records": 30600,
+        "date_range": {
+            "start": "2023-01-31",
+            "end": "2025-12-31"
+        },
+        "last_updated": "2026-03-16"
     }
 }
