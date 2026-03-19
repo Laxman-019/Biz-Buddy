@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from startups.models import *
 from startups.serializers import *
 from startups.ai_analyzer import analyze_idea
+from startups.market_analyzer import analyze_market
 
 
 def startup_only(func):
@@ -17,7 +18,7 @@ def startup_only(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-
+# Idea Validation
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @startup_only
@@ -102,3 +103,96 @@ def idea_detail(request, idea_id):
         return Response(status=204)
 
     return Response(IdeaValidationSerializer(idea).data)
+
+
+
+# Market Intelligence
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def market_list(request):
+    reports = MarketIntelligence.objects.filter(user=request.user)
+    return Response(MarketIntelligenceSerializer(reports, many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def market_submit(request):
+    serializer = MarketSubmitSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    d = serializer.validated_data
+
+    report = MarketIntelligence.objects.create(
+        user = request.user,
+        product_name = d['product_name'],
+        industry = d['industry'],
+        target_region = d['target_region'],
+        customer_type = d['customer_type'],
+        description = d['description'],
+        status = 'analyzing',
+    )
+
+    try:
+        result = analyze_market(
+            product_name  = report.product_name,
+            industry = report.industry,
+            target_region = report.target_region,
+            customer_type = report.customer_type,
+            description = report.description,
+            user = request.user,
+        )
+
+        report.status = 'done'
+        report.raw_ai_response = result['raw']
+        report.market_summary = result['market_summary']
+        report.key_insights = result['key_insights']
+        report.tam_value = result['tam_value']
+        report.tam_explanation = result['tam_explanation']
+        report.sam_value = result['sam_value']
+        report.sam_explanation = result['sam_explanation']
+        report.som_value = result['som_value']
+        report.som_explanation = result['som_explanation']
+        report.sizing_methodology = result['sizing_methodology']
+        report.market_growth_rate = result['market_growth_rate']
+        report.market_direction = result['market_direction']
+        report.trend_summary = result['trend_summary']
+        report.tailwinds = result['tailwinds']
+        report.headwinds = result['headwinds']
+        report.tech_shifts = result['tech_shifts']
+        report.regulatory_factors = result['regulatory_factors']
+        report.consumer_shifts = result['consumer_shifts']
+        report.personas = result['personas']
+        report.save()
+
+    except Exception as e:
+        report.status = 'failed'
+        report.error_message = str(e)
+        report.save()
+        return Response(
+            {'error': 'Analysis failed.', 'detail': str(e)},
+            status=500
+        )
+
+    return Response(
+        MarketIntelligenceSerializer(report).data,
+        status=201
+    )
+
+
+@api_view(['GET', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def market_detail(request, report_id):
+    try:
+        report = MarketIntelligence.objects.get(id=report_id, user=request.user)
+    except MarketIntelligence.DoesNotExist:
+        return Response({'error': 'Not found.'}, status=404)
+
+    if request.method == 'DELETE':
+        report.delete()
+        return Response(status=204)
+
+    return Response(MarketIntelligenceSerializer(report).data)

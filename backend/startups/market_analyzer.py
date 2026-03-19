@@ -1,6 +1,6 @@
 import os
 import json
-import google.generativeai as genai
+import google.genai as genai
 
 
 def analyze_market(product_name, industry, target_region,
