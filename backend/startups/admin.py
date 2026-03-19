@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import IdeaValidation
+from startups.models import *
 
 
 @admin.register(IdeaValidation)
@@ -16,5 +16,21 @@ class IdeaValidationAdmin(admin.ModelAdmin):
         'scalability_analysis', 'entry_barriers_analysis', 'founder_fit_analysis',
         'timing_analysis', 'funding_analysis',
         'key_risks', 'opportunities', 'next_steps',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
+
+
+@admin.register(MarketIntelligence)
+class MarketIntelligenceAdmin(admin.ModelAdmin):
+    list_display  = ['product_name', 'user', 'industry', 'target_region', 'status', 'created_at']
+    list_filter   = ['status', 'target_region', 'customer_type']
+    search_fields = ['product_name', 'user__email']
+    readonly_fields = [
+        'status', 'market_summary', 'key_insights',
+        'tam_value', 'tam_explanation', 'sam_value', 'sam_explanation',
+        'som_value', 'som_explanation', 'sizing_methodology',
+        'market_growth_rate', 'market_direction', 'trend_summary',
+        'tailwinds', 'headwinds', 'tech_shifts',
+        'regulatory_factors', 'consumer_shifts', 'personas',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
