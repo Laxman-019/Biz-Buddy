@@ -21,18 +21,18 @@ class IdeaValidation(models.Model):
         ('pivot',      'Pivot Recommended'),
     ]
 
-    user            = models.ForeignKey(
+    user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='idea_validations'
     )
 
     # User Input 
-    idea_title      = models.CharField(max_length=255)
+    idea_title = models.CharField(max_length=255)
     idea_description = models.TextField(
         help_text="User describes their idea in plain text"
     )
 
     # Analysis Status 
-    status          = models.CharField(
+    status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default='pending'
     )
 
@@ -90,3 +90,84 @@ class IdeaValidation(models.Model):
             'Timing Factor':     self.score_timing_factor,
             'Funding Readiness': self.score_funding_readiness,
         }
+
+
+class MarketIntelligence(models.Model):
+
+    CUSTOMER_TYPE_CHOICES = [
+        ('b2b','B2B — Business to Business'),
+        ('b2c','B2C — Business to Consumer'),
+        ('both','Both B2B and B2C'),
+    ]
+
+    REGION_CHOICES = [
+        ('india','India'),
+        ('global','Global'),
+        ('north_india','North India'),
+        ('south_india','South India'),
+        ('east_india','East India'),
+        ('west_india','West India'),
+        ('tier1_cities','Tier 1 Cities'),
+        ('tier2_cities','Tier 2 & 3 Cities'),
+        ('southeast_asia','Southeast Asia'),
+        ('us','United States'),
+        ('europe','Europe'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending','Pending'),
+        ('analyzing','Analyzing'),
+        ('done','Done'),
+        ('failed','Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='market_intelligence'
+    )
+
+    product_name = models.CharField(max_length=255)
+    industry = models.CharField(max_length=100)
+    target_region = models.CharField(max_length=50, choices=REGION_CHOICES)
+    customer_type = models.CharField(max_length=10, choices=CUSTOMER_TYPE_CHOICES)
+    description = models.TextField(
+        help_text="Brief description of product and target customer"
+    )
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+    tam_value = models.CharField(max_length=100, blank=True)
+    tam_explanation = models.TextField(blank=True)
+    sam_value = models.CharField(max_length=100, blank=True)
+    sam_explanation = models.TextField(blank=True)
+    som_value = models.CharField(max_length=100, blank=True)
+    som_explanation = models.TextField(blank=True)
+    sizing_methodology = models.TextField(blank=True)
+
+    market_growth_rate   = models.CharField(max_length=50, blank=True)
+    market_direction     = models.CharField(max_length=20, blank=True)
+    tailwinds = models.JSONField(default=list, blank=True)
+    headwinds = models.JSONField(default=list, blank=True)
+    tech_shifts = models.JSONField(default=list, blank=True)
+    regulatory_factors = models.JSONField(default=list, blank=True)
+    consumer_shifts = models.JSONField(default=list, blank=True)
+    trend_summary = models.TextField(blank=True)
+
+    personas = models.JSONField(default=list, blank=True)
+
+    key_insights = models.JSONField(default=list, blank=True)
+    market_summary = models.TextField(blank=True)
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_market_intelligence'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — {self.product_name}"
