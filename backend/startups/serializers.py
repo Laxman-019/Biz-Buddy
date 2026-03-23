@@ -44,8 +44,9 @@ class IdeaValidationSerializer(serializers.ModelSerializer):
 
 
 class IdeaSubmitSerializer(serializers.Serializer):
-    idea_title       = serializers.CharField(max_length=255)
+    idea_title = serializers.CharField(max_length=255)
     idea_description = serializers.CharField(min_length=50)
+    
 
 class MarketIntelligenceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,7 +83,7 @@ class MarketIntelligenceSerializer(serializers.ModelSerializer):
 
 class MarketSubmitSerializer(serializers.Serializer):
     product_name  = serializers.CharField(max_length=255)
-    industry      = serializers.CharField(max_length=100)
+    industry = serializers.CharField(max_length=100)
     target_region = serializers.ChoiceField(choices=[
         'india', 'global', 'north_india', 'south_india',
         'east_india', 'west_india', 'tier1_cities', 'tier2_cities',
