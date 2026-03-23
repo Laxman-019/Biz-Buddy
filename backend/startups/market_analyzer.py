@@ -1,15 +1,19 @@
 import os
 import json
-import google.genai as genai
+import re
+from google import genai
 
 
 def analyze_market(product_name, industry, target_region,
                    customer_type, description, user) -> dict:
 
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise Exception("GEMINI_API_KEY not found in environment variables")
 
-    startup_name  = user.startup_name or "Not specified"
+    client = genai.Client(api_key=api_key)
+
+    startup_name = user.startup_name or "Not specified"
     user_industry = user.get_effective_industry() or industry
 
     prompt = f"""
@@ -151,46 +155,68 @@ Use Indian market context where region is India.
 Use real market data and realistic estimates.
 """
 
-    response = model.generate_content(prompt)
-    raw = response.text.strip()
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
 
-    # Strip markdown if Gemini adds it
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
+        raw = response.text.strip()
+
+        if raw.startswith("```"):
+            lines = raw.split('\n')
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            raw = '\n'.join(lines).strip()
+
         if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
+            raw = raw[4:].strip()
 
-    data = json.loads(raw)
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as json_err:
+            # Try to extract JSON with regex
+            json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+            else:
+                raise Exception(
+                    f"Failed to parse JSON from response: {raw[:200]}")
 
-    sizing = data.get("market_sizing", {})
-    trends = data.get("trend_analysis", {})
-    personas = data.get("customer_personas", [])
+        sizing = data.get("market_sizing", {})
+        trends = data.get("trend_analysis", {})
+        personas = data.get("customer_personas", [])
 
-    return {
-        "raw":raw,
-        "market_summary":data.get("market_summary", ""),
-        "key_insights":data.get("key_insights", []),
+        return {
+            "raw": raw,
+            "market_summary": data.get("market_summary", ""),
+            "key_insights": data.get("key_insights", []),
 
-        # Sizing
-        "tam_value":sizing.get("tam_value", ""),
-        "tam_explanation":sizing.get("tam_explanation", ""),
-        "sam_value":sizing.get("sam_value", ""),
-        "sam_explanation":sizing.get("sam_explanation", ""),
-        "som_value":sizing.get("som_value", ""),
-        "som_explanation":sizing.get("som_explanation", ""),
-        "sizing_methodology": sizing.get("methodology", ""),
+            # Sizing
+            "tam_value": sizing.get("tam_value", ""),
+            "tam_explanation": sizing.get("tam_explanation", ""),
+            "sam_value": sizing.get("sam_value", ""),
+            "sam_explanation": sizing.get("sam_explanation", ""),
+            "som_value": sizing.get("som_value", ""),
+            "som_explanation": sizing.get("som_explanation", ""),
+            "sizing_methodology": sizing.get("methodology", ""),
 
-        # Trends
-        "market_growth_rate":trends.get("market_growth_rate",""),
-        "market_direction":trends.get("market_direction", ""),
-        "trend_summary":trends.get("trend_summary", ""),
-        "tailwinds":trends.get("tailwinds", []),
-        "headwinds":trends.get("headwinds", []),
-        "tech_shifts":trends.get("tech_shifts", []),
-        "regulatory_factors":trends.get("regulatory_factors", []),
-        "consumer_shifts":trends.get("consumer_shifts", []),
+            # Trends
+            "market_growth_rate": trends.get("market_growth_rate", ""),
+            "market_direction": trends.get("market_direction", ""),
+            "trend_summary": trends.get("trend_summary", ""),
+            "tailwinds": trends.get("tailwinds", []),
+            "headwinds": trends.get("headwinds", []),
+            "tech_shifts": trends.get("tech_shifts", []),
+            "regulatory_factors": trends.get("regulatory_factors", []),
+            "consumer_shifts": trends.get("consumer_shifts", []),
+            "personas": personas,
+        }
 
-        # Personas
-        "personas": personas,
-    }
+    except Exception as e:
+        print(f"Error in analyze_market: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise Exception(f"AI market analysis failed: {str(e)}")
