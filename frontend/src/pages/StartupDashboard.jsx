@@ -3,11 +3,13 @@ import Layout from "../components/Layout"
 import IdeaValidation from '../pages/IdeaValidation'
 import { FaLightbulb, FaChartLine, FaCubes, FaRocket,
          FaChartPie, FaHandshake, FaBullhorn, FaBolt,
-         FaUsers, FaShieldAlt } from 'react-icons/fa'
+  FaUsers, FaShieldAlt
+} from 'react-icons/fa'
+import MarketIntelligence from './MarketIntelligence'
 
 const FEATURES = [
   { id: 'idea-validation', label: 'Idea Validation',   icon: <FaLightbulb />, active: true  },
-  { id: 'market-intel',    label: 'Market Intelligence',icon: <FaChartLine />, active: false },
+  { id: 'market-intel',    label: 'Market Intelligence',icon: <FaChartLine />, active: true },
   { id: 'business-model',  label: 'Business Model',    icon: <FaCubes />,     active: false },
   { id: 'mvp-planner',     label: 'MVP Planning',      icon: <FaRocket />,    active: false },
   { id: 'financials',      label: 'Financials',        icon: <FaChartPie />,  active: false },
@@ -24,6 +26,7 @@ const StartupDashboard = () => {
   const renderFeature = () => {
     switch (activeFeature) {
       case 'idea-validation': return <IdeaValidation />
+      case 'market-intel': return <MarketIntelligence />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
