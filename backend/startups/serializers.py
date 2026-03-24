@@ -91,3 +91,57 @@ class MarketSubmitSerializer(serializers.Serializer):
     ])
     customer_type = serializers.ChoiceField(choices=['b2b', 'b2c', 'both'])
     description   = serializers.CharField(min_length=30)
+    
+
+
+class BusinessModelSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = BusinessModel
+        fields = [
+            'id', 'idea', 'idea_title',
+            'revenue_model', 'price_per_customer',
+            'estimated_cac', 'additional_context', 'status',
+            'overall_summary', 'business_model_score', 'overall_verdict',
+            'canvas_problem', 'canvas_solution', 'canvas_uvp',
+            'canvas_unfair_advantage', 'canvas_customer_segments',
+            'canvas_channels', 'canvas_revenue_streams',
+            'canvas_cost_structure', 'canvas_key_metrics',
+            'revenue_model_analysis', 'revenue_model_recommended',
+            'revenue_model_reasoning', 'pricing_recommendation',
+            'ltv_estimate', 'ltv_explanation', 'cac_analysis',
+            'ltv_cac_ratio', 'ltv_cac_verdict',
+            'payback_period_months', 'payback_verdict',
+            'contribution_margin', 'unit_economics_score',
+            'recommendations', 'risks',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status', 'overall_summary', 'business_model_score',
+            'overall_verdict',
+            'canvas_problem', 'canvas_solution', 'canvas_uvp',
+            'canvas_unfair_advantage', 'canvas_customer_segments',
+            'canvas_channels', 'canvas_revenue_streams',
+            'canvas_cost_structure', 'canvas_key_metrics',
+            'revenue_model_analysis', 'revenue_model_recommended',
+            'revenue_model_reasoning', 'pricing_recommendation',
+            'ltv_estimate', 'ltv_explanation', 'cac_analysis',
+            'ltv_cac_ratio', 'ltv_cac_verdict',
+            'payback_period_months', 'payback_verdict',
+            'contribution_margin', 'unit_economics_score',
+            'recommendations', 'risks',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class BusinessModelSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    revenue_model = serializers.ChoiceField(choices=[
+        'subscription', 'one_time', 'freemium',
+        'marketplace', 'advertising', 'usage_based',
+        'licensing', 'not_decided',
+    ])
+    price_per_customer = serializers.DecimalField(max_digits=10, decimal_places=2)
+    estimated_cac = serializers.DecimalField(max_digits=10, decimal_places=2)
+    additional_context = serializers.CharField(required=False, allow_blank=True)
