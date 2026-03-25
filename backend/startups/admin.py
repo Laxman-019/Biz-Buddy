@@ -38,16 +38,22 @@ class MarketIntelligenceAdmin(admin.ModelAdmin):
 
 @admin.register(BusinessModel)
 class BusinessModelAdmin(admin.ModelAdmin):
-    list_display = ['idea', 'user', 'revenue_model', 'business_model_score', 'overall_verdict', 'status', 'created_at']
+    list_display = ['idea', 'user', 'revenue_model',
+                     'business_model_score', 'overall_verdict', 'status', 'created_at']
     list_filter = ['status', 'revenue_model', 'overall_verdict']
     search_fields = ['idea__idea_title', 'user__email']
     readonly_fields = [
         'status', 'overall_summary', 'business_model_score', 'overall_verdict',
-        'canvas_problem', 'canvas_solution', 'canvas_uvp', 'canvas_unfair_advantage', 
-        'canvas_customer_segments', 'canvas_channels', 'canvas_revenue_streams', 
-        'canvas_cost_structure', 'canvas_key_matrics', 'revenue_model_analysis',
-        'revenue_model_recommended', 'revenue_model_reasoning', 'pricing_recommendation',
-        'ltv_estimate', 'ltv_explanation', 'cac_analysis', 'ltv_cac_ratio', 'ltv_cac_verdict',
-        'payback_period_months', 'payback_verdict', 'contribution_margin', 'unit_economics_score',
-        'recommendations', 'risks', 'raw_ai_response', 'error_message', 'created_at', 'updated_at'
+        'canvas_problem', 'canvas_solution', 'canvas_uvp',
+        'canvas_unfair_advantage', 'canvas_customer_segments',
+        'canvas_channels', 'canvas_revenue_streams',
+        'canvas_cost_structure', 'canvas_key_metrics',
+        'revenue_model_analysis', 'revenue_model_recommended',
+        'revenue_model_reasoning', 'pricing_recommendation',
+        'ltv_estimate', 'ltv_explanation', 'cac_analysis',
+        'ltv_cac_ratio', 'ltv_cac_verdict',
+        'payback_period_months', 'payback_verdict',
+        'contribution_margin', 'unit_economics_score',
+        'recommendations', 'risks',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
