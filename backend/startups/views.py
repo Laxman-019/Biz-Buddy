@@ -5,6 +5,7 @@ from startups.models import *
 from startups.serializers import *
 from startups.ai_analyzer import analyze_idea
 from startups.market_analyzer import analyze_market
+from startups.business_analyzer import analyze_business_model
 
 
 def startup_only(func):
@@ -196,3 +197,119 @@ def market_detail(request, report_id):
         return Response(status=204)
 
     return Response(MarketIntelligenceSerializer(report).data)
+
+
+
+# Business models
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def business_model_list(req):
+    models_qs = BusinessModel.objects.filter(user=req.user)
+    return Response(BusinessModelSerializer(models_qs, many=True).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def ideas_for_dropdown(req):
+    ideas = IdeaValidation.objects.filter(
+        user=req.user, status__in=['active', 'done']
+    ).values('id', 'idea_title', 'overall_score', 'verdict')
+    return Response(list(ideas))
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def business_model_submit(request):
+    serializer = BusinessModelSubmitSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    d = serializer.validated_data
+
+    # Validate idea belongs to user
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'], user=request.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({'error': 'Idea not found.'}, status=404)
+
+    bm = BusinessModel.objects.create(
+        user = request.user,
+        idea = idea,
+        revenue_model = d['revenue_model'],
+        price_per_customer = d['price_per_customer'],
+        estimated_cac = d['estimated_cac'],
+        additional_context = d.get('additional_context', ''),
+        status = 'analyzing',
+    )
+
+    try:
+        result = analyze_business_model(
+            idea = idea,
+            revenue_model = d['revenue_model'],
+            price_per_customer = d['price_per_customer'],
+            estimated_cac = d['estimated_cac'],
+            additional_context = d.get('additional_context', ''),
+            user = request.user,
+        )
+
+        bm.status = 'done'
+        bm.raw_ai_response = result['raw']
+        bm.overall_summary = result['overall_summary']
+        bm.business_model_score = result['business_model_score']
+        bm.overall_verdict = result['overall_verdict']
+        bm.recommendations = result['recommendations']
+        bm.risks = result['risks']
+        bm.canvas_problem = result['canvas_problem']
+        bm.canvas_solution = result['canvas_solution']
+        bm.canvas_uvp = result['canvas_uvp']
+        bm.canvas_unfair_advantage = result['canvas_unfair_advantage']
+        bm.canvas_customer_segments = result['canvas_customer_segments']
+        bm.canvas_channels = result['canvas_channels']
+        bm.canvas_revenue_streams = result['canvas_revenue_streams']
+        bm.canvas_cost_structure = result['canvas_cost_structure']
+        bm.canvas_key_metrics = result['canvas_key_metrics']
+        bm.revenue_model_analysis = result['revenue_model_analysis']
+        bm.revenue_model_recommended = result['revenue_model_recommended']
+        bm.revenue_model_reasoning = result['revenue_model_reasoning']
+        bm.pricing_recommendation = result['pricing_recommendation']
+        bm.ltv_estimate = result['ltv_estimate']
+        bm.ltv_explanation = result['ltv_explanation']
+        bm.cac_analysis = result['cac_analysis']
+        bm.ltv_cac_ratio = result['ltv_cac_ratio']
+        bm.ltv_cac_verdict = result['ltv_cac_verdict']
+        bm.payback_period_months = result['payback_period_months']
+        bm.payback_verdict = result['payback_verdict']
+        bm.contribution_margin = result['contribution_margin']
+        bm.unit_economics_score = result['unit_economics_score']
+        bm.save()
+
+    except Exception as e:
+        bm.status = 'failed'
+        bm.error_message = str(e)
+        bm.save()
+        return Response(
+            {'error': 'Analysis failed.', 'detail': str(e)},
+            status=500
+        )
+
+    return Response(BusinessModelSerializer(bm).data, status=201)
+
+
+@api_view(['GET', 'DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def business_model_detail(request, bm_id):
+    try:
+        bm = BusinessModel.objects.get(id=bm_id, user=request.user)
+    except BusinessModel.DoesNotExist:
+        return Response({'error': 'Not found.'}, status=404)
+
+    if request.method == 'DELETE':
+        bm.delete()
+        return Response(status=204)
+
+    return Response(BusinessModelSerializer(bm).data)

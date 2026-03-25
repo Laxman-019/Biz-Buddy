@@ -8,4 +8,8 @@ urlpatterns = [
     path('market/', market_list),
     path('market/submit/', market_submit),
     path('market/<int:report_id>/',market_detail),
+    path('business-model/',business_model_list),
+    path('business-model/ideas/',ideas_for_dropdown),
+    path('business-model/submit/',business_model_submit),
+    path('business-model/<int:bm_id>/',business_model_detail),
 ]
