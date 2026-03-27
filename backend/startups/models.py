@@ -265,3 +265,95 @@ class BusinessModel(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — {self.idea.idea_title}"
+    
+    
+    
+class MVPPlan(models.Model):
+
+    PRODUCT_TYPE_CHOICES = [
+        ('web_app', 'Web Application'),
+        ('mobile_app','Mobile App'),
+        ('both', 'Web + Mobile'),
+        ('physical', 'Physical Product'),
+        ('service', 'Service-based'),
+    ]
+
+    TECH_SKILL_CHOICES = [
+        ('fullstack', 'Full-stack Developer'),
+        ('frontend', 'Frontend Only'),
+        ('backend', 'Backend Only'),
+        ('no_code', 'No Dev Skills — No-code only'),
+        ('none', 'No Technical Skills'),
+    ]
+
+    PLATFORM_CHOICES = [
+        ('web', 'Web'),
+        ('mobile', 'Mobile'),
+        ('both', 'Web + Mobile'),
+    ]
+
+    BUDGET_CHOICES = [
+        ('lt_1l', 'Under ₹1 Lakh'),
+        ('1l_5l', '₹1L – ₹5L'),
+        ('5l_20l', '₹5L – ₹20L'),
+        ('20l_50l', '₹20L – ₹50L'),
+        ('gt_50l', 'Above ₹50L'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='mvp_plans'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='mvp_plans'
+    )
+
+    product_type = models.CharField(max_length=20, choices=PRODUCT_TYPE_CHOICES)
+    launch_weeks = models.IntegerField(help_text="Target weeks to launch")
+    team_size = models.IntegerField(help_text="Number of people available to build")
+    start_date = models.DateField(null=True, blank=True)
+    available_budget = models.CharField(max_length=20, choices=BUDGET_CHOICES, blank=True)
+    tech_skills = models.CharField(max_length=20, choices=TECH_SKILL_CHOICES, blank=True)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES, blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    mvp_score = models.FloatField(null=True, blank=True)
+    mvp_verdict = models.CharField(max_length=50, blank=True)
+    mvp_summary = models.TextField(blank=True)
+    core_features = models.JSONField(default=list, blank=True)
+    nice_to_haves = models.JSONField(default=list, blank=True)
+    learning_goals = models.JSONField(default=list, blank=True)
+    success_metrics = models.JSONField(default=list, blank=True)
+    mvp_risks = models.JSONField(default=list, blank=True)
+
+    total_duration_weeks = models.IntegerField(null=True, blank=True)
+    roadmap_summary = models.TextField(blank=True)
+    phases = models.JSONField(default=list, blank=True)
+
+    tech_summary = models.TextField(blank=True)
+    recommended_stack = models.JSONField(default=list, blank=True)
+    build_items = models.JSONField(default=list, blank=True)
+    buy_items = models.JSONField(default=list, blank=True)
+    nocode_options = models.JSONField(default=list, blank=True)
+    core_ip = models.JSONField(default=list, blank=True)
+    tech_recommendations = models.JSONField(default=list, blank=True)
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_mvp_plans'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — MVP: {self.idea.idea_title}"  
