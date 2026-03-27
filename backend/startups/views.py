@@ -6,6 +6,7 @@ from startups.serializers import *
 from startups.ai_analyzer import analyze_idea
 from startups.market_analyzer import analyze_market
 from startups.business_analyzer import analyze_business_model
+from startups.mvp_analyzer import analyze_mvp
 
 
 def startup_only(func):
@@ -313,3 +314,106 @@ def business_model_detail(request, bm_id):
         return Response(status=204)
 
     return Response(BusinessModelSerializer(bm).data)
+
+
+# MVP plans 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def mvp_list(req):
+    plans = MVPPlan.objects.filter(user=req.user)
+    return Response(MVPPlanSerializer(plans, many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def mvp_submit(req):
+    serializer = MVPSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+
+    except IdeaValidation.DoesNotExist:
+        return Response({'error':"Idea not found"},status=404)
+    
+    plan = MVPPlan.objects.create(
+        user = req.user,
+        idea = idea,
+        product_type = d['product_type'],
+        launch_weeks = d['launch_weeks'],
+        team_size = d['team_size'],
+        start_date = d.get('start_date'),
+        tech_skills = d['tech_skills'],
+        platform = d['platform'],
+        status = 'analyzing'
+    )
+
+    try:
+        result = analyze_mvp(
+            idea = idea,
+            product_type = d['product_type'],
+            launch_weeks = d['launch_weeks'],
+            team_size = d['team_size'],
+            start_date = d.get('start_date'),
+            tech_skills = d['tech_skills'],
+            platform = d['platform'],
+            user = req.user
+        )
+
+        plan.status = 'done'
+        plan.raw_ai_response = result['raw']
+        plan.mvp_score = result['mvp_score']
+        plan.mvp_verdict = result['mvp_verdict']
+        plan.mvp_summary = result['mvp_summary']
+        plan.core_features = result['core_features']
+        plan.nice_to_haves = result['nice_to_haves']
+        plan.learning_goals = result['learning_goals']
+        plan.success_metrics = result['success_metrics']
+        plan.mvp_risks = result['mvp_risks']
+        plan.total_duration_weeks = result['total_duration_weeks']
+        plan.roadmap_summary = result['roadmap_summary']
+        plan.phases = result['phases']
+        plan.tech_summary = result['tech_summary']
+        plan.recommended_stack = result['recommended_stack']
+        plan.build_items = result['build_items']
+        plan.buy_items = result['buy_items']
+        plan.nocode_options = result['nocode_options']
+        plan.core_ip = result['core_ip']
+        plan.tech_recommendations = result['tech_recommendations']
+        plan.save()
+
+    except Exception as e:
+        plan.status = "failed"
+        plan.error_message = str(e)
+        plan.save()
+        return Response(
+            {
+                'error':'Analysis Failed.',
+                'detail':str(e)
+            },
+            status=500
+        )
+    
+    return Response(MVPPlanSerializer(plan).data,status=201)
+
+
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def mvp_detail(req,plan_id):
+    try:
+        plan = MVPPlan.objects.get(id=plan_id,user=req.user)
+    except MVPPlan.DoesNotExist:
+        return Response({'error':'Not Found.'},status=404)
+    
+    if req.method == 'DELETE':
+        plan.delete()
+        return Response(status=204)
+    
+    return Response(MVPPlanSerializer(plan).data)
