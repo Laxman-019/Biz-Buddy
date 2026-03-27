@@ -145,3 +145,52 @@ class BusinessModelSubmitSerializer(serializers.Serializer):
     price_per_customer = serializers.DecimalField(max_digits=10, decimal_places=2)
     estimated_cac = serializers.DecimalField(max_digits=10, decimal_places=2)
     additional_context = serializers.CharField(required=False, allow_blank=True)
+    
+    
+class MVPPlanSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = MVPPlan
+        fields = [
+            'id', 'idea', 'idea_title',
+            'product_type', 'launch_weeks', 'team_size',
+            'start_date', 'available_budget', 'tech_skills', 'platform',
+            'status',
+            'mvp_score', 'mvp_verdict', 'mvp_summary',
+            'core_features', 'nice_to_haves', 'learning_goals',
+            'success_metrics', 'mvp_risks',
+            'total_duration_weeks', 'roadmap_summary', 'phases',
+            'tech_summary', 'recommended_stack',
+            'build_items', 'buy_items', 'nocode_options',
+            'core_ip', 'tech_recommendations',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'mvp_score', 'mvp_verdict', 'mvp_summary',
+            'core_features', 'nice_to_haves', 'learning_goals',
+            'success_metrics', 'mvp_risks',
+            'total_duration_weeks', 'roadmap_summary', 'phases',
+            'tech_summary', 'recommended_stack',
+            'build_items', 'buy_items', 'nocode_options',
+            'core_ip', 'tech_recommendations',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class MVPSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    product_type = serializers.ChoiceField(choices=[
+        'web_app', 'mobile_app', 'both', 'physical', 'service'
+    ])
+    launch_weeks = serializers.IntegerField(min_value=1, max_value=104)
+    team_size = serializers.IntegerField(min_value=1)
+    start_date = serializers.DateField(required=False, allow_null=True)
+    available_budget = serializers.ChoiceField(choices=[
+        'lt_1l', '1l_5l', '5l_20l', '20l_50l', 'gt_50l'
+    ])
+    tech_skills = serializers.ChoiceField(choices=[
+        'fullstack', 'frontend', 'backend', 'no_code', 'none'
+    ])
+    platform = serializers.ChoiceField(choices=['web', 'mobile', 'both'])
