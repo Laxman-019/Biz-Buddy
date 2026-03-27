@@ -12,4 +12,7 @@ urlpatterns = [
     path('business-model/ideas/',ideas_for_dropdown),
     path('business-model/submit/',business_model_submit),
     path('business-model/<int:bm_id>/',business_model_detail),
+    path('mvp/',mvp_list),
+    path('mvp/submit/',mvp_submit),
+    path('mvp/<int:plan_id>/',mvp_detail),
 ]

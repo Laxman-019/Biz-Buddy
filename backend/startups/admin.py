@@ -38,8 +38,7 @@ class MarketIntelligenceAdmin(admin.ModelAdmin):
 
 @admin.register(BusinessModel)
 class BusinessModelAdmin(admin.ModelAdmin):
-    list_display = ['idea', 'user', 'revenue_model',
-                     'business_model_score', 'overall_verdict', 'status', 'created_at']
+    list_display = ['idea', 'user', 'revenue_model',                    'business_model_score', 'overall_verdict', 'status', 'created_at']
     list_filter = ['status', 'revenue_model', 'overall_verdict']
     search_fields = ['idea__idea_title', 'user__email']
     readonly_fields = [
@@ -56,4 +55,19 @@ class BusinessModelAdmin(admin.ModelAdmin):
         'contribution_margin', 'unit_economics_score',
         'recommendations', 'risks',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
+
+
+
+@admin.register(MVPPlan)
+class MVPPlanAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'product_type', 'launch_weeks',         'mvp_score', 'mvp_verdict', 'status', 'created_at']
+    list_filter   = ['status', 'product_type', 'mvp_verdict']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status', 'mvp_score', 'mvp_verdict', 'mvp_summary',
+        'core_features', 'nice_to_haves', 'learning_goals',
+        'success_metrics', 'mvp_risks','total_duration_weeks', 'roadmap_summary', 'phases','tech_summary', 'recommended_stack', 'build_items',
+        'buy_items', 'nocode_options', 'core_ip', 'tech_recommendations',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at', 
     ]
