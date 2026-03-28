@@ -15,4 +15,7 @@ urlpatterns = [
     path('mvp/',mvp_list),
     path('mvp/submit/',mvp_submit),
     path('mvp/<int:plan_id>/',mvp_detail),
+    path('financials/', financials_list),
+    path('financials/submit/', financials_submit),
+    path('financials/<int:record_id>/', financials_detail),
 ]
