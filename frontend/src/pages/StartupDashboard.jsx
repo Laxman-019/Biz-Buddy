@@ -8,13 +8,14 @@ import { FaLightbulb, FaChartLine, FaCubes, FaRocket,
 import MarketIntelligence from './MarketIntelligence'
 import BusinessModel from './BusinessModel'
 import MVPPlanner from './MVPPlanner'
+import StartupFinancials from './StartupFinancials'
 
 const FEATURES = [
   { id: 'idea-validation', label: 'Idea Validation',   icon: <FaLightbulb />, active: true  },
   { id: 'market-intel',    label: 'Market Intelligence',icon: <FaChartLine />, active: true },
   { id: 'business-model',  label: 'Business Model',    icon: <FaCubes />,     active: true },
   { id: 'mvp-planner',     label: 'MVP Planning',      icon: <FaRocket />,    active: true },
-  { id: 'financials',      label: 'Financials',        icon: <FaChartPie />,  active: false },
+  { id: 'financials',      label: 'Financials',        icon: <FaChartPie />,  active: true },
   { id: 'investor',        label: 'Investor Readiness',icon: <FaHandshake />, active: false },
   { id: 'go-to-market',    label: 'Go-To-Market',      icon: <FaBullhorn />,  active: false },
   { id: 'kpis',            label: 'Startup KPIs',      icon: <FaBolt />,      active: false },
@@ -43,6 +44,7 @@ const StartupDashboard = () => {
       case 'market-intel': return <MarketIntelligence />
       case 'business-model': return <BusinessModel />
       case 'mvp-planner': return <MVPPlanner />
+      case 'financials': return <StartupFinancials />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
