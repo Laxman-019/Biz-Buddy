@@ -7,12 +7,13 @@ import { FaLightbulb, FaChartLine, FaCubes, FaRocket,
 } from 'react-icons/fa'
 import MarketIntelligence from './MarketIntelligence'
 import BusinessModel from './BusinessModel'
+import MVPPlanner from './MVPPlanner'
 
 const FEATURES = [
   { id: 'idea-validation', label: 'Idea Validation',   icon: <FaLightbulb />, active: true  },
   { id: 'market-intel',    label: 'Market Intelligence',icon: <FaChartLine />, active: true },
   { id: 'business-model',  label: 'Business Model',    icon: <FaCubes />,     active: true },
-  { id: 'mvp-planner',     label: 'MVP Planning',      icon: <FaRocket />,    active: false },
+  { id: 'mvp-planner',     label: 'MVP Planning',      icon: <FaRocket />,    active: true },
   { id: 'financials',      label: 'Financials',        icon: <FaChartPie />,  active: false },
   { id: 'investor',        label: 'Investor Readiness',icon: <FaHandshake />, active: false },
   { id: 'go-to-market',    label: 'Go-To-Market',      icon: <FaBullhorn />,  active: false },
@@ -22,13 +23,26 @@ const FEATURES = [
 ]
 
 const StartupDashboard = () => {
-  const [activeFeature, setActiveFeature] = useState('idea-validation')
+  const [activeFeature, setActiveFeature] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('startup_active_feature') || 'idea-validation';
+    }
+    return 'idea-validation';
+  });
+
+  const setFeature = (featureId) => {
+    setActiveFeature(featureId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('startup_active_feature', featureId);
+    }
+  };
 
   const renderFeature = () => {
     switch (activeFeature) {
       case 'idea-validation': return <IdeaValidation />
       case 'market-intel': return <MarketIntelligence />
       case 'business-model': return <BusinessModel />
+      case 'mvp-planner': return <MVPPlanner />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
@@ -52,7 +66,7 @@ const StartupDashboard = () => {
             {FEATURES.map((f) => (
               <button
                 key={f.id}
-                onClick={() => f.active && setActiveFeature(f.id)}
+                onClick={() => f.active && setFeature(f.id)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition
                   ${activeFeature === f.id
                     ? 'bg-purple-50 text-purple-700 border border-purple-200'
