@@ -357,3 +357,111 @@ class MVPPlan(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — MVP: {self.idea.idea_title}"  
+    
+    
+    
+class StartupFinancials(models.Model):
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    RUNWAY_STATUS_CHOICES = [
+        ('comfortable', 'Comfortable'),
+        ('healthy', 'Healthy'),
+        ('raising_soon','Raising Soon'),
+        ('urgent', 'Urgent'),
+        ('critical', 'Critical'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='startup_financials'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='startup_financials'
+    )
+
+
+    cash_on_hand = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0
+    )
+    monthly_burn_rate = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0
+    )
+
+
+    starting_monthly_revenue = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0
+    )
+    monthly_revenue_growth = models.FloatField(
+        default=0, help_text="Monthly revenue growth rate in %"
+    )
+    current_monthly_expenses = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0
+    )
+    expense_growth_rate = models.FloatField(
+        default=0, help_text="Monthly expense growth rate in %"
+    )
+
+
+    funding_amount_target = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0
+    )
+    funds_product_pct = models.FloatField(default=40)
+    funds_marketing_pct = models.FloatField(default=30)
+    funds_salaries_pct = models.FloatField(default=20)
+    funds_ops_pct = models.FloatField(default=10)
+    funding_milestone = models.TextField(
+        blank=True, help_text="What milestone will this funding help reach?"
+    )
+
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+
+    runway_months = models.FloatField(null=True, blank=True)
+    runway_status = models.CharField(
+        max_length=20, choices=RUNWAY_STATUS_CHOICES, blank=True
+    )
+    zero_date = models.CharField(max_length=50, blank=True)
+    runway_summary = models.TextField(blank=True)
+    runway_scenarios = models.JSONField(default=list, blank=True)
+    runway_recommendations= models.JSONField(default=list, blank=True)
+
+
+    breakeven_month = models.IntegerField(null=True, blank=True)
+    projection_summary = models.TextField(blank=True)
+    yearly_projections = models.JSONField(default=list, blank=True)
+    monthly_projections = models.JSONField(default=list, blank=True)
+    projection_milestones = models.JSONField(default=list, blank=True)
+    projection_risks = models.JSONField(default=list, blank=True)
+    projection_assumptions= models.JSONField(default=list, blank=True)
+
+
+    funding_verdict = models.CharField(max_length=50, blank=True)
+    funding_summary = models.TextField(blank=True)
+    funding_score = models.FloatField(null=True, blank=True)
+    valuation_context = models.TextField(blank=True)
+    runway_extended_months= models.FloatField(null=True, blank=True)
+    funding_milestones = models.JSONField(default=list, blank=True)
+    funding_tips = models.JSONField(default=list, blank=True)
+    use_of_funds_analysis = models.TextField(blank=True)
+
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_financials'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — Financials: {self.idea.idea_title}"
