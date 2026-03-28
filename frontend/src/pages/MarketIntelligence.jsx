@@ -419,7 +419,6 @@ const MarketReport = ({ report, onDelete }) => {
         {expanded ? <FaChevronUp className="text-gray-300 shrink-0" /> : <FaChevronDown className="text-gray-300 shrink-0" />}
       </div>
 
-      {/* Expanded Report */}
       {expanded && report.status === "done" && (
         <div className="border-t border-gray-100">
           {/* Market Summary */}
@@ -429,7 +428,6 @@ const MarketReport = ({ report, onDelete }) => {
               <p className="text-sm text-gray-600 leading-relaxed">{report.market_summary}</p>
             </div>
 
-            {/* Key Insights */}
             {report.key_insights?.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                 {report.key_insights.map((insight, i) => (
@@ -446,7 +444,6 @@ const MarketReport = ({ report, onDelete }) => {
             )}
           </div>
 
-          {/* Tabs */}
           <div className="flex border-b border-gray-100 px-5">
             {TABS.map((tab, i) => (
               <button
@@ -460,7 +457,6 @@ const MarketReport = ({ report, onDelete }) => {
             ))}
           </div>
 
-          {/* Tab Content */}
           <div className="p-5">
             {activeTab === 0 && (
               <MarketFunnel
@@ -501,7 +497,6 @@ const MarketReport = ({ report, onDelete }) => {
         </div>
       )}
 
-      {/* Failed */}
       {expanded && report.status === "failed" && (
         <div className="border-t border-gray-100 p-5">
           <div className="bg-red-50 rounded-xl p-4 text-sm text-red-600">Analysis failed: {report.error_message || "Please try again."}</div>
@@ -511,9 +506,22 @@ const MarketReport = ({ report, onDelete }) => {
   );
 };
 
-// Main Component
+const REPORTS_STORAGE_KEY = "market_intelligence_reports";
+
 const MarketIntelligence = () => {
-  const [reports, setReports] = useState([]);
+  const [reports, setReports] = useState(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem(REPORTS_STORAGE_KEY);
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (err) {
+          console.warn("Failed to parse cached market reports", err);
+        }
+      }
+    }
+    return [];
+  });
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -525,23 +533,34 @@ const MarketIntelligence = () => {
     description: "",
   });
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
+  const cacheReports = (data) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(data));
+    }
+  };
 
   const fetchReports = async () => {
     try {
       const res = await axiosInstance.get("/api/market/");
+      console.log("API Response:", res.data);
       const reportsData = Array.isArray(res.data) ? res.data : res.data?.results && Array.isArray(res.data.results) ? res.data.results : [];
-      setReports(reportsData);
+
+      if (reportsData.length > 0 || reports.length === 0) {
+        setReports(reportsData);
+        cacheReports(reportsData);
+      }
     } catch (error) {
       console.error("Fetch error:", error);
       toast.error("Failed to load reports");
-      setReports([]);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -553,7 +572,11 @@ const MarketIntelligence = () => {
     try {
       const res = await axiosInstance.post("/api/market/submit/", formData);
       const newReport = res.data;
-      setReports((prevReports) => [newReport, ...prevReports]);
+      setReports((prevReports) => {
+        const updated = [newReport, ...prevReports];
+        cacheReports(updated);
+        return updated;
+      });
       setFormData({
         product_name: "",
         industry: "",
@@ -575,7 +598,9 @@ const MarketIntelligence = () => {
     if (!window.confirm("Delete this market report?")) return;
     try {
       await axiosInstance.delete(`/api/market/${id}/`);
-      setReports(reports.filter((r) => r.id !== id));
+      const updated = reports.filter((r) => r.id !== id);
+      setReports(updated);
+      cacheReports(updated);
       toast.success("Deleted");
     } catch {
       toast.error("Failed to delete");

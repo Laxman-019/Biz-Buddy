@@ -113,7 +113,7 @@ def idea_detail(request, idea_id):
 @permission_classes([IsAuthenticated])
 @startup_only
 def market_list(request):
-    reports = MarketIntelligence.objects.filter(user=request.user)
+    reports = MarketIntelligence.objects.filter(user=request.user).order_by('-created_at')
     return Response(MarketIntelligenceSerializer(reports, many=True).data)
 
 
@@ -348,6 +348,7 @@ def mvp_submit(req):
         launch_weeks = d['launch_weeks'],
         team_size = d['team_size'],
         start_date = d.get('start_date'),
+        available_budget = d['available_budget'],
         tech_skills = d['tech_skills'],
         platform = d['platform'],
         status = 'analyzing'
@@ -360,6 +361,7 @@ def mvp_submit(req):
             launch_weeks = d['launch_weeks'],
             team_size = d['team_size'],
             start_date = d.get('start_date'),
+            available_budget = d['available_budget'],
             tech_skills = d['tech_skills'],
             platform = d['platform'],
             user = req.user
