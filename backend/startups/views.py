@@ -7,6 +7,7 @@ from startups.ai_analyzer import analyze_idea
 from startups.market_analyzer import analyze_market
 from startups.business_analyzer import analyze_business_model
 from startups.mvp_analyzer import analyze_mvp
+from startups.financials_analyzer import analyze_financials
 
 
 def startup_only(func):
@@ -419,3 +420,114 @@ def mvp_detail(req,plan_id):
         return Response(status=204)
     
     return Response(MVPPlanSerializer(plan).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def financials_list(req):
+    records = StartupFinancials.objects.filter(user=req.user)
+    return Response(StartupFinancialsSerializer(records, many=True).data)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def financials_submit(req):
+    serializer = FinancialsSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+
+    except IdeaValidation.DoesNotExist:
+        return Response({'error':"Idea not found"},status=404)
+    
+    record = StartupFinancials.objects.create(
+        user = req.user,
+        idea = idea,
+        cash_on_hand = d['cash_on_hand'],
+        monthly_burn_rate = d['monthly_burn_rate'],
+        starting_monthly_revenue = d['starting_monthly_revenue'],
+        monthly_revenue_growth = d['monthly_revenue_growth'],
+        current_monthly_expenses = d['current_monthly_expenses'],
+        expense_growth_rate = d['expense_growth_rate'],
+        funding_amount_target = d['funding_amount_target'],
+        funds_product_pct = d.get('funds_product_pct',40),
+        funds_marketing_pct = d.get('funds_marketing_pct',30),
+        funds_salaries_pct = d.get('funds_salaries_pct',20),
+        funds_ops_pct = d.get('funds_ops_pct',10),
+        funding_milestone = d.get('funding_milestone',''),
+        status = 'analyzing'
+    ) 
+
+    try:
+        result = analyze_financials(
+            idea = idea,
+            cash_on_hand = d['cash_on_hand'],
+            monthly_burn_rate = d['monthly_burn_rate'],
+            starting_monthly_revenue = d['starting_monthly_revenue'],
+            monthly_revenue_growth = d['monthly_revenue_growth'],
+            current_monthly_expenses = d['current_monthly_expenses'],
+            expense_growth_rate = d['expense_growth_rate'],
+            funding_amount_target = d['funding_amount_target'],
+            funds_product_pct = d.get('funds_product_pct',40),
+            funds_marketing_pct = d.get('funds_marketing_pct',30),
+            funds_salaries_pct = d.get('funds_salaries_pct',20),
+            funds_ops_pct = d.get('funds_ops_pct',10),
+            funding_milestone = d.get('funding_milestone',''),
+            user = req.user
+        )
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.runway_months = result['runway_months']
+        record.runway_status = result['runway_status']
+        record.zero_date = result['zero_date']
+        record.runway_summary = result['runway_summary']
+        record.runway_scenarios = result['runway_scenarios']
+        record.runway_recommendations = result['runway_recommendations']
+        record.breakeven_month = result['breakeven_month']
+        record.projection_summary = result['projection_summary']
+        record.yearly_projections = result['yearly_projections']
+        record.monthly_projections = result['monthly_projections']
+        record.projection_milestones = result['projection_milestones']
+        record.projection_risks = result['projection_risks']
+        record.projection_assumptions = result['projection_assumptions']
+        record.funding_verdict = result['funding_verdict']
+        record.funding_summary = result['funding_summary']
+        record.funding_score = result['funding_score']
+        record.valuation_context = result['valuation_context']
+        record.runway_extended_months = result['runway_extended_months']
+        record.funding_milestones = result['funding_milestones']
+        record.funding_tips = result['funding_tips']
+        record.use_of_funds_analysis = result['use_of_funds_analysis']
+        record.save()
+
+    except Exception as e:
+        record.status = "failed"
+        record.error_message = str(e)
+        record.save()
+        return Response({'error':'Analysis Failed.','detail':str(e)},status=500)
+    
+    return Response(StartupFinancialsSerializer(record).data,status=201)
+
+
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def financials_detail(req,record_id):
+    try:
+        record = StartupFinancials.objects.get(id=record_id,user=req.user)
+    except StartupFinancials.DoesNotExist:
+        return Response({'error':'Not Found.'},status=404)
+    
+    if req.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+    
+    return Response(StartupFinancialsSerializer(record).data)

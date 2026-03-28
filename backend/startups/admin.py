@@ -71,3 +71,23 @@ class MVPPlanAdmin(admin.ModelAdmin):
         'buy_items', 'nocode_options', 'core_ip', 'tech_recommendations',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at', 
     ]
+
+
+
+@admin.register(StartupFinancials)
+class StartupFinancialsAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'runway_months', 'runway_status',         'breakeven_month', 'funding_score', 'status', 'created_at']
+    list_filter   = ['status', 'runway_status', 'funding_verdict']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status',
+        'runway_months', 'runway_status', 'zero_date',
+        'runway_summary', 'runway_scenarios', 'runway_recommendations',
+        'breakeven_month', 'projection_summary',
+        'yearly_projections', 'monthly_projections',
+        'projection_milestones', 'projection_risks', 'projection_assumptions',
+        'funding_verdict', 'funding_summary', 'funding_score',
+        'valuation_context', 'runway_extended_months',
+        'funding_milestones', 'funding_tips', 'use_of_funds_analysis',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
