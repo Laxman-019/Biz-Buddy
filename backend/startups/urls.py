@@ -18,4 +18,7 @@ urlpatterns = [
     path('financials/', financials_list),
     path('financials/submit/', financials_submit),
     path('financials/<int:record_id>/', financials_detail),
+    path('investor/', investor_list),
+    path('investor/submit/', investor_submit),
+    path('investor/<int:record_id>/', investor_detail),
 ]
