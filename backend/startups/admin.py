@@ -112,3 +112,26 @@ class InvestorReadinessAdmin(admin.ModelAdmin):
         'dd_priority_items', 'dd_red_flags', 'dd_preparation_tips',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
+
+
+
+@admin.register(GoToMarket)
+class GoToMarketAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'launch_weeks',                    'launch_score', 'launch_verdict','pricing_score', 'status', 'created_at']
+    list_filter   = ['status', 'launch_verdict', 'pricing_verdict']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status',
+        'launch_score', 'launch_verdict', 'launch_summary',
+        'beachhead_analysis', 'launch_channels',
+        'first_90_days', 'pr_strategy',
+        'launch_risks', 'launch_tips',
+        'acq_summary', 'acq_score', 'projected_cac',
+        'channel_priority', 'channel_strategies',
+        'budget_allocation', 'growth_hacks',
+        'pricing_score', 'pricing_verdict', 'pricing_summary',
+        'recommended_price', 'pricing_rationale',
+        'package_tiers', 'psychological_tips',
+        'price_testing_plan', 'annual_strategy',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
