@@ -254,3 +254,51 @@ class FinancialsSubmitSerializer(serializers.Serializer):
     funds_salaries_pct = serializers.FloatField(default=20)
     funds_ops_pct = serializers.FloatField(default=10)
     funding_milestone = serializers.CharField(required=False, allow_blank=True)
+    
+    
+class InvestorReadinessSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = InvestorReadiness
+        fields = [
+            'id', 'idea', 'idea_title', 'status',
+            'funding_stage', 'amount_raising',
+            'team_description', 'traction_so_far',
+            'company_stage', 'completed_items',
+            'pitch_score', 'pitch_verdict', 'pitch_summary',
+            'pitch_slides', 'investor_questions', 'storytelling_tips',
+            'investor_list', 'outreach_template',
+            'warm_intro_strategy', 'investor_tips',
+            'dd_score', 'dd_summary', 'dd_checklist',
+            'dd_priority_items', 'dd_red_flags', 'dd_preparation_tips',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'pitch_score', 'pitch_verdict', 'pitch_summary',
+            'pitch_slides', 'investor_questions', 'storytelling_tips',
+            'investor_list', 'outreach_template',
+            'warm_intro_strategy', 'investor_tips',
+            'dd_score', 'dd_summary', 'dd_checklist',
+            'dd_priority_items', 'dd_red_flags', 'dd_preparation_tips',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class InvestorReadinessSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    funding_stage = serializers.ChoiceField(
+        choices=['pre_seed', 'seed', 'series_a']
+    )
+    amount_raising = serializers.DecimalField(max_digits=14, decimal_places=2)
+    team_description = serializers.CharField()
+    traction_so_far = serializers.CharField()
+    company_stage = serializers.ChoiceField(
+        choices=['idea', 'mvp', 'revenue', 'growth']
+    )
+    completed_items = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list
+    )
