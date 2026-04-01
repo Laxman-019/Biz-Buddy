@@ -8,6 +8,7 @@ from startups.market_analyzer import analyze_market
 from startups.business_analyzer import analyze_business_model
 from startups.mvp_analyzer import analyze_mvp
 from startups.financials_analyzer import analyze_financials
+from startups.investor_analyzer import analyze_investor_readiness
 
 
 def startup_only(func):
@@ -531,3 +532,106 @@ def financials_detail(req,record_id):
         return Response(status=204)
     
     return Response(StartupFinancialsSerializer(record).data)
+
+# Investor Intelligence
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def investor_list(req):
+    records = InvestorReadiness.objects.filter(user=req.user)
+    return Response(InvestorReadinessSerializer(records,many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def investor_submit(req):
+    serializer = InvestorReadinessSubmitSerializer(data=req.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({'error':'Idea Not Found.'},status=404)
+    
+    record = InvestorReadiness.objects.create(
+        user = req.user,
+        idea = idea,
+        funding_stage = d['funding_stage'],
+        amount_raising = d['amount_raising'],
+        team_description = d['team_description'],
+        traction_so_far = d['traction_so_far'],
+        company_stage = d['company_stage'],
+        completed_items = d.get('completed_items',[]),
+        status = 'analyzing'
+    )
+
+    try:
+        result = analyze_investor_readiness(
+            idea = idea,
+            funding_stage = d['funding_stage'],
+            amount_raising = d['amount_raising'],
+            team_description = d['team_description'],
+            traction_so_far = d['traction_so_far'],
+            company_stage = d['company_stage'],
+            completed_items = d.get('completed_items',[]),
+            user = req.user,
+        )
+
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.pitch_score = result['pitch_score']
+        record.pitch_verdict = result['pitch_verdict']
+        record.pitch_summary = result['pitch_summary']
+        record.pitch_slides = result['pitch_slides']
+        record.investor_questions = result['investor_questions']
+        record.storytelling_tips = result['storytelling_tips']
+        record.investor_list = result['investor_list']
+        record.outreach_template = result['outreach_template']
+        record.warm_intro_strategy = result['warm_intro_strategy']
+        record.investor_tips = result['investor_tips']
+        record.dd_score = result['dd_score']
+        record.dd_summary = result['dd_summary']
+        record.dd_checklist = result['dd_checklist']
+        record.dd_priority_items = result['dd_priority_items']
+        record.dd_red_flags = result['dd_red_flags']
+        record.dd_preparation_tips = result['dd_preparation_tips']
+        record.save()       
+
+    except Exception as e:
+        record.status = 'failed'
+        record.error_message = str(e)
+        record.save()
+        return Response({
+            'error':'Analysis Failed',
+            'detail':str(e), 
+        },status=500)
+    
+    return Response(
+        InvestorReadinessSerializer(record).data,
+        status=201
+    )
+        
+    
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def investor_detail(req,record_id):
+    try:
+        record = InvestorReadiness.objects.get(id=record_id,User=req.user)
+
+    except InvestorReadiness.DoesNotExist:
+        return Response({
+            'error':'Not Found.',
+        },status=404)
+    
+    if req.method == 'DELETE':
+        req.delete()
+        return Response(status=204)
+    
+    return Response(InvestorReadinessSerializer(record).data)
