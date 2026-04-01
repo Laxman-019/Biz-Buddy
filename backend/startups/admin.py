@@ -91,3 +91,24 @@ class StartupFinancialsAdmin(admin.ModelAdmin):
         'funding_milestones', 'funding_tips', 'use_of_funds_analysis',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
+    
+    
+
+
+@admin.register(InvestorReadiness)
+class InvestorReadinessAdmin(admin.ModelAdmin):
+    list_display = ['idea', 'user', 'funding_stage',
+                     'pitch_score', 'pitch_verdict',
+                     'dd_score', 'status', 'created_at']
+    list_filter = ['status', 'funding_stage', 'pitch_verdict']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status',
+        'pitch_score', 'pitch_verdict', 'pitch_summary',
+        'pitch_slides', 'investor_questions', 'storytelling_tips',
+        'investor_list', 'outreach_template',
+        'warm_intro_strategy', 'investor_tips',
+        'dd_score', 'dd_summary', 'dd_checklist',
+        'dd_priority_items', 'dd_red_flags', 'dd_preparation_tips',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
