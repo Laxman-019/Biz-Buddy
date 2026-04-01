@@ -39,15 +39,15 @@ class IdeaValidation(models.Model):
     # AI Report — Scores (0-100)
     score_market_demand= models.FloatField(null=True, blank=True)
     score_competition= models.FloatField(null=True, blank=True)
-    score_profit_potential  = models.FloatField(null=True, blank=True)
-    score_scalability       = models.FloatField(null=True, blank=True)
-    score_entry_barriers    = models.FloatField(null=True, blank=True)
-    score_founder_fit       = models.FloatField(null=True, blank=True)
-    score_timing_factor     = models.FloatField(null=True, blank=True)
+    score_profit_potential = models.FloatField(null=True, blank=True)
+    score_scalability = models.FloatField(null=True, blank=True)
+    score_entry_barriers = models.FloatField(null=True, blank=True)
+    score_founder_fit = models.FloatField(null=True, blank=True)
+    score_timing_factor = models.FloatField(null=True, blank=True)
     score_funding_readiness = models.FloatField(null=True, blank=True)
-    overall_score           = models.FloatField(null=True, blank=True)
+    overall_score = models.FloatField(null=True, blank=True)
 
-    # AI Report — Analysis Text
+    # AI Report 
     verdict = models.CharField(
         max_length=20, choices=VERDICT_CHOICES, null=True, blank=True
     )
@@ -465,3 +465,88 @@ class StartupFinancials(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — Financials: {self.idea.idea_title}"
+    
+
+class InvestorReadiness(models.Model):
+
+    FUNDING_STAGE_CHOICES = [
+        ('pre_seed', 'Pre-seed'),
+        ('seed', 'Seed'),
+        ('series_a', 'Series A'),
+    ]
+
+    COMPANY_STAGE_CHOICES = [
+        ('idea', 'Idea Stage'),
+        ('mvp', 'MVP Built'),
+        ('revenue', 'Early Revenue'),
+        ('growth', 'Growing Revenue'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='investor_readiness'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='investor_readiness'
+    )
+
+    funding_stage = models.CharField(
+        max_length=20, choices=FUNDING_STAGE_CHOICES
+    )
+    amount_raising = models.DecimalField(
+        max_digits=14, decimal_places=2
+    )
+    team_description = models.TextField(
+        help_text="Brief description of founding team and their backgrounds"
+    )
+    traction_so_far = models.TextField(
+        help_text="Any traction — users, revenue, partnerships, pilots"
+    )
+
+    company_stage = models.CharField(
+        max_length=20, choices=COMPANY_STAGE_CHOICES
+    )
+    completed_items = models.JSONField(
+        default=list, blank=True,
+        help_text="List of DD items already completed"
+    )
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+    pitch_score = models.FloatField(null=True, blank=True)
+    pitch_verdict = models.CharField(max_length=50, blank=True)
+    pitch_summary = models.TextField(blank=True)
+    pitch_slides  = models.JSONField(default=list, blank=True)
+    investor_questions = models.JSONField(default=list, blank=True)
+    storytelling_tips = models.JSONField(default=list, blank=True)
+    investor_list = models.JSONField(default=list, blank=True)
+    outreach_template = models.TextField(blank=True)
+    warm_intro_strategy = models.TextField(blank=True)
+    investor_tips = models.JSONField(default=list, blank=True)
+    dd_score = models.FloatField(null=True, blank=True)
+    dd_summary = models.TextField(blank=True)
+    dd_checklist  = models.JSONField(default=list, blank=True)
+    dd_priority_items = models.JSONField(default=list, blank=True)
+    dd_red_flags = models.JSONField(default=list, blank=True)
+    dd_preparation_tips = models.JSONField(default=list, blank=True)
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_investor_readiness'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — Investor: {self.idea.idea_title}"
