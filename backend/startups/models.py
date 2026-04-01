@@ -550,3 +550,114 @@ class InvestorReadiness(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — Investor: {self.idea.idea_title}"
+    
+class GoToMarket(models.Model):
+
+    PRICING_MODEL_CHOICES = [
+        ('subscription', 'Subscription'),
+        ('one_time', 'One-time Purchase'),
+        ('freemium', 'Freemium'),
+        ('usage_based', 'Usage-based'),
+        ('tiered', 'Tiered Pricing'),
+        ('not_decided', 'Not decided yet'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='go_to_market'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='go_to_market'
+    )
+
+    beachhead_market = models.TextField(
+        help_text="Specific segment to dominate first"
+    )
+    launch_weeks = models.IntegerField(
+        help_text="Weeks from now to launch"
+    )
+    launch_budget = models.DecimalField(
+        max_digits=12, decimal_places=2,
+        help_text="Total launch budget in ₹"
+    )
+
+    monthly_acq_budget   = models.DecimalField(
+        max_digits=12, decimal_places=2,
+        help_text="Monthly customer acquisition budget in ₹"
+    )
+    target_monthly_customers = models.IntegerField(
+        help_text="Target new customers per month"
+    )
+    preferred_channels = models.JSONField(
+        default=list,
+        help_text="List of preferred acquisition channels"
+    )
+
+    current_price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        help_text="Current or planned price per customer (₹)"
+    )
+    competitor_price_min  = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text="Lowest competitor price (₹)"
+    )
+    competitor_price_max  = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text="Highest competitor price (₹)"
+    )
+    pricing_model         = models.CharField(
+        max_length=20, choices=PRICING_MODEL_CHOICES
+    )
+
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+    launch_score = models.FloatField(null=True, blank=True)
+    launch_verdict = models.CharField(max_length=50, blank=True)
+    launch_summary = models.TextField(blank=True)
+    beachhead_analysis = models.TextField(blank=True)
+    launch_channels = models.JSONField(default=list, blank=True)
+    first_90_days = models.JSONField(default=list, blank=True)
+    pr_strategy = models.TextField(blank=True)
+    launch_risks = models.JSONField(default=list, blank=True)
+    launch_tips = models.JSONField(default=list, blank=True)
+    acq_summary = models.TextField(blank=True)
+    acq_score = models.FloatField(null=True, blank=True)
+    channel_strategies = models.JSONField(default=list, blank=True)
+    budget_allocation = models.JSONField(default=list, blank=True)
+    growth_hacks = models.JSONField(default=list, blank=True)
+    channel_priority = models.JSONField(default=list, blank=True)
+    projected_cac = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    pricing_score = models.FloatField(null=True, blank=True)
+    pricing_verdict = models.CharField(max_length=50, blank=True)
+    pricing_summary = models.TextField(blank=True)
+    recommended_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    pricing_rationale = models.TextField(blank=True)
+    package_tiers = models.JSONField(default=list, blank=True)
+    psychological_tips = models.JSONField(default=list, blank=True)
+    price_testing_plan = models.TextField(blank=True)
+    annual_strategy = models.TextField(blank=True)
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_go_to_market'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — GTM: {self.idea.idea_title}"

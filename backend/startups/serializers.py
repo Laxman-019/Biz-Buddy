@@ -302,3 +302,67 @@ class InvestorReadinessSubmitSerializer(serializers.Serializer):
         required=False,
         default=list
     )
+
+class GoToMarketSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = GoToMarket
+        fields = [
+            'id', 'idea', 'idea_title', 'status',
+            'beachhead_market', 'launch_weeks', 'launch_budget',
+            'monthly_acq_budget', 'target_monthly_customers',
+            'preferred_channels',
+            'current_price', 'competitor_price_min',
+            'competitor_price_max', 'pricing_model',
+            'launch_score', 'launch_verdict', 'launch_summary',
+            'beachhead_analysis', 'launch_channels',
+            'first_90_days', 'pr_strategy',
+            'launch_risks', 'launch_tips',
+            'acq_summary', 'acq_score', 'projected_cac',
+            'channel_priority', 'channel_strategies',
+            'budget_allocation', 'growth_hacks',
+            'pricing_score', 'pricing_verdict', 'pricing_summary',
+            'recommended_price', 'pricing_rationale',
+            'package_tiers', 'psychological_tips',
+            'price_testing_plan', 'annual_strategy',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'launch_score', 'launch_verdict', 'launch_summary',
+            'beachhead_analysis', 'launch_channels',
+            'first_90_days', 'pr_strategy',
+            'launch_risks', 'launch_tips',
+            'acq_summary', 'acq_score', 'projected_cac',
+            'channel_priority', 'channel_strategies',
+            'budget_allocation', 'growth_hacks',
+            'pricing_score', 'pricing_verdict', 'pricing_summary',
+            'recommended_price', 'pricing_rationale',
+            'package_tiers', 'psychological_tips',
+            'price_testing_plan', 'annual_strategy',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class GTMSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    beachhead_market = serializers.CharField()
+    launch_weeks = serializers.IntegerField(min_value=1)
+    launch_budget = serializers.DecimalField(max_digits=12, decimal_places=2)
+    monthly_acq_budget = serializers.DecimalField(max_digits=12, decimal_places=2)
+    target_monthly_customers = serializers.IntegerField(min_value=1)
+    preferred_channels = serializers.ListField(
+        child=serializers.CharField(), required=False, default=list
+    )
+    current_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    competitor_price_min = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, default=0
+    )
+    competitor_price_max = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, default=0
+    )
+    pricing_model = serializers.ChoiceField(choices=[
+        'subscription', 'one_time', 'freemium',
+        'usage_based', 'tiered', 'not_decided',
+    ])
