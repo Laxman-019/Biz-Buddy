@@ -97,9 +97,7 @@ class StartupFinancialsAdmin(admin.ModelAdmin):
 
 @admin.register(InvestorReadiness)
 class InvestorReadinessAdmin(admin.ModelAdmin):
-    list_display = ['idea', 'user', 'funding_stage',
-                     'pitch_score', 'pitch_verdict',
-                     'dd_score', 'status', 'created_at']
+    list_display = ['idea', 'user', 'funding_stage',                     'pitch_score', 'pitch_verdict', 'dd_score', 'status', 'created_at']
     list_filter = ['status', 'funding_stage', 'pitch_verdict']
     search_fields = ['idea__idea_title', 'user__email']
     readonly_fields = [
@@ -133,5 +131,25 @@ class GoToMarketAdmin(admin.ModelAdmin):
         'recommended_price', 'pricing_rationale',
         'package_tiers', 'psychological_tips',
         'price_testing_plan', 'annual_strategy',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
+
+
+
+@admin.register(StartupKPIs)
+class StartupKPIsAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'north_star_metric',                     'retention_score', 'k_factor', 'status', 'created_at']
+    list_filter   = ['status', 'retention_verdict', 'viral_verdict']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status', 'north_star_metric', 'north_star_why',
+        'north_star_how_to_measure', 'supporting_metrics',
+        'kpi_benchmarks', 'warning_signs', 'tracking_recommendations',
+        'retention_score', 'retention_verdict', 'retention_summary',
+        'pmf_assessment', 'benchmark_comparison',
+        'churn_reasons', 'retention_strategies', 'retention_quick_wins',
+        'k_factor', 'viral_verdict', 'viral_summary',
+        'viral_loop_design', 'k_factor_improvements',
+        'growth_projections', 'viral_examples',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
