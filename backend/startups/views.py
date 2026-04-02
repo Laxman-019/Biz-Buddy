@@ -667,7 +667,7 @@ def gtm_submit(req):
         user = req.user,
         idea = idea,
         beachhead_market = d['beachhead_market'],
-        launch_week = d['launch_week'],
+        launch_weeks = d['launch_weeks'],
         launch_budget = d['launch_budget'],
         monthly_acq_budget = d['monthly_acq_budget'],
         target_monthly_customers = d['target_monthly_customers'],
@@ -683,7 +683,7 @@ def gtm_submit(req):
         result = analyze_gtm(
             idea = idea,
             beachhead_market = d['beachhead_market'],
-            launch_week = d['launch_week'],
+            launch_weeks = d['launch_weeks'],
             launch_budget = d['launch_budget'],
             monthly_acq_budget = d['monthly_acq_budget'],
             target_monthly_customers = d['target_monthly_customers'],

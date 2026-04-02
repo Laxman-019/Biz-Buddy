@@ -10,18 +10,19 @@ import BusinessModel from './BusinessModel'
 import MVPPlanner from './MVPPlanner'
 import StartupFinancials from './StartupFinancials'
 import InvestorReadiness from './InvestorReadiness'
+import GoToMarket from './GoToMarket'
 
 const FEATURES = [
-  { id: 'idea-validation', label: 'Idea Validation',   icon: <FaLightbulb />, active: true  },
-  { id: 'market-intel',    label: 'Market Intelligence',icon: <FaChartLine />, active: true },
-  { id: 'business-model',  label: 'Business Model',    icon: <FaCubes />,     active: true },
-  { id: 'mvp-planner',     label: 'MVP Planning',      icon: <FaRocket />,    active: true },
-  { id: 'financials',      label: 'Financials',        icon: <FaChartPie />,  active: true },
-  { id: 'investor',        label: 'Investor Readiness',icon: <FaHandshake />, active: true },
-  { id: 'go-to-market',    label: 'Go-To-Market',      icon: <FaBullhorn />,  active: false },
-  { id: 'kpis',            label: 'Startup KPIs',      icon: <FaBolt />,      active: false },
-  { id: 'team',            label: 'Team & Culture',    icon: <FaUsers />,     active: false },
-  { id: 'risks',           label: 'Startup Risks',     icon: <FaShieldAlt />,    active: false },
+  { id: 'idea-validation', label: 'Idea Validation', icon: <FaLightbulb />, active: true  },
+  { id: 'market-intel', label: 'Market Intelligence',icon: <FaChartLine />, active: true },
+  { id: 'business-model', label: 'Business Model', icon: <FaCubes />, active: true },
+  { id: 'mvp-planner', label: 'MVP Planning', icon: <FaRocket />, active: true },
+  { id: 'financials', label: 'Financials', icon: <FaChartPie />,  active: true },
+  { id: 'investor', label: 'Investor Readiness',icon: <FaHandshake />, active: true },
+  { id: 'go-to-market', label: 'Go-To-Market', icon: <FaBullhorn />,  active: true },
+  { id: 'kpis', label: 'Startup KPIs', icon: <FaBolt />, active: false },
+  { id: 'team', label: 'Team & Culture', icon: <FaUsers />, active: false },
+  { id: 'risks', label: 'Startup Risks', icon: <FaShieldAlt />, active: false },
 ]
 
 const StartupDashboard = () => {
@@ -47,6 +48,7 @@ const StartupDashboard = () => {
       case 'mvp-planner': return <MVPPlanner />
       case 'financials': return <StartupFinancials />
       case 'investor': return <InvestorReadiness />
+      case 'go-to-market': return <GoToMarket />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
