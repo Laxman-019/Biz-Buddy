@@ -366,3 +366,66 @@ class GTMSubmitSerializer(serializers.Serializer):
         'subscription', 'one_time', 'freemium',
         'usage_based', 'tiered', 'not_decided',
     ])
+    
+
+
+
+class StartupKPIsSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = StartupKPIs
+        fields = [
+            'id', 'idea', 'idea_title', 'status',
+            # Inputs
+            'business_model_type', 'primary_goal', 'currently_tracking',
+            'week1_retention', 'month1_retention', 'month3_retention',
+            'avg_invites_per_user', 'invite_conversion_rate',
+            'monthly_active_users',
+            # North Star
+            'north_star_metric', 'north_star_why',
+            'north_star_how_to_measure', 'supporting_metrics',
+            'kpi_benchmarks', 'warning_signs', 'tracking_recommendations',
+            # Retention
+            'retention_score', 'retention_verdict', 'retention_summary',
+            'pmf_assessment', 'benchmark_comparison',
+            'churn_reasons', 'retention_strategies', 'retention_quick_wins',
+            # Viral
+            'k_factor', 'viral_verdict', 'viral_summary',
+            'viral_loop_design', 'k_factor_improvements',
+            'growth_projections', 'viral_examples',
+            # Meta
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'north_star_metric', 'north_star_why',
+            'north_star_how_to_measure', 'supporting_metrics',
+            'kpi_benchmarks', 'warning_signs', 'tracking_recommendations',
+            'retention_score', 'retention_verdict', 'retention_summary',
+            'pmf_assessment', 'benchmark_comparison',
+            'churn_reasons', 'retention_strategies', 'retention_quick_wins',
+            'k_factor', 'viral_verdict', 'viral_summary',
+            'viral_loop_design', 'k_factor_improvements',
+            'growth_projections', 'viral_examples',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class KPIsSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    business_model_type = serializers.ChoiceField(choices=[
+        'saas', 'marketplace', 'consumer', 'ecommerce', 'service'
+    ])
+    primary_goal = serializers.ChoiceField(choices=[
+        'growth', 'retention', 'revenue', 'engagement'
+    ])
+    currently_tracking = serializers.CharField(
+        required=False, allow_blank=True
+    )
+    week1_retention = serializers.FloatField(default=0)
+    month1_retention = serializers.FloatField(default=0)
+    month3_retention = serializers.FloatField(default=0)
+    avg_invites_per_user = serializers.FloatField(default=0)
+    invite_conversion_rate = serializers.FloatField(default=0)
+    monthly_active_users = serializers.IntegerField(default=0)
