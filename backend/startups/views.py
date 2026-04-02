@@ -9,6 +9,7 @@ from startups.business_analyzer import analyze_business_model
 from startups.mvp_analyzer import analyze_mvp
 from startups.financials_analyzer import analyze_financials
 from startups.investor_analyzer import analyze_investor_readiness
+from startups.gtm_analyzer import analyze_gtm
 
 
 def startup_only(func):
@@ -623,7 +624,7 @@ def investor_submit(req):
 @startup_only
 def investor_detail(req,record_id):
     try:
-        record = InvestorReadiness.objects.get(id=record_id,User=req.user)
+        record = InvestorReadiness.objects.get(id=record_id, user=req.user)
 
     except InvestorReadiness.DoesNotExist:
         return Response({
@@ -635,3 +636,122 @@ def investor_detail(req,record_id):
         return Response(status=204)
     
     return Response(InvestorReadinessSerializer(record).data)
+
+
+
+# GO-TO Market
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def gtm_list(req):
+    records = GoToMarket.objects.filter(user=req.user)
+    return Response(GoToMarketSerializer(records, many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def gtm_submit(req):
+    serializer = GTMSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status= 400)
+    d = serializer.validated_data
+    
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'], user=req.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({'error': 'Idea not found.'},status=404)
+
+    record = GoToMarket.objects.create(
+        user = req.user,
+        idea = idea,
+        beachhead_market = d['beachhead_market'],
+        launch_week = d['launch_week'],
+        launch_budget = d['launch_budget'],
+        monthly_acq_budget = d['monthly_acq_budget'],
+        target_monthly_customers = d['target_monthly_customers'],
+        preferred_channels = d.get('preferred_channels', []),
+        current_price = d['current_price'],
+        competitor_price_min = d.get('competitor_price_min', 0),
+        competitor_price_max = d.get('competitor_price_max', 0),
+        pricing_model = d['pricing_model'],
+        status = 'analyzing'
+    )
+    
+    try:
+        result = analyze_gtm(
+            idea = idea,
+            beachhead_market = d['beachhead_market'],
+            launch_week = d['launch_week'],
+            launch_budget = d['launch_budget'],
+            monthly_acq_budget = d['monthly_acq_budget'],
+            target_monthly_customers = d['target_monthly_customers'],
+            preferred_channels = d.get('preferred_channels', []),
+            current_price = d['current_price'],
+            competitor_price_min = d.get('competitor_price_min', 0),
+            competitor_price_max = d.get('competitor_price_max', 0),
+            pricing_model = d['pricing_model'],
+            user = req.user,
+        )
+        
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.launch_score = result['launch_score']
+        record.launch_verdict = result['launch_verdict']
+        record.launch_summary = result['launch_summary']
+        record.beachhead_analysis = result['beachhead_analysis']
+        record.launch_channels = result['launch_channels']
+        record.first_90_days = result['first_90_days']
+        record.pr_strategy = result['pr_strategy']
+        record.launch_risks = result['launch_risks']
+        record.launch_tips = result['launch_tips']
+        record.acq_score = result['acq_score']
+        record.acq_summary = result['acq_summary']
+        record.projected_cac = result['projected_cac']
+        record.channel_priority = result['channel_priority']
+        record.channel_strategies = result['channel_strategies']
+        record.budget_allocation = result['budget_allocation']
+        record.growth_hacks = result['growth_hacks']
+        record.pricing_score = result['pricing_score']
+        record.pricing_verdict = result['pricing_verdict']
+        record.pricing_summary = result['pricing_summary']
+        record.recommended_price = result['recommended_price']
+        record.pricing_rationale = result['pricing_rationale']
+        record.package_tiers = result['package_tiers']
+        record.psychological_tips = result['psychological_tips']
+        record.price_testing_plan = result['price_testing_plan']
+        record.annual_strategy = result['annual_strategy']
+        record.save()
+    except Exception as e:
+        record.status = 'Failed'
+        record.error_message = str(e)
+        record.save()
+        return Response(
+            {
+                'error': 'Analysis failed.',
+                'detail': str(e)
+            }, 
+            status = 500
+        )
+        
+    return Response(GoToMarketSerializer(record).data, status= 201)
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def gtm_detail(req, record_id):
+    try:
+        record = GoToMarket.objects.get(id = record_id, user = req.user)
+    except GoToMarket.DoesNotExist:
+        return Response(
+            {
+                'error': 'Not Found.'
+            }, status = 404
+        ) 
+    
+    if req.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+
+    return Response(GoToMarketSerializer(record).data)

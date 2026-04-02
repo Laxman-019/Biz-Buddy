@@ -21,4 +21,7 @@ urlpatterns = [
     path('investor/', investor_list),
     path('investor/submit/', investor_submit),
     path('investor/<int:record_id>/', investor_detail),
+    path('gtm/', gtm_list),
+    path('gtm/submit/', gtm_submit),
+    path('gtm/<int:record_id>/', gtm_detail),
 ]
