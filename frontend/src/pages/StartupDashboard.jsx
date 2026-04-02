@@ -11,6 +11,7 @@ import MVPPlanner from './MVPPlanner'
 import StartupFinancials from './StartupFinancials'
 import InvestorReadiness from './InvestorReadiness'
 import GoToMarket from './GoToMarket'
+import StartupKPIs from './StartupKPIs'
 
 const FEATURES = [
   { id: 'idea-validation', label: 'Idea Validation', icon: <FaLightbulb />, active: true  },
@@ -20,7 +21,7 @@ const FEATURES = [
   { id: 'financials', label: 'Financials', icon: <FaChartPie />,  active: true },
   { id: 'investor', label: 'Investor Readiness',icon: <FaHandshake />, active: true },
   { id: 'go-to-market', label: 'Go-To-Market', icon: <FaBullhorn />,  active: true },
-  { id: 'kpis', label: 'Startup KPIs', icon: <FaBolt />, active: false },
+  { id: 'kpis', label: 'Startup KPIs', icon: <FaBolt />, active: true },
   { id: 'team', label: 'Team & Culture', icon: <FaUsers />, active: false },
   { id: 'risks', label: 'Startup Risks', icon: <FaShieldAlt />, active: false },
 ]
@@ -49,6 +50,7 @@ const StartupDashboard = () => {
       case 'financials': return <StartupFinancials />
       case 'investor': return <InvestorReadiness />
       case 'go-to-market': return <GoToMarket />
+      case 'kpis' : return <StartupKPIs />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
