@@ -10,6 +10,7 @@ from startups.mvp_analyzer import analyze_mvp
 from startups.financials_analyzer import analyze_financials
 from startups.investor_analyzer import analyze_investor_readiness
 from startups.gtm_analyzer import analyze_gtm
+from startups.kpi_analyzer import analyze_kpis
 
 
 def startup_only(func):
@@ -755,3 +756,114 @@ def gtm_detail(req, record_id):
         return Response(status=204)
 
     return Response(GoToMarketSerializer(record).data)
+
+
+# Startup KPI Intelligence
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def kpis_list(req):
+    records = StartupKPIs.objects.filter(user=req.user)
+    return Response(StartupKPIsSerializer(records,many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def kpis_submit(req):
+    serializer = KPIsSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({
+            'error':'Idea Not Found',
+        },status=404)
+    
+    record = StartupKPIs.objects.create(
+        user=req.user,
+        idea = idea,
+        business_model_type = d['business_model_type'],
+        primary_goal = d['primary_goal'],
+        currently_tracking = d.get('currently_tracking',""),
+        week1_retention = d.get('week_1_retention',0),
+        month1_retention = d.get('month1_retention',0),
+        month3_retention = d.get('month3_retention',0),
+        avg_invites_per_user = d.get('avg_invites_per_user',0),
+        invite_conversion_rate = d.get('invite_conversion_rate',0),
+        monthly_active_users = d.get('monthly_active_users',0),
+        status = 'analyzing'
+    )
+    try:
+        result = analyze_kpis(
+            idea = idea,
+            business_model_type = d['business_model_type'],
+            primary_goal = d['primary_goal'],
+            currently_tracking = d.get('currently_tracking',""),
+            week1_retention = d.get('week_1_retention',0),
+            month1_retention = d.get('month1_retention',0),
+            month3_retention = d.get('month3_retention',0),
+            avg_invites_per_user = d.get('avg_invites_per_user',0),
+            invite_conversion_rate = d.get('invite_conversion_rate',0),
+            monthly_active_users = d.get('monthly_active_users',0),
+            user = req.user
+        )
+
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.north_star_metric = result['north_star_metric']
+        record.north_star_why = result['north_star_why']
+        record.north_star_how_to_measure = result['north_star_how_to_measure']
+        record.supporting_metrics = result['supporting_metrics']
+        record.kpi_benchmarks = result['kpi_benchmarks']
+        record.warning_signs = result['warning_signs']
+        record.tracking_recommendations = result['tracking_recommendations']
+        record.retention_score = result['retention_score']
+        record.retention_verdict = result['retention_verdict']
+        record.retention_summary = result['retention_summary']
+        record.pmf_assessment = result['pmf_assessment']
+        record.benchmark_comparison = result['benchmark_comparison']
+        record.churn_reasons = result['churn_reasons']
+        record.retention_strategies = result['retention_strategies']
+        record.retention_quick_wins = result['retention_quick_wins']
+        record.k_factor = result['k_factor']
+        record.viral_verdict = result['viral_verdict']
+        record.viral_summary = result['viral_summary']
+        record.viral_loop_design = result['viral_loop_design']
+        record.k_factor_improvements = result['k_factor_improvements']
+        record.growth_projections = result['growth_projections']
+        record.viral_examples = result['viral_examples']
+        record.save()
+    except Exception as e:
+        record.status = 'failed'
+        record.error_message = str(e)
+        record.save()
+        return Response({
+            'error':'Analysis failed',
+            'detail':str(e)
+        },status=500)
+    
+    return Response(StartupKPIsSerializer(record).data,status=201)
+
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def kpis_detail(req, record_id):
+    try:
+        record = StartupKPIs.objects.get(id = record_id, user = req.user)
+    except StartupKPIs.DoesNotExist:
+        return Response(
+            {
+                'error': 'Not Found.'
+            }, status = 404
+        ) 
+    
+    if req.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+
+    return Response(StartupKPIsSerializer(record).data)
