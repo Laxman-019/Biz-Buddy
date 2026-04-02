@@ -24,4 +24,7 @@ urlpatterns = [
     path('gtm/', gtm_list),
     path('gtm/submit/', gtm_submit),
     path('gtm/<int:record_id>/', gtm_detail),
+    path('kpis/', kpis_list),
+    path('kpis/submit/', kpis_submit),
+    path('kpis/<int:record_id>/', kpis_detail),
 ]
