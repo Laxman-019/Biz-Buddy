@@ -661,3 +661,109 @@ class GoToMarket(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — GTM: {self.idea.idea_title}"
+    
+    
+class StartupKPIs(models.Model):
+
+    BUSINESS_MODEL_TYPE_CHOICES = [
+        ('saas', 'SaaS / Software'),
+        ('marketplace', 'Marketplace'),
+        ('consumer', 'Consumer App'),
+        ('ecommerce', 'E-commerce'),
+        ('service', 'Service-based'),
+    ]
+
+    PRIMARY_GOAL_CHOICES = [
+        ('growth', 'Growth — acquire more users'),
+        ('retention', 'Retention — keep existing users'),
+        ('revenue', 'Revenue — maximize monetization'),
+        ('engagement', 'Engagement — increase usage'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='startup_kpis'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='startup_kpis'
+    )
+
+    business_model_type = models.CharField(
+        max_length=20, choices=BUSINESS_MODEL_TYPE_CHOICES
+    )
+    primary_goal = models.CharField(
+        max_length=20, choices=PRIMARY_GOAL_CHOICES
+    )
+    currently_tracking = models.TextField(
+        blank=True,
+        help_text="Metrics the founder is currently tracking"
+    )
+
+    week1_retention = models.FloatField(
+        default=0, help_text="% of users still active after week 1"
+    )
+    month1_retention = models.FloatField(
+        default=0, help_text="% of users still active after month 1"
+    )
+    month3_retention = models.FloatField(
+        default=0, help_text="% of users still active after month 3"
+    )
+
+    avg_invites_per_user   = models.FloatField(
+        default=0, help_text="Average invites sent per user"
+    )
+    invite_conversion_rate = models.FloatField(
+        default=0, help_text="% of invites that convert to signups"
+    )
+    monthly_active_users = models.IntegerField(
+        default=0, help_text="Current monthly active users"
+    )
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+    north_star_metric = models.CharField(max_length=200, blank=True)
+    north_star_why = models.TextField(blank=True)
+    north_star_how_to_measure = models.TextField(blank=True)
+    supporting_metrics = models.JSONField(default=list, blank=True)
+    kpi_benchmarks = models.JSONField(default=list, blank=True)
+    warning_signs = models.JSONField(default=list, blank=True)
+    tracking_recommendations = models.JSONField(default=list, blank=True)
+
+    retention_score = models.FloatField(null=True, blank=True)
+    retention_verdict = models.CharField(max_length=50, blank=True)
+    retention_summary = models.TextField(blank=True)
+    pmf_assessment = models.TextField(blank=True)
+    benchmark_comparison = models.JSONField(default=list, blank=True)
+    churn_reasons = models.JSONField(default=list, blank=True)
+    retention_strategies = models.JSONField(default=list, blank=True)
+    retention_quick_wins = models.JSONField(default=list, blank=True)
+
+    k_factor = models.FloatField(null=True, blank=True)
+    viral_verdict = models.CharField(max_length=50, blank=True)
+    viral_summary = models.TextField(blank=True)
+    viral_loop_design = models.TextField(blank=True)
+    k_factor_improvements = models.JSONField(default=list, blank=True)
+    growth_projections = models.JSONField(default=list, blank=True)
+    viral_examples = models.JSONField(default=list, blank=True)
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_kpis'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — KPIs: {self.idea.idea_title}"
