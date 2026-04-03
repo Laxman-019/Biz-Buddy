@@ -27,4 +27,7 @@ urlpatterns = [
     path('kpis/', kpis_list),
     path('kpis/submit/', kpis_submit),
     path('kpis/<int:record_id>/', kpis_detail),
+    path('team/', team_list),
+    path('team/submit/', team_submit),
+    path('team/<int:record_id>/', team_detail),
 ]
