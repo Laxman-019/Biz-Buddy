@@ -767,3 +767,108 @@ class StartupKPIs(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — KPIs: {self.idea.idea_title}"
+    
+    
+
+class TeamCulture(models.Model):
+
+    WORK_MODE_CHOICES = [
+        ('remote', 'Fully Remote'),
+        ('office', 'In-Office'),
+        ('hybrid', 'Hybrid'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='team_culture'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='team_culture'
+    )
+
+
+    founders = models.JSONField(
+        default=list,
+        help_text="List of founders with name, role, background, equity_pct"
+    )
+    is_solo_founder = models.BooleanField(default=False)
+
+
+    current_team_size = models.IntegerField(default=1)
+    hiring_budget_12m = models.DecimalField(
+        max_digits=14, decimal_places=2, default=0,
+        help_text="12-month hiring budget in ₹"
+    )
+    priority_roles = models.TextField(
+        blank=True,
+        help_text="Roles the founder wants to hire first"
+    )
+    work_mode = models.CharField(
+        max_length=10, choices=WORK_MODE_CHOICES, default='hybrid'
+    )
+
+
+    current_advisors = models.TextField(
+        blank=True,
+        help_text="Existing advisors if any"
+    )
+    expertise_gaps = models.TextField(
+        blank=True,
+        help_text="Key areas where team lacks expertise"
+    )
+
+
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+
+    team_score = models.FloatField(null=True, blank=True)
+    team_verdict = models.CharField(max_length=50, blank=True)
+    team_summary = models.TextField(blank=True)
+    skills_gap_analysis = models.JSONField(default=list, blank=True)
+    equity_assessment = models.TextField(blank=True)
+    vesting_recommendation= models.TextField(blank=True)
+    conflict_risks = models.JSONField(default=list, blank=True)
+    team_recommendations = models.JSONField(default=list, blank=True)
+    founder_agreements = models.JSONField(default=list, blank=True)
+
+    
+    hiring_score = models.FloatField(null=True, blank=True)
+    hiring_summary = models.TextField(blank=True)
+    hiring_roadmap = models.JSONField(default=list, blank=True)
+    recruitment_channels  = models.JSONField(default=list, blank=True)
+    culture_values = models.JSONField(default=list, blank=True)
+    first_10_guide = models.JSONField(default=list, blank=True)
+    compensation_benchmarks = models.JSONField(default=list, blank=True)
+    hiring_mistakes = models.JSONField(default=list, blank=True)
+
+    
+    advisory_score = models.FloatField(null=True, blank=True)
+    advisory_summary = models.TextField(blank=True)
+    ideal_advisors = models.JSONField(default=list, blank=True)
+    advisor_equity_guide = models.TextField(blank=True)
+    where_to_find = models.JSONField(default=list, blank=True)
+    outreach_approach = models.TextField(blank=True)
+    meeting_cadence = models.TextField(blank=True)
+    advisor_red_flags = models.JSONField(default=list, blank=True)
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_team_culture'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — Team: {self.idea.idea_title}"

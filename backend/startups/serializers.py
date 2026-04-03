@@ -429,3 +429,70 @@ class KPIsSubmitSerializer(serializers.Serializer):
     avg_invites_per_user = serializers.FloatField(default=0)
     invite_conversion_rate = serializers.FloatField(default=0)
     monthly_active_users = serializers.IntegerField(default=0)
+    
+    
+
+
+class TeamCultureSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = TeamCulture
+        fields = [
+            'id', 'idea', 'idea_title', 'status',
+            'founders', 'is_solo_founder',
+            'current_team_size', 'hiring_budget_12m',
+            'priority_roles', 'work_mode',
+            'current_advisors', 'expertise_gaps',
+            'team_score', 'team_verdict', 'team_summary',
+            'skills_gap_analysis', 'equity_assessment',
+            'vesting_recommendation', 'conflict_risks',
+            'team_recommendations', 'founder_agreements',
+            'hiring_score', 'hiring_summary', 'hiring_roadmap',
+            'recruitment_channels', 'culture_values',
+            'first_10_guide', 'compensation_benchmarks',
+            'hiring_mistakes',
+            'advisory_score', 'advisory_summary', 'ideal_advisors',
+            'advisor_equity_guide', 'where_to_find',
+            'outreach_approach', 'meeting_cadence', 'advisor_red_flags',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'team_score', 'team_verdict', 'team_summary',
+            'skills_gap_analysis', 'equity_assessment',
+            'vesting_recommendation', 'conflict_risks',
+            'team_recommendations', 'founder_agreements',
+            'hiring_score', 'hiring_summary', 'hiring_roadmap',
+            'recruitment_channels', 'culture_values',
+            'first_10_guide', 'compensation_benchmarks',
+            'hiring_mistakes',
+            'advisory_score', 'advisory_summary', 'ideal_advisors',
+            'advisor_equity_guide', 'where_to_find',
+            'outreach_approach', 'meeting_cadence', 'advisor_red_flags',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class TeamCultureSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    founders = serializers.ListField(
+        child=serializers.DictField(), default=list
+    )
+    is_solo_founder = serializers.BooleanField(default=False)
+    current_team_size = serializers.IntegerField(default=1)
+    hiring_budget_12m = serializers.DecimalField(
+        max_digits=14, decimal_places=2
+    )
+    priority_roles = serializers.CharField(
+        required=False, allow_blank=True
+    )
+    work_mode = serializers.ChoiceField(
+        choices=['remote', 'office', 'hybrid']
+    )
+    current_advisors = serializers.CharField(
+        required=False, allow_blank=True
+    )
+    expertise_gaps = serializers.CharField(
+        required=False, allow_blank=True
+    )
