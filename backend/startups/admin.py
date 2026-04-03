@@ -138,7 +138,7 @@ class GoToMarketAdmin(admin.ModelAdmin):
 
 @admin.register(StartupKPIs)
 class StartupKPIsAdmin(admin.ModelAdmin):
-    list_display  = ['idea', 'user', 'north_star_metric',                     'retention_score', 'k_factor', 'status', 'created_at']
+    list_display  = ['idea', 'user', 'north_star_metric', 'retention_score', 'k_factor', 'status', 'created_at']
     list_filter   = ['status', 'retention_verdict', 'viral_verdict']
     search_fields = ['idea__idea_title', 'user__email']
     readonly_fields = [
@@ -151,5 +151,27 @@ class StartupKPIsAdmin(admin.ModelAdmin):
         'k_factor', 'viral_verdict', 'viral_summary',
         'viral_loop_design', 'k_factor_improvements',
         'growth_projections', 'viral_examples',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
+
+
+@admin.register(TeamCulture)
+class TeamCultureAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'team_score', 'team_verdict',
+                     'hiring_score', 'advisory_score', 'status', 'created_at']
+    list_filter   = ['status', 'team_verdict', 'work_mode']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status',
+        'team_score', 'team_verdict', 'team_summary',
+        'skills_gap_analysis', 'equity_assessment',
+        'vesting_recommendation', 'conflict_risks',
+        'team_recommendations', 'founder_agreements',
+        'hiring_score', 'hiring_summary', 'hiring_roadmap',
+        'recruitment_channels', 'culture_values',
+        'first_10_guide', 'compensation_benchmarks', 'hiring_mistakes',
+        'advisory_score', 'advisory_summary', 'ideal_advisors',
+        'advisor_equity_guide', 'where_to_find',
+        'outreach_approach', 'meeting_cadence', 'advisor_red_flags',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
