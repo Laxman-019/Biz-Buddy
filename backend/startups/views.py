@@ -11,6 +11,7 @@ from startups.financials_analyzer import analyze_financials
 from startups.investor_analyzer import analyze_investor_readiness
 from startups.gtm_analyzer import analyze_gtm
 from startups.kpi_analyzer import analyze_kpis
+from startups.team_analyzer import analyze_team
 
 
 def startup_only(func):
@@ -867,3 +868,115 @@ def kpis_detail(req, record_id):
         return Response(status=204)
 
     return Response(StartupKPIsSerializer(record).data)
+
+
+#Team culture intelligence
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def team_list(req):
+    records = TeamCulture.objects.filter(user=req.user)
+    return Response(TeamCultureSerializer(records,many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def team_submit(req):
+    serializer = TeamCultureSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({
+            'error':'Idea Not Found',
+        },status=404)
+    
+    record = TeamCulture.objects.create(
+        user = req.user,
+        idea = idea,
+        founders = d.get('founders',[]),
+        is_solo_founder = d.get('is_solo_founder',False),
+        current_team_size = d.get('current_team_size',1),
+        hiring_budget_12m = d['hiring_budget_12m'],
+        priority_roles = d.get('priority_roles',''),
+        work_mode = d['work_mode'],
+        current_advisors = d.get('current_advisors',''),
+        expertise_gaps = d.get('expertise_gaps',''),
+        status = 'analyzing'
+    )
+    try:
+        result = analyze_team(
+            idea = idea,
+            founders = d.get('founders',[]),
+            is_solo_founder = d.get('is_solo_founder',False),
+            current_team_size = d.get('current_team_size',1),
+            hiring_budget_12m = d['hiring_budget_12m'],
+            priority_roles = d.get('priority_roles',''),
+            work_mode = d['work_mode'],
+            current_advisors = d.get('current_advisors',''),
+            expertise_gaps = d.get('expertise_gaps',''),
+            user = req.user
+        )
+    
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.team_score = result['team_score']
+        record.team_verdict = result['team_verdict']
+        record.team_summary = result['team_summary']
+        record.skills_gap_analysis = result['skills_gap_analysis']
+        record.equity_assessment = result['equity_assessment']
+        record.vesting_recommendation = result['vesting_recommendation']
+        record.conflict_risks = result['conflict_risks']
+        record.team_recommendations = result['team_recommendations']
+        record.founder_agreements = result['founder_agreements']
+        record.hiring_score = result['hiring_score']
+        record.hiring_summary = result['hiring_summary']
+        record.hiring_roadmap = result['hiring_roadmap']
+        record.recruitment_channels = result['recruitment_channels']
+        record.culture_values = result['culture_values']
+        record.first_10_guide = result['first_10_guide']
+        record.compensation_benchmarks = result['compensation_benchmarks']
+        record.hiring_mistakes = result['hiring_mistakes']
+        record.advisory_score = result['advisory_score']
+        record.ideal_advisors = result['ideal_advisors']
+        record.advisor_equity_guide = result['advisor_equity_guide']
+        record.where_to_find = result['where_to_find']
+        record.outreach_approach = result['outreach_approach']
+        record.meeting_cadence = result['meeting_cadence']
+        record.advisor_red_flags = result['advisor_red_flags']
+        record.save()
+
+    except Exception as e:
+        record.status = 'failed'
+        record.error_message = str(e)
+        record.save()
+        return Response({
+            'error':'Analysis Failed.',
+            'detail':str(e)
+        },status=500)
+    
+    return Response(TeamCultureSerializer(record).data,status=201)
+
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def team_detail(req, record_id):
+    try:
+        record = TeamCulture.objects.get(id = record_id, user = req.user)
+    except TeamCulture.DoesNotExist:
+        return Response(
+            {
+                'error': 'Not Found.'
+            }, status = 404
+        ) 
+    
+    if req.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+
+    return Response(TeamCultureSerializer(record).data)
