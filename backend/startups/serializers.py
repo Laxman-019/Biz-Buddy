@@ -496,3 +496,49 @@ class TeamCultureSubmitSerializer(serializers.Serializer):
     expertise_gaps = serializers.CharField(
         required=False, allow_blank=True
     )
+    
+    
+
+
+class StartupRisksSerializer(serializers.ModelSerializer):
+    idea_title = serializers.CharField(source='idea.idea_title', read_only=True)
+
+    class Meta:
+        model  = StartupRisks
+        fields = [
+            'id', 'idea', 'idea_title', 'status',
+            'business_type', 'handles_customer_data',
+            'handles_payments', 'regulated_space',
+            'regulation_details', 'biggest_worry',
+            'overall_risk_score', 'overall_risk_level', 'risk_summary',
+            'risk_register',
+            'legal_summary', 'legal_checklist', 'immediate_legal_actions',
+            'mitigation_summary', 'mitigation_actions',
+            'risk_monitoring_plan', 'insurance_recommendations',
+            'error_message', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'status',
+            'overall_risk_score', 'overall_risk_level', 'risk_summary',
+            'risk_register',
+            'legal_summary', 'legal_checklist', 'immediate_legal_actions',
+            'mitigation_summary', 'mitigation_actions',
+            'risk_monitoring_plan', 'insurance_recommendations',
+            'error_message', 'created_at', 'updated_at',
+        ]
+
+
+class RisksSubmitSerializer(serializers.Serializer):
+    idea_id = serializers.IntegerField()
+    business_type = serializers.ChoiceField(choices=[
+        'b2b_saas', 'b2c_app', 'marketplace', 'service', 'physical'
+    ])
+    handles_customer_data = serializers.BooleanField(default=False)
+    handles_payments = serializers.BooleanField(default=False)
+    regulated_space = serializers.BooleanField(default=False)
+    regulation_details = serializers.CharField(
+        required=False, allow_blank=True
+    )
+    biggest_worry = serializers.CharField(
+        required=False, allow_blank=True
+    )

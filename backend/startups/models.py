@@ -872,3 +872,83 @@ class TeamCulture(models.Model):
 
     def __str__(self):
         return f"{self.user.email} — Team: {self.idea.idea_title}"
+    
+    
+class StartupRisks(models.Model):
+
+    BUSINESS_TYPE_CHOICES = [
+        ('b2b_saas', 'B2B SaaS'),
+        ('b2c_app', 'B2C App'),
+        ('marketplace', 'Marketplace'),
+        ('service', 'Service-based'),
+        ('physical', 'Physical Product'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('analyzing', 'Analyzing'),
+        ('done', 'Done'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='startup_risks'
+    )
+    idea = models.ForeignKey(
+        IdeaValidation, on_delete=models.CASCADE,
+        related_name='startup_risks'
+    )
+
+    
+    business_type = models.CharField(
+        max_length=20, choices=BUSINESS_TYPE_CHOICES
+    )
+    handles_customer_data = models.BooleanField(default=False)
+    handles_payments = models.BooleanField(default=False)
+    regulated_space = models.BooleanField(default=False)
+    regulation_details = models.TextField(
+        blank=True,
+        help_text="Which regulations apply — SEBI, RBI, FSSAI, etc."
+    )
+    biggest_worry = models.TextField(
+        blank=True,
+        help_text="Founder's current biggest concern"
+    )
+
+    
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default='pending'
+    )
+
+
+    overall_risk_score = models.FloatField(null=True, blank=True)
+    overall_risk_level = models.CharField(max_length=20, blank=True)
+    risk_summary = models.TextField(blank=True)
+
+
+    risk_register = models.JSONField(default=list, blank=True)
+
+
+    legal_summary = models.TextField(blank=True)
+    legal_checklist = models.JSONField(default=list, blank=True)
+    immediate_legal_actions = models.JSONField(default=list, blank=True)
+
+    
+    mitigation_summary = models.TextField(blank=True)
+    mitigation_actions = models.JSONField(default=list, blank=True)
+    risk_monitoring_plan = models.JSONField(default=list, blank=True)
+    insurance_recommendations = models.JSONField(default=list, blank=True)
+
+
+    raw_ai_response = models.TextField(blank=True)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'startup_risks'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} — Risks: {self.idea.idea_title}"
