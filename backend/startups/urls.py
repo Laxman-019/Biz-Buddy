@@ -30,4 +30,7 @@ urlpatterns = [
     path('team/', team_list),
     path('team/submit/', team_submit),
     path('team/<int:record_id>/', team_detail),
+    path('risks/', risks_list),
+    path('risks/submit/', risks_submit),
+    path('risks/<int:record_id>/', risks_detail),
 ]

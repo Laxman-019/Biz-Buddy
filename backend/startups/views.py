@@ -12,6 +12,7 @@ from startups.investor_analyzer import analyze_investor_readiness
 from startups.gtm_analyzer import analyze_gtm
 from startups.kpi_analyzer import analyze_kpis
 from startups.team_analyzer import analyze_team
+from startups.risk_analyzer import analyze_risks
 
 
 def startup_only(func):
@@ -894,7 +895,7 @@ def team_submit(req):
         return Response({
             'error':'Idea Not Found',
         },status=404)
-    
+    2
     record = TeamCulture.objects.create(
         user = req.user,
         idea = idea,
@@ -980,3 +981,99 @@ def team_detail(req, record_id):
         return Response(status=204)
 
     return Response(TeamCultureSerializer(record).data)
+
+
+
+# Startup Risks intelligence
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def risks_list(req):
+    records = StartupRisks.objects.filter(user=req.user)
+    return Response(StartupRisksSerializer(records,many=True).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def risks_submit(req):
+    serializer = RisksSubmitSerializer(data=req.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors,status=400)
+    
+    d = serializer.validated_data
+    try:
+        idea = IdeaValidation.objects.get(id=d['idea_id'],user=req.user)
+    except IdeaValidation.DoesNotExist:
+        return Response({
+            'error':'Idea Not Found',
+        },status=404)
+    
+    record = StartupRisks.objects.create(
+        user = req.user,
+        idea = idea,
+        business_type = d['business_type'],
+        handles_customer_data = d.get('handles_customer_data'),
+        handles_payment = d.get('handles_payment'),
+        regulated_space = d.get('regulated_space'),
+        regulation_details = d.get('regulation_details'),
+        biggest_worry = d.get('biggest_worry'),
+        status = 'analyzing',
+    )
+    
+    try:
+        result = analyze_risks(
+            idea = idea,
+            business_type = d['business_type'],
+            handles_customer_data = d.get('handles_customer_data'),
+            handles_payment = d.get('handles_payment'),
+            regulated_space = d.get('regulated_space'),
+            regulation_details = d.get('regulation_details'),
+            biggest_worry = d.get('biggest_worry'),
+            user = req.user,
+        )
+        
+        record.status = 'done'
+        record.raw_ai_response = result['raw']
+        record.overall_risk_score = result['overall_risk_score']
+        record.overall_risk_level = result['overall_risk_level']
+        record.risk_summary = result['risk_summary']
+        record.risk_register = result['risk_register']
+        record.legal_summary = result['legal_summary']
+        record.legal_checklist = result['legal_checklist']
+        record.immediate_legal_actions = result['immediate_legal_actions']
+        record.mitigation_summary = result['mitigation_summary']
+        record.mitigation_actions = result['mitigation_actions']
+        record.risk_monitoring_plan = result['risk_monitoring_plan']
+        record.insurance_recommendations = result['insurance_recommendations']
+        record.save()
+        
+        
+    except Exception as e:
+        record.status = 'failed'
+        record.error_message = str(e)
+        record.save()
+        return Response({'error' : 'Analysis failed','detail': str(e)}, status = 500)
+
+    return Response(StartupRisksSerializer(record).data, status = 201)
+
+
+@api_view(['GET','DELETE'])
+@permission_classes([IsAuthenticated])
+@startup_only
+def risks_detail(req, record_id):
+    try:
+        record = StartupRisks.objects.get(id = record_id, user = req.user)
+    except StartupRisks.DoesNotExist:
+        return Response(
+            {
+                'error': 'Not Found.'
+            }, status = 404
+        ) 
+    
+    if req.method == 'DELETE':
+        record.delete()
+        return Response(status=204)
+
+    return Response(StartupRisksSerializer(record).data)
