@@ -1014,11 +1014,11 @@ def risks_submit(req):
         user = req.user,
         idea = idea,
         business_type = d['business_type'],
-        handles_customer_data = d.get('handles_customer_data'),
-        handles_payment = d.get('handles_payment'),
-        regulated_space = d.get('regulated_space'),
-        regulation_details = d.get('regulation_details'),
-        biggest_worry = d.get('biggest_worry'),
+        handles_customer_data = d.get('handles_customer_data',False),
+        handles_payments = d.get('handles_payments',False),
+        regulated_space = d.get('regulated_space',False),
+        regulation_details = d.get('regulation_details',''),
+        biggest_worry = d.get('biggest_worry',''),
         status = 'analyzing',
     )
     
@@ -1026,11 +1026,11 @@ def risks_submit(req):
         result = analyze_risks(
             idea = idea,
             business_type = d['business_type'],
-            handles_customer_data = d.get('handles_customer_data'),
-            handles_payment = d.get('handles_payment'),
-            regulated_space = d.get('regulated_space'),
-            regulation_details = d.get('regulation_details'),
-            biggest_worry = d.get('biggest_worry'),
+            handles_customer_data = d.get('handles_customer_data',False),
+            handles_payments = d.get('handles_payments',False),
+            regulated_space = d.get('regulated_space',False),
+            regulation_details = d.get('regulation_details',''),
+            biggest_worry = d.get('biggest_worry',''),
             user = req.user,
         )
         

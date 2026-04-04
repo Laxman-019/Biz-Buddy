@@ -13,6 +13,7 @@ import InvestorReadiness from './InvestorReadiness'
 import GoToMarket from './GoToMarket'
 import StartupKPIs from './StartupKPIs'
 import TeamCulture from './TeamCulture'
+import StartupRisks from './StartupRisks'
 
 const FEATURES = [
   { id: 'idea-validation', label: 'Idea Validation', icon: <FaLightbulb />, active: true  },
@@ -24,7 +25,7 @@ const FEATURES = [
   { id: 'go-to-market', label: 'Go-To-Market', icon: <FaBullhorn />,  active: true },
   { id: 'kpis', label: 'Startup KPIs', icon: <FaBolt />, active: true },
   { id: 'team', label: 'Team & Culture', icon: <FaUsers />, active: true },
-  { id: 'risks', label: 'Startup Risks', icon: <FaShieldAlt />, active: false },
+  { id: 'risks', label: 'Startup Risks', icon: <FaShieldAlt />, active: true },
 ]
 
 const StartupDashboard = () => {
@@ -53,6 +54,7 @@ const StartupDashboard = () => {
       case 'go-to-market': return <GoToMarket />
       case 'kpis' : return <StartupKPIs />
       case 'team': return <TeamCulture />
+      case 'risks': return <StartupRisks />
       default: return (
         <div className="flex flex-col items-center justify-center h-64 text-gray-400">
           <FaRocket className="text-5xl mb-4 text-gray-300" />
