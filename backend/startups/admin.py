@@ -175,3 +175,18 @@ class TeamCultureAdmin(admin.ModelAdmin):
         'outreach_approach', 'meeting_cadence', 'advisor_red_flags',
         'raw_ai_response', 'error_message', 'created_at', 'updated_at',
     ]
+
+
+
+@admin.register(StartupRisks)
+class StartupRisksAdmin(admin.ModelAdmin):
+    list_display  = ['idea', 'user', 'overall_risk_score',                     'overall_risk_level', 'status', 'created_at']
+    list_filter   = ['status', 'overall_risk_level', 'business_type']
+    search_fields = ['idea__idea_title', 'user__email']
+    readonly_fields = [
+        'status',
+        'overall_risk_score', 'overall_risk_level', 'risk_summary',
+        'risk_register', 'legal_summary', 'legal_checklist', 'immediate_legal_actions', 'mitigation_summary', 'mitigation_actions',
+        'risk_monitoring_plan', 'insurance_recommendations',
+        'raw_ai_response', 'error_message', 'created_at', 'updated_at',
+    ]
