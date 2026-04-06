@@ -59,3 +59,22 @@ class RegisterSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = [
+            'id',
+            'email',
+            'user_name',
+            'business_type',
+            'startup_name',
+            'company_name',
+            'industry',
+            'custom_industry',
+            'funding_stage',
+            'team_size',
+            'phone_number',
+            'created_at',
+        ]

@@ -163,3 +163,10 @@ def startup_dashboard(req):
         "email": user.email,
         "user_name": user.user_name
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)

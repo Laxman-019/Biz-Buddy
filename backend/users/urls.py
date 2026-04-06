@@ -10,4 +10,7 @@ urlpatterns = [
     path('profile/', get_user_profile, name='profile'),
     
     path('startup/dashboard/', startup_dashboard, name='startup-dashboard'),
+
+    path('users/me/', me),
+
 ]
