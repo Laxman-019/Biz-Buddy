@@ -14,8 +14,10 @@ import GoToMarket from './GoToMarket'
 import StartupKPIs from './StartupKPIs'
 import TeamCulture from './TeamCulture'
 import StartupRisks from './StartupRisks'
+import StartupOverview from './StartupOverview'
 
 const FEATURES = [
+  { id: 'overview', label: 'Dashboard Overview', icon: <FaChartPie />, active: true  },
   { id: 'idea-validation', label: 'Idea Validation', icon: <FaLightbulb />, active: true  },
   { id: 'market-intel', label: 'Market Intelligence',icon: <FaChartLine />, active: true },
   { id: 'business-model', label: 'Business Model', icon: <FaCubes />, active: true },
@@ -31,9 +33,9 @@ const FEATURES = [
 const StartupDashboard = () => {
   const [activeFeature, setActiveFeature] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('startup_active_feature') || 'idea-validation';
+      return localStorage.getItem('startup_active_feature') || 'overview';
     }
-    return 'idea-validation';
+    return 'overview';
   });
 
   const setFeature = (featureId) => {
@@ -45,6 +47,7 @@ const StartupDashboard = () => {
 
   const renderFeature = () => {
     switch (activeFeature) {
+      case 'overview': return <StartupOverview onNavigate={setActiveFeature} />
       case 'idea-validation': return <IdeaValidation />
       case 'market-intel': return <MarketIntelligence />
       case 'business-model': return <BusinessModel />
