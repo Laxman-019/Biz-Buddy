@@ -57,7 +57,7 @@ const FEATURES = [
     bg: "bg-cyan-50",
     border: "border-cyan-200",
     text: "text-cyan-700",
-    endpoint: "/api/market/",
+    endpoint: "/api/startups/market/",
     scoreKey: null,
     verdictKey: "market_direction",
     statusKey: "status",
