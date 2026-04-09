@@ -1,6 +1,8 @@
 import os
 import json
 import re
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from google import genai  
 
 
@@ -16,12 +18,16 @@ def analyze_financials(idea, cash_on_hand, monthly_burn_rate,
         raise Exception("GEMINI_API_KEY not found in environment variables")
     
     client = genai.Client(api_key=api_key)
+    current_date = datetime.now()
+    current_month_year = current_date.strftime("%B %Y")
 
     startup_name  = user.startup_name or "Not specified"
     industry      = user.get_effective_industry() or "Not specified"
     funding_stage = user.get_funding_stage_display() if user.funding_stage else "Not specified"
 
     prompt = f"""
+**Today is {current_month_year}**. All dates MUST be in the future from this date.
+Do NOT generate any past dates like 2025.
 You are a senior startup CFO and financial analyst specializing in early-stage
 Indian startups. You are an expert in runway management, financial projections,
 and fundraising strategy.
@@ -65,7 +71,7 @@ Return ONLY valid JSON. No markdown. No code blocks. No extra text.
   "runway": {{
     "runway_months": <float>,
     "runway_status": "<one of: comfortable | healthy | raising_soon | urgent | critical>",
-    "zero_date": "<e.g. March 2026>",
+    "zero_date": "<MUST be a future date, e.g. {(current_date + relativedelta(months=12)).strftime('%B %Y')}>",
     "runway_summary": "<2-3 sentence burn rate assessment>",
     "scenarios": [
       {{
@@ -204,6 +210,7 @@ If burn rate is 0, set runway_months to 999 (infinite).
                 raise Exception(f"Failed to parse JSON from response: {raw[:200]}")
 
         runway = data.get("runway", {})
+        correct_zero_date = current_date + relativedelta(months=int(runway.get("runway_months", 0)))
         projection = data.get("projection", {})
         funding = data.get("funding", {})
 
@@ -213,7 +220,7 @@ If burn rate is 0, set runway_months to 999 (infinite).
             # Runway
             "runway_months": runway.get("runway_months"),
             "runway_status": runway.get("runway_status", ""),
-            "zero_date": runway.get("zero_date", ""),
+            "zero_date": correct_zero_date.strftime("%B %Y"),
             "runway_summary": runway.get("runway_summary", ""),
             "runway_scenarios": runway.get("scenarios", []),
             "runway_recommendations": runway.get("recommendations", []),
