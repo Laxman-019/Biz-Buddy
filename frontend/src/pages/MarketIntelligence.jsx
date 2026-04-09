@@ -541,7 +541,7 @@ const MarketIntelligence = () => {
 
   const fetchReports = async () => {
     try {
-      const res = await axiosInstance.get("/api/market/");
+      const res = await axiosInstance.get("/api/startups/market/");
       console.log("API Response:", res.data);
       const reportsData = Array.isArray(res.data) ? res.data : res.data?.results && Array.isArray(res.data.results) ? res.data.results : [];
 
@@ -570,7 +570,7 @@ const MarketIntelligence = () => {
     }
     setSubmitting(true);
     try {
-      const res = await axiosInstance.post("/api/market/submit/", formData);
+      const res = await axiosInstance.post("/api/startups/market/submit/", formData);
       const newReport = res.data;
       setReports((prevReports) => {
         const updated = [newReport, ...prevReports];
@@ -597,7 +597,7 @@ const MarketIntelligence = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this market report?")) return;
     try {
-      await axiosInstance.delete(`/api/market/${id}/`);
+      await axiosInstance.delete(`/api/startups/market/${id}/`);
       const updated = reports.filter((r) => r.id !== id);
       setReports(updated);
       cacheReports(updated);

@@ -145,9 +145,6 @@ def get_user_profile(req):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def startup_dashboard(req):
-    """
-    Simple startup dashboard view
-    """
     user = req.user
     
     if user.business_type != 'startup':
