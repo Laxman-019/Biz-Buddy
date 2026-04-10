@@ -5,6 +5,7 @@ from predictions.strategy_engine import generate_business_strategy
 from predictions.intelligence_engine import generate_intelligence
 from predictions.market_engine import calculate_market_metrics
 from predictions.competitor_engine import analyze_competitor_position
+from predictions.gemini_engine import generate_gemini_insights
 from rest_framework import status
 from businesses.models import BusinessRecord
 from django.db.models import Sum, Avg, Count
@@ -392,3 +393,32 @@ def business_performance_summary(req):
         logger.error(f'Error in performance summary: {str(e)}')
         
         return Response({'status': 'error', 'message': str(e)}, status=500)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ai_recommendations(request):
+    try:
+        intelligence_data = generate_intelligence(request.user)
+
+        if intelligence_data.get("status") == "insufficient_data":
+            return Response({
+                "status": "insufficient_data",
+                "message": "Add at least 14 days of records to activate AI recommendations.",
+                "required": intelligence_data.get("required_records", 14),
+                "available": intelligence_data.get("available_records", 0)
+            }, status=200)
+
+        strategy_data = generate_business_strategy(request.user)
+
+        gemini_data = generate_gemini_insights(request.user, intelligence_data)
+
+        return Response({
+            "status": "success",
+            "strategy": strategy_data,          
+            "gemini_analysis": gemini_data,     
+            "intelligence": intelligence_data   
+        })
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
