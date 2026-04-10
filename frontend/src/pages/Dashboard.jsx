@@ -152,6 +152,8 @@ const Dashboard = () => {
   const [businessInsights, setBusinessInsights] = useState(null);
   const [selectedBusiness, setSelectedBusiness] = useState("all");
   const [filteredRecords, setFilteredRecords] = useState(null);
+  const [gemini, setGemini] = useState(null);
+  const [geminiLoading, setGeminiLoading] = useState(false);
 
   const fetchBusinessData = async (businessName) => {
     try {
@@ -205,6 +207,17 @@ const Dashboard = () => {
       if (statusRes.data.has_enough_data) {
         const intelligenceRes = await axiosInstance.get("/api/intelligence/");
         setIntelligence(intelligenceRes.data);
+        setGeminiLoading(true);
+        try {
+          const geminiRes = await axiosInstance.get(
+            "/api/ai-recommendations/",
+          );
+          setGemini(geminiRes.data);
+        } catch (e) {
+          console.error("Gemini fetch failed:", e);
+        } finally {
+          setGeminiLoading(false);
+        }
       }
     } catch (err) {
       if (err.response?.status === 404) setError(`API endpoint not found: ${err.config.url}`);
@@ -269,12 +282,12 @@ const Dashboard = () => {
     { id: "overview", label: "Overview", icon: <BarChart2 className="w-4 h-4" /> },
     { id: "insights", label: "AI Insights", icon: <Brain className="w-4 h-4" />, dot: status?.has_enough_data },
     { id: "strategy", label: "Growth Strategy", icon: <Zap className="w-4 h-4" />, dot: status?.has_enough_data },
+    { id: "gemini",    label: "Gemini Analysis", icon: <Sparkles className="w-4 h-4" />, dot: status?.has_enough_data },
   ];
 
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50/80">
-
         <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
           <div className="px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -282,8 +295,12 @@ const Dashboard = () => {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">Business Intelligence</h1>
-                <p className="text-gray-400 text-xs">AI-powered insights to grow smarter</p>
+                <h1 className="text-lg font-bold text-gray-900 leading-tight">
+                  Business Intelligence
+                </h1>
+                <p className="text-gray-400 text-xs">
+                  AI-powered insights to grow smarter
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -298,7 +315,9 @@ const Dashboard = () => {
                 disabled={refreshing}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+                />
                 {refreshing ? "Refreshing…" : "Refresh"}
               </button>
             </div>
@@ -310,21 +329,23 @@ const Dashboard = () => {
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${activeTab === t.id
+                className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all ${
+                  activeTab === t.id
                     ? "text-indigo-600 border-indigo-600"
                     : "text-gray-500 border-transparent hover:text-indigo-500"
-                  }`}
+                }`}
               >
                 {t.icon}
                 {t.label}
-                {t.dot && <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />}
+                {t.dot && (
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                )}
               </button>
             ))}
           </div>
         </div>
 
         <div className="py-5 px-4 space-y-6">
-
           {selectedBusiness !== "all" && (
             <div className="flex items-center justify-between bg-indigo-600 text-white rounded-2xl px-5 py-3 shadow-md shadow-indigo-200">
               <div className="flex items-center gap-3">
@@ -333,7 +354,10 @@ const Dashboard = () => {
                 <span className="font-bold text-white">{selectedBusiness}</span>
               </div>
               <button
-                onClick={() => { setSelectedBusiness("all"); setFilteredRecords(null); }}
+                onClick={() => {
+                  setSelectedBusiness("all");
+                  setFilteredRecords(null);
+                }}
                 className="flex items-center gap-1.5 text-xs text-indigo-200 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg"
               >
                 <ArrowLeft className="w-3 h-3" /> All Businesses
@@ -348,7 +372,9 @@ const Dashboard = () => {
                   <Calendar className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-blue-900 mb-1">Unlock AI-Powered Insights</h3>
+                  <h3 className="font-bold text-blue-900 mb-1">
+                    Unlock AI-Powered Insights
+                  </h3>
                   <p className="text-blue-600 text-sm mb-4">{status.message}</p>
                   <div className="relative w-full bg-blue-100 rounded-full h-2.5 overflow-hidden">
                     <div
@@ -368,7 +394,6 @@ const Dashboard = () => {
 
           {activeTab === "overview" && overview && (
             <div className="space-y-6">
-
               {/* KPI Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <KPICard
@@ -412,16 +437,49 @@ const Dashboard = () => {
                     <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={currentTrend} barSize={28}>
                         <defs>
-                          <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#4F46E5" stopOpacity={1} />
-                            <stop offset="100%" stopColor="#818cf8" stopOpacity={0.7} />
+                          <linearGradient
+                            id="salesGrad"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="0%"
+                              stopColor="#4F46E5"
+                              stopOpacity={1}
+                            />
+                            <stop
+                              offset="100%"
+                              stopColor="#818cf8"
+                              stopOpacity={0.7}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#f1f5f9"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          tick={{ fontSize: 11, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                        />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="sales" fill="url(#salesGrad)" radius={[6, 6, 0, 0]} name="Sales" />
+                        <Bar
+                          dataKey="sales"
+                          fill="url(#salesGrad)"
+                          radius={[6, 6, 0, 0]}
+                          name="Sales"
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
@@ -442,19 +500,55 @@ const Dashboard = () => {
                     <ResponsiveContainer width="100%" height={240}>
                       <AreaChart data={currentTrend}>
                         <defs>
-                          <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#10B981" stopOpacity={0.25} />
-                            <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
+                          <linearGradient
+                            id="profitGrad"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="0%"
+                              stopColor="#10B981"
+                              stopOpacity={0.25}
+                            />
+                            <stop
+                              offset="100%"
+                              stopColor="#10B981"
+                              stopOpacity={0}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#f1f5f9"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          tick={{ fontSize: 11, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: "#94a3b8" }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                        />
                         <Tooltip content={<CustomTooltip />} />
                         <Area
-                          type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={2.5}
+                          type="monotone"
+                          dataKey="profit"
+                          stroke="#10B981"
+                          strokeWidth={2.5}
                           fill="url(#profitGrad)"
-                          dot={{ fill: "#10B981", r: 4, strokeWidth: 2, stroke: "#fff" }}
+                          dot={{
+                            fill: "#10B981",
+                            r: 4,
+                            strokeWidth: 2,
+                            stroke: "#fff",
+                          }}
                           name="Profit"
                         />
                       </AreaChart>
@@ -475,36 +569,69 @@ const Dashboard = () => {
                     subtitle="AI-assessed performance & suggestions"
                     icon={<Zap className="w-4 h-4" />}
                     badge={
-                      <Pill color={currentBizInsights?.status === "danger" ? "red" : currentBizInsights?.status === "warning" ? "amber" : "green"}>
-                        {currentBizInsights?.status === "danger" ? "⚠ Needs Attention" : currentBizInsights?.status === "warning" ? "⚡ Watch Closely" : "✓ On Track"}
+                      <Pill
+                        color={
+                          currentBizInsights?.status === "danger"
+                            ? "red"
+                            : currentBizInsights?.status === "warning"
+                              ? "amber"
+                              : "green"
+                        }
+                      >
+                        {currentBizInsights?.status === "danger"
+                          ? "⚠ Needs Attention"
+                          : currentBizInsights?.status === "warning"
+                            ? "⚡ Watch Closely"
+                            : "✓ On Track"}
                       </Pill>
                     }
                   />
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">Performance</p>
+                      <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                        Performance
+                      </p>
                       {currentBizInsights?.messages?.map((msg, i) => {
                         const s = currentBizInsights?.status;
                         return (
-                          <DiagRow key={i} text={msg}
-                            type={s === "danger" ? "risk" : s === "warning" ? "obs" : "strength"}
+                          <DiagRow
+                            key={i}
+                            text={msg}
+                            type={
+                              s === "danger"
+                                ? "risk"
+                                : s === "warning"
+                                  ? "obs"
+                                  : "strength"
+                            }
                           />
                         );
                       })}
                       {!currentBizInsights?.messages?.length && (
-                        <p className="text-sm text-gray-400">No performance data yet.</p>
+                        <p className="text-sm text-gray-400">
+                          No performance data yet.
+                        </p>
                       )}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Suggestions</p>
+                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">
+                        Suggestions
+                      </p>
                       {currentBizInsights?.suggestions?.map((sug, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 mb-2 last:mb-0">
+                        <div
+                          key={i}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 mb-2 last:mb-0"
+                        >
                           <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                          <p className="text-sm text-amber-800 leading-relaxed">{sug}</p>
+                          <p className="text-sm text-amber-800 leading-relaxed">
+                            {sug}
+                          </p>
                         </div>
                       ))}
                       {!currentBizInsights?.suggestions?.length && (
-                        <p className="text-sm text-gray-400">No suggestions yet.</p>
+                        <p className="text-sm text-gray-400">
+                          No suggestions yet.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -524,25 +651,39 @@ const Dashboard = () => {
                       return (
                         <button
                           key={i}
-                          onClick={() => { setSelectedBusiness(name); fetchBusinessData(name); }}
-                          className={`group w-full text-left p-4 rounded-xl border transition-all duration-200 ${isActive
+                          onClick={() => {
+                            setSelectedBusiness(name);
+                            fetchBusinessData(name);
+                          }}
+                          className={`group w-full text-left p-4 rounded-xl border transition-all duration-200 ${
+                            isActive
                               ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
                               : "bg-gray-50 border-gray-100 text-gray-700 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm"
-                            }`}
+                          }`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${isActive ? "bg-white/20 text-white" : "bg-indigo-100 text-indigo-700"}`}>
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${isActive ? "bg-white/20 text-white" : "bg-indigo-100 text-indigo-700"}`}
+                              >
                                 {name[0]?.toUpperCase()}
                               </div>
-                              <p className={`font-semibold text-sm truncate max-w-30 ${isActive ? "text-white" : "text-gray-800"}`}>{name}</p>
+                              <p
+                                className={`font-semibold text-sm truncate max-w-30 ${isActive ? "text-white" : "text-gray-800"}`}
+                              >
+                                {name}
+                              </p>
                             </div>
-                            <ChevronRight className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${isActive ? "text-white/70" : "text-gray-300"}`} />
+                            <ChevronRight
+                              className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${isActive ? "text-white/70" : "text-gray-300"}`}
+                            />
                           </div>
                           {isActive && (
                             <div className="mt-2 flex items-center gap-1.5">
                               <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                              <span className="text-xs text-indigo-200">Currently viewing</span>
+                              <span className="text-xs text-indigo-200">
+                                Currently viewing
+                              </span>
                             </div>
                           )}
                         </button>
@@ -551,7 +692,10 @@ const Dashboard = () => {
                   </div>
                   {selectedBusiness !== "all" && (
                     <button
-                      onClick={() => { setSelectedBusiness("all"); setFilteredRecords(null); }}
+                      onClick={() => {
+                        setSelectedBusiness("all");
+                        setFilteredRecords(null);
+                      }}
                       className="mt-5 text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1.5 transition-colors"
                     >
                       <ArrowLeft className="w-4 h-4" /> View All Businesses
@@ -574,19 +718,34 @@ const Dashboard = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     <AIMetricCard
                       title="Forecast Trend"
-                      value={intelligence?.intelligence?.forecast?.trend?.toUpperCase() || "N/A"}
-                      icon={intelligence?.intelligence?.forecast?.trend === "declining"
-                        ? <TrendingDown className="w-5 h-5" />
-                        : <TrendingUp className="w-5 h-5" />}
+                      value={
+                        intelligence?.intelligence?.forecast?.trend?.toUpperCase() ||
+                        "N/A"
+                      }
+                      icon={
+                        intelligence?.intelligence?.forecast?.trend ===
+                        "declining" ? (
+                          <TrendingDown className="w-5 h-5" />
+                        ) : (
+                          <TrendingUp className="w-5 h-5" />
+                        )
+                      }
                       color={
-                        intelligence?.intelligence?.forecast?.trend === "growing" ? "green"
-                          : intelligence?.intelligence?.forecast?.trend === "declining" ? "red"
+                        intelligence?.intelligence?.forecast?.trend ===
+                        "growing"
+                          ? "green"
+                          : intelligence?.intelligence?.forecast?.trend ===
+                              "declining"
+                            ? "red"
                             : "yellow"
                       }
                     />
                     <AIMetricCard
                       title="30-Day Forecast"
-                      value={formatCurrency(intelligence?.intelligence?.forecast?.predicted_30_day_demand)}
+                      value={formatCurrency(
+                        intelligence?.intelligence?.forecast
+                          ?.predicted_30_day_demand,
+                      )}
                       subtitle={`${intelligence?.intelligence?.forecast?.confidence_score || 0}% confidence`}
                       icon={<Target className="w-5 h-5" />}
                       color="blue"
@@ -594,19 +753,31 @@ const Dashboard = () => {
                     <AIMetricCard
                       title="Market Share"
                       value={`${intelligence?.intelligence?.market?.market_share_percent || 0}%`}
-                      subtitle={intelligence?.intelligence?.market?.share_status || "Unknown"}
+                      subtitle={
+                        intelligence?.intelligence?.market?.share_status ||
+                        "Unknown"
+                      }
                       icon={<Shield className="w-5 h-5" />}
                       color="blue"
                     />
                     <AIMetricCard
                       title="Risk Score"
                       value={`${intelligence?.intelligence?.risk?.risk_score || 0}/100`}
-                      subtitle={intelligence?.intelligence?.risk?.risk_level || "Unknown"}
+                      subtitle={
+                        intelligence?.intelligence?.risk?.risk_level ||
+                        "Unknown"
+                      }
                       icon={<AlertTriangle className="w-5 h-5" />}
                       color={
-                        intelligence?.intelligence?.risk?.risk_level === "Low Risk" ? "green"
-                          : intelligence?.intelligence?.risk?.risk_level === "Moderate Risk" ? "yellow"
-                            : intelligence?.intelligence?.risk?.risk_level === "High Risk" ? "red"
+                        intelligence?.intelligence?.risk?.risk_level ===
+                        "Low Risk"
+                          ? "green"
+                          : intelligence?.intelligence?.risk?.risk_level ===
+                              "Moderate Risk"
+                            ? "yellow"
+                            : intelligence?.intelligence?.risk?.risk_level ===
+                                "High Risk"
+                              ? "red"
                               : "blue"
                       }
                     />
@@ -621,30 +792,51 @@ const Dashboard = () => {
                       />
                       <div className="grid md:grid-cols-3 gap-6">
                         <div>
-                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">Key Observations</p>
-                          {intelligence.intelligence.diagnostics.diagnostics?.map((d, i) => (
-                            <DiagRow key={i} text={d} type="obs" />
-                          ))}
-                          {!intelligence.intelligence.diagnostics.diagnostics?.length && (
-                            <p className="text-sm text-gray-400">No observations available</p>
+                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                            Key Observations
+                          </p>
+                          {intelligence.intelligence.diagnostics.diagnostics?.map(
+                            (d, i) => (
+                              <DiagRow key={i} text={d} type="obs" />
+                            ),
+                          )}
+                          {!intelligence.intelligence.diagnostics.diagnostics
+                            ?.length && (
+                            <p className="text-sm text-gray-400">
+                              No observations available
+                            </p>
                           )}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">Risk Factors</p>
-                          {intelligence.intelligence.diagnostics.risks?.map((r, i) => (
-                            <DiagRow key={i} text={r} type="risk" />
-                          ))}
-                          {!intelligence.intelligence.diagnostics.risks?.length && (
-                            <p className="text-sm text-gray-400">No major risks detected</p>
+                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">
+                            Risk Factors
+                          </p>
+                          {intelligence.intelligence.diagnostics.risks?.map(
+                            (r, i) => (
+                              <DiagRow key={i} text={r} type="risk" />
+                            ),
+                          )}
+                          {!intelligence.intelligence.diagnostics.risks
+                            ?.length && (
+                            <p className="text-sm text-gray-400">
+                              No major risks detected
+                            </p>
                           )}
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">Strengths</p>
-                          {intelligence.intelligence.diagnostics.strengths?.map((s, i) => (
-                            <DiagRow key={i} text={s} type="strength" />
-                          ))}
-                          {!intelligence.intelligence.diagnostics.strengths?.length && (
-                            <p className="text-sm text-gray-400">No strengths identified yet</p>
+                          <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">
+                            Strengths
+                          </p>
+                          {intelligence.intelligence.diagnostics.strengths?.map(
+                            (s, i) => (
+                              <DiagRow key={i} text={s} type="strength" />
+                            ),
+                          )}
+                          {!intelligence.intelligence.diagnostics.strengths
+                            ?.length && (
+                            <p className="text-sm text-gray-400">
+                              No strengths identified yet
+                            </p>
                           )}
                         </div>
                       </div>
@@ -660,12 +852,23 @@ const Dashboard = () => {
                       />
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="bg-linear-to-br from-violet-50 to-purple-50 border border-violet-100 p-5 rounded-2xl">
-                          <p className="text-violet-500 text-xs font-bold uppercase tracking-widest mb-2">Your Business Cluster</p>
-                          <p className="text-3xl font-black text-violet-900">{intelligence.intelligence.competitor.user_cluster}</p>
+                          <p className="text-violet-500 text-xs font-bold uppercase tracking-widest mb-2">
+                            Your Business Cluster
+                          </p>
+                          <p className="text-3xl font-black text-violet-900">
+                            {intelligence.intelligence.competitor.user_cluster}
+                          </p>
                         </div>
                         <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-2xl">
-                          <p className="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2">Competitors in Analysis</p>
-                          <p className="text-3xl font-black text-blue-900">{intelligence.intelligence.competitor.total_competitors}</p>
+                          <p className="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2">
+                            Competitors in Analysis
+                          </p>
+                          <p className="text-3xl font-black text-blue-900">
+                            {
+                              intelligence.intelligence.competitor
+                                .total_competitors
+                            }
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -688,7 +891,11 @@ const Dashboard = () => {
                     title="AI-Generated Growth Strategy"
                     subtitle="Personalized action plan based on your data"
                     icon={<Lightbulb className="w-4 h-4" />}
-                    badge={<Pill color="indigo"><Sparkles className="w-3 h-3" /> AI Powered</Pill>}
+                    badge={
+                      <Pill color="indigo">
+                        <Sparkles className="w-3 h-3" /> AI Powered
+                      </Pill>
+                    }
                   />
 
                   <div className="space-y-6">
@@ -700,8 +907,12 @@ const Dashboard = () => {
                         <div className="bg-linear-to-br from-green-50 to-emerald-50 border border-green-100 p-5 rounded-2xl space-y-2">
                           {intelligence.strategies.strengths.map((s, i) => (
                             <div key={i} className="flex items-start gap-3">
-                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-green-500 text-white text-xs flex items-center justify-center font-bold">✓</span>
-                              <p className="text-green-800 text-sm leading-relaxed">{s}</p>
+                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-green-500 text-white text-xs flex items-center justify-center font-bold">
+                                ✓
+                              </span>
+                              <p className="text-green-800 text-sm leading-relaxed">
+                                {s}
+                              </p>
                             </div>
                           ))}
                         </div>
@@ -716,38 +927,50 @@ const Dashboard = () => {
                         <div className="bg-linear-to-br from-red-50 to-rose-50 border border-red-100 p-5 rounded-2xl space-y-2">
                           {intelligence.strategies.warnings.map((w, i) => (
                             <div key={i} className="flex items-start gap-3">
-                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-red-500 text-white text-xs flex items-center justify-center font-bold">⚠</span>
-                              <p className="text-red-800 text-sm leading-relaxed">{w}</p>
+                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                                ⚠
+                              </span>
+                              <p className="text-red-800 text-sm leading-relaxed">
+                                {w}
+                              </p>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {intelligence?.strategies?.recommended_strategies?.length > 0 && (
+                    {intelligence?.strategies?.recommended_strategies?.length >
+                      0 && (
                       <div>
                         <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-2">
                           <Zap className="w-4 h-4" /> Recommended Actions
                         </p>
                         <div className="bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-5 rounded-2xl space-y-3">
-                          {intelligence.strategies.recommended_strategies.map((r, i) => (
-                            <div key={i} className="flex items-start gap-3">
-                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
-                                {i + 1}
-                              </span>
-                              <p className="text-indigo-800 text-sm leading-relaxed">{r}</p>
-                            </div>
-                          ))}
+                          {intelligence.strategies.recommended_strategies.map(
+                            (r, i) => (
+                              <div key={i} className="flex items-start gap-3">
+                                <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
+                                  {i + 1}
+                                </span>
+                                <p className="text-indigo-800 text-sm leading-relaxed">
+                                  {r}
+                                </p>
+                              </div>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
 
                     {!intelligence?.strategies?.strengths?.length &&
                       !intelligence?.strategies?.warnings?.length &&
-                      !intelligence?.strategies?.recommended_strategies?.length && (
+                      !intelligence?.strategies?.recommended_strategies
+                        ?.length && (
                         <div className="text-center py-8 text-gray-400">
                           <Lightbulb className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No strategies generated yet. Check back soon.</p>
+                          <p className="text-sm">
+                            No strategies generated yet. Check back soon.
+                          </p>
                         </div>
                       )}
                   </div>
@@ -756,6 +979,129 @@ const Dashboard = () => {
             </div>
           )}
 
+          {activeTab === "gemini" && (
+            <div className="space-y-6">
+              {!status?.has_enough_data ? (
+                <InsufficientDataCard
+                  remaining={status?.remaining}
+                  message="Add more records to unlock Gemini-powered AI analysis for your business."
+                />
+              ) : geminiLoading ? (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+                  <div className="relative w-14 h-14 mx-auto mb-5">
+                    <div className="absolute inset-0 rounded-full border-4 border-violet-100" />
+                    <div className="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin" />
+                    <div className="absolute inset-3 rounded-full bg-violet-50 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-violet-600" />
+                    </div>
+                  </div>
+                  <p className="text-gray-700 font-semibold">
+                    Gemini is analysing your business…
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    This may take a few seconds
+                  </p>
+                </div>
+              ) : gemini?.gemini_analysis?.status === "success" ? (
+                <>
+                  {/* Executive Summary */}
+                  <div className="bg-linear-to-br from-violet-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-5 h-5 text-violet-200" />
+                      <p className="text-violet-200 text-xs font-bold uppercase tracking-widest">
+                        Gemini Executive Summary
+                      </p>
+                    </div>
+                    <p className="text-white text-base leading-relaxed font-medium">
+                      {gemini.gemini_analysis.ai_insights.executive_summary}
+                    </p>
+                  </div>
+
+                  {/* Recommendations */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                    <SectionHeading
+                      title="AI Recommendations"
+                      subtitle="Gemini-generated action plan based on your full business context"
+                      icon={<Lightbulb className="w-4 h-4" />}
+                      badge={
+                        <Pill color="indigo">
+                          <Sparkles className="w-3 h-3" /> Gemini AI
+                        </Pill>
+                      }
+                    />
+                    <div className="space-y-4">
+                      {gemini.gemini_analysis.ai_insights.recommendations?.map(
+                        (rec, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-4 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl hover:shadow-sm transition-all"
+                          >
+                            <span className="shrink-0 w-8 h-8 rounded-xl bg-indigo-600 text-white text-sm font-black flex items-center justify-center shadow-sm">
+                              {i + 1}
+                            </span>
+                            <div>
+                              <p className="text-indigo-900 font-bold text-sm mb-0.5">
+                                {rec.title}
+                              </p>
+                              <p className="text-indigo-700 text-sm leading-relaxed">
+                                {rec.action}
+                              </p>
+                              <p className="text-indigo-400 text-xs mt-1 italic">
+                                {rec.reason}
+                              </p>
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Key Risk + Growth Opportunity side by side */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="bg-red-50 border border-red-100 rounded-2xl p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                        <p className="text-xs font-bold text-red-500 uppercase tracking-widest">
+                          Key Risk to Watch
+                        </p>
+                      </div>
+                      <p className="text-red-800 text-sm leading-relaxed">
+                        {gemini.gemini_analysis.ai_insights.key_risk}
+                      </p>
+                    </div>
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <TrendingUp className="w-4 h-4 text-emerald-600" />
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+                          Growth Opportunity
+                        </p>
+                      </div>
+                      <p className="text-emerald-800 text-sm leading-relaxed">
+                        {gemini.gemini_analysis.ai_insights.growth_opportunity}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-10 text-center">
+                  <XCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+                  <p className="text-gray-700 font-semibold">
+                    Gemini analysis unavailable
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    {gemini?.gemini_analysis?.message ||
+                      "Check your Gemini API key in the backend .env file."}
+                  </p>
+                  <button
+                    onClick={handleRefresh}
+                    className="mt-4 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
