@@ -10,4 +10,5 @@ urlpatterns = [
     path('market/',market_analysis),
     path('competitor/',competitor_analysis),
     path('strategy/',business_strategy),
+    path('ai-recommendations/',ai_recommendations),
 ]
