@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
+import Layout from "../components/Layout";
 
 const startupSections = [
   {
@@ -38,7 +39,7 @@ const startupSections = [
         ],
         highlight: {
           label: "The Mom Test",
-          text: "Your idea score is based on data, not opinions. Avoid asking friends/family if they \"like\" your idea — they will lie to be nice. Validate through real customer behaviour and market signals.",
+          text: 'Your idea score is based on data, not opinions. Avoid asking friends/family if they "like" your idea — they will lie to be nice. Validate through real customer behaviour and market signals.',
           color: "#F5F3FF",
           border: "#8B5CF6",
         },
@@ -50,7 +51,7 @@ const startupSections = [
         description: "Deep-dive analysis into whether the problem you are solving is real, urgent, and widespread enough to build a business around.",
         details: [
           { label: "Problem Frequency", value: "How often does the target customer encounter this problem? Daily > Weekly > Monthly > Rarely" },
-          { label: "Problem Severity", value: "Is this a \"painkiller\" (must-solve) or \"vitamin\" (nice-to-have)? Painkillers win." },
+          { label: "Problem Severity", value: 'Is this a "painkiller" (must-solve) or "vitamin" (nice-to-have)? Painkillers win.' },
           { label: "Current Solutions", value: "What do people use today? Spreadsheets? Manual processes? Competitors? Workarounds signal opportunity." },
           { label: "Willingness to Pay", value: "Have customers already spent money on solutions? Are they paying for alternatives now?" },
         ],
@@ -71,10 +72,7 @@ const startupSections = [
           { label: "Pricing Test", value: "What price points have customers indicated they would pay? Record actual numbers." },
           { label: "Purchase Triggers", value: "What specific event makes someone decide to buy?" },
         ],
-        tips: [
-          "Create a landing page describing your solution with a \"Buy Now\" or \"Join Waitlist\" button before building",
-          "Run smoke tests — can you get people to pay before you build?",
-        ],
+        tips: ['Create a landing page describing your solution with a "Buy Now" or "Join Waitlist" button before building', "Run smoke tests — can you get people to pay before you build?"],
       },
     ],
   },
@@ -96,13 +94,10 @@ const startupSections = [
           { label: "SOM — Serviceable Obtainable Market", value: "The portion of SAM you can realistically capture in the next 3–5 years — your real target." },
         ],
         formula: "SOM = SAM × Realistic Market Share %",
-        tips: [
-          "Investors expect you to know your TAM, but they invest in your SOM",
-          "Use bottom-up (customer count × price) not just top-down (percentage of giant market)",
-        ],
+        tips: ["Investors expect you to know your TAM, but they invest in your SOM", "Use bottom-up (customer count × price) not just top-down (percentage of giant market)"],
         highlight: {
           label: "Bottom-Up Calculation",
-          text: "Instead of saying \"we'll capture 1% of a $50B market\", calculate: \"There are 10,000 coffee shops in our city. We can reach 2,000 in year one. At $500/year, our SOM is $1M.\" This is far more credible.",
+          text: 'Instead of saying "we\'ll capture 1% of a $50B market", calculate: "There are 10,000 coffee shops in our city. We can reach 2,000 in year one. At $500/year, our SOM is $1M." This is far more credible.',
           color: "#ECFEFF",
           border: "#0891B2",
         },
@@ -131,10 +126,7 @@ const startupSections = [
           { label: "Behaviors", value: "Buying patterns, brand loyalty, research process, decision triggers." },
           { label: "Channels", value: "Where they get information — LinkedIn? TikTok? Industry publications?" },
         ],
-        tips: [
-          "Create 1–3 primary personas — more than that and you lose focus",
-          "Interview real people in your target audience to validate personas",
-        ],
+        tips: ["Create 1–3 primary personas — more than that and you lose focus", "Interview real people in your target audience to validate personas"],
       },
     ],
   },
@@ -155,16 +147,13 @@ const startupSections = [
           { label: "Solution", value: "Top 3 features your product offers to solve each problem." },
           { label: "Unique Value Proposition", value: "Single, clear, compelling message that turns a visitor into a prospect." },
           { label: "Unfair Advantage", value: "Something that cannot be easily copied or bought." },
-          { label: "Customer Segments", value: "Target customers — be specific, not \"everyone\"." },
+          { label: "Customer Segments", value: 'Target customers — be specific, not "everyone".' },
           { label: "Channels", value: "Path to customers — how will you reach them?" },
           { label: "Revenue Streams", value: "How will you make money? Pricing model, revenue sources." },
           { label: "Cost Structure", value: "Fixed and variable costs to operate." },
           { label: "Key Metrics", value: "Key activities you measure — the numbers that show progress." },
         ],
-        tips: [
-          "Complete the canvas in 20 minutes — if it takes longer, you're overthinking",
-          "Update the canvas monthly as you learn from customers",
-        ],
+        tips: ["Complete the canvas in 20 minutes — if it takes longer, you're overthinking", "Update the canvas monthly as you learn from customers"],
         highlight: {
           label: "Canvas vs. Business Plan",
           text: "Traditional business plans take months and become obsolete in weeks. The Lean Canvas takes 20 minutes and evolves with your learning.",
@@ -185,10 +174,7 @@ const startupSections = [
           { label: "Advertising", value: "Sell access to audience attention — requires massive scale." },
           { label: "Licensing", value: "Charge for rights to use your technology or IP." },
         ],
-        tips: [
-          "Match revenue model to customer preference — B2B prefers predictable subscriptions",
-          "Calculate LTV (Lifetime Value) early — how much a customer pays over their entire relationship",
-        ],
+        tips: ["Match revenue model to customer preference — B2B prefers predictable subscriptions", "Calculate LTV (Lifetime Value) early — how much a customer pays over their entire relationship"],
       },
       {
         title: "Unit Economics",
@@ -202,10 +188,7 @@ const startupSections = [
           { label: "Payback Period", value: "CAC ÷ monthly contribution margin. Months to recover acquisition cost." },
         ],
         formula: "Healthy SaaS: LTV ≥ 3× CAC, Payback Period ≤ 12 months",
-        tips: [
-          "If CAC > LTV, you lose money on every customer — business model fails",
-          "Track unit economics from day one — don't wait until you have 'enough data'",
-        ],
+        tips: ["If CAC > LTV, you lose money on every customer — business model fails", "Track unit economics from day one — don't wait until you have 'enough data'"],
       },
     ],
   },
@@ -228,10 +211,7 @@ const startupSections = [
           { label: "Success Metrics", value: "How will you know if the MVP works? 100 signups? 10 paying customers?" },
           { label: "Time to Build", value: "Estimated weeks to launch — if > 12 weeks, scope is too big." },
         ],
-        tips: [
-          "If you're embarrassed by your first version, you launched too late — Reid Hoffman",
-          "Launch before you feel ready — real feedback beats perfect assumptions",
-        ],
+        tips: ["If you're embarrassed by your first version, you launched too late — Reid Hoffman", "Launch before you feel ready — real feedback beats perfect assumptions"],
         highlight: {
           label: "Concierge MVP",
           text: "Before writing code, deliver the service manually. If you're building software for restaurants, process orders by hand for one restaurant first. You'll learn more in a week than months of development.",
@@ -263,10 +243,7 @@ const startupSections = [
           { label: "Commodity Features", value: "Use existing tools — authentication, payments, hosting, analytics." },
           { label: "No-Code Options", value: "Can you launch without developers? Bubble, Webflow, Airtable, Zapier." },
         ],
-        tips: [
-          "Build only what differentiates you — everything else is a tool, buy it",
-          "Don't over-architect for scale you won't have for years",
-        ],
+        tips: ["Build only what differentiates you — everything else is a tool, buy it", "Don't over-architect for scale you won't have for years"],
       },
     ],
   },
@@ -295,10 +272,7 @@ const startupSections = [
           { range: "3–6 months", label: "Urgent", color: "#EA580C" },
           { range: "< 3 months", label: "Critical", color: "#DC2626" },
         ],
-        tips: [
-          "Fundraising takes 6–9 months — start when you have 12+ months runway",
-          "Runway = freedom. Longer runway = better deals, more leverage",
-        ],
+        tips: ["Fundraising takes 6–9 months — start when you have 12+ months runway", "Runway = freedom. Longer runway = better deals, more leverage"],
         highlight: {
           label: "The 18-Month Rule",
           text: "Always raise money when you have 18 months of runway left. At 12 months, investors sense desperation. At 6 months, you have no leverage.",
@@ -317,10 +291,7 @@ const startupSections = [
           { label: "Headcount Plan", value: "Who you hire and when — biggest expense for most startups." },
           { label: "Growth Assumptions", value: "Customer acquisition rate, churn rate, price changes over time." },
         ],
-        tips: [
-          "Show three scenarios: Base Case, Best Case, Worst Case",
-          "Update monthly as you learn — your first projection will be wrong, that's OK",
-        ],
+        tips: ["Show three scenarios: Base Case, Best Case, Worst Case", "Update monthly as you learn — your first projection will be wrong, that's OK"],
       },
       {
         title: "Funding Requirements",
@@ -332,10 +303,7 @@ const startupSections = [
           { label: "Milestone Funding", value: "What will this money achieve? MVP launch? 100 customers? $10K MRR?" },
           { label: "Valuation Context", value: "Typical valuations for similar stage companies in your space." },
         ],
-        tips: [
-          "Raise enough to reach the NEXT milestone — not just survive",
-          "Too little funding = constant distraction raising more",
-        ],
+        tips: ["Raise enough to reach the NEXT milestone — not just survive", "Too little funding = constant distraction raising more"],
       },
     ],
   },
@@ -363,10 +331,7 @@ const startupSections = [
           { label: "9. Team", value: "Why you're the ones to win — relevant experience." },
           { label: "10. Financials & Ask", value: "Projections, use of funds, amount raising." },
         ],
-        tips: [
-          "10–12 slides maximum — investors have short attention spans",
-          "Practice 100 times — your pitch should feel effortless",
-        ],
+        tips: ["10–12 slides maximum — investors have short attention spans", "Practice 100 times — your pitch should feel effortless"],
         highlight: {
           label: "Story > Data",
           text: "Investors fund stories, not spreadsheets. Your deck should tell a compelling story about a massive problem, your unique insight, and why your team is destined to win.",
@@ -386,10 +351,7 @@ const startupSections = [
           { label: "Check Size", value: "Typical investment amount — is it right for your raise?" },
           { label: "Warm Intro Path", value: "Who can introduce you? Mutual connections?" },
         ],
-        tips: [
-          "Quality over quantity — 20 great fits beat 200 spray-and-pray emails",
-          "Warm intros convert 5× better than cold emails",
-        ],
+        tips: ["Quality over quantity — 20 great fits beat 200 spray-and-pray emails", "Warm intros convert 5× better than cold emails"],
       },
       {
         title: "Due Diligence Room",
@@ -403,10 +365,7 @@ const startupSections = [
           { label: "Team", value: "Resumes, employment agreements, org chart" },
           { label: "Market", value: "Competitive analysis, market research, customer interviews" },
         ],
-        tips: [
-          "Create a secure virtual data room (Google Drive with restricted access works)",
-          "Don't wait until term sheet to prepare — have it ready from day one",
-        ],
+        tips: ["Create a secure virtual data room (Google Drive with restricted access works)", "Don't wait until term sheet to prepare — have it ready from day one"],
       },
     ],
   },
@@ -428,10 +387,7 @@ const startupSections = [
           { label: "Launch Timeline", value: "Countdown to launch day and first 90 days post-launch activities." },
           { label: "PR Strategy", value: "Media outreach, press release, journalist targeting for coverage." },
         ],
-        tips: [
-          "Do things that don't scale — hand-serve first customers to learn deeply",
-          "First 100 customers should be evangelists — treat them like royalty",
-        ],
+        tips: ["Do things that don't scale — hand-serve first customers to learn deeply", "First 100 customers should be evangelists — treat them like royalty"],
         highlight: {
           label: "The Beachhead Strategy",
           text: "Dominate a small, specific market completely before expanding. Instead of 'restaurant software', target 'pizza shops in Chicago'. Win them all, then expand.",
@@ -451,10 +407,7 @@ const startupSections = [
           { label: "Paid Ads", value: "Platforms, targeting, budget, creative tests, expected CPC and conversion." },
           { label: "Referrals", value: "Customer referral program design, incentives, promotion plan." },
         ],
-        tips: [
-          "Test channels cheaply before scaling — $500 tests reveal potential",
-          "Double down on what works — kill what doesn't quickly",
-        ],
+        tips: ["Test channels cheaply before scaling — $500 tests reveal potential", "Double down on what works — kill what doesn't quickly"],
       },
       {
         title: "Pricing Strategy",
@@ -467,10 +420,7 @@ const startupSections = [
           { label: "Package Structure", value: "Tiers, features in each, add-ons, annual vs monthly discounts." },
           { label: "Price Testing", value: "Plan for testing different price points — surveys, A/B tests." },
         ],
-        tips: [
-          "Most startups underprice — charge more than you think is fair",
-          "Free trials convert better than freemium for B2B",
-        ],
+        tips: ["Most startups underprice — charge more than you think is fair", "Free trials convert better than freemium for B2B"],
       },
     ],
   },
@@ -491,10 +441,7 @@ const startupSections = [
           { label: "Characteristics", value: "Leading indicator, correlates with retention, reflects customer value." },
           { label: "Examples", value: "Airbnb: Nights booked. Spotify: Time listened. Slack: Messages sent." },
         ],
-        tips: [
-          "Choose one metric that matters most — not 10",
-          "Should measure customer success, not just company success",
-        ],
+        tips: ["Choose one metric that matters most — not 10", "Should measure customer success, not just company success"],
         highlight: {
           label: "Finding Your North Star",
           text: "Ask: What is the single action a customer takes that means they are getting value? For Uber, it's rides completed. For Dropbox, it's files saved. That's your North Star.",
@@ -512,10 +459,7 @@ const startupSections = [
           { label: "Retention Rate", value: "% of cohort still active in week 1, 2, 3, month 1, 2, 3, etc." },
           { label: "Flattening Curve", value: "When retention stabilizes, you've found product-market fit." },
         ],
-        tips: [
-          "If retention curve keeps dropping to zero, you don't have product-market fit",
-          "Flat retention after initial drop = product-market fit achieved",
-        ],
+        tips: ["If retention curve keeps dropping to zero, you don't have product-market fit", "Flat retention after initial drop = product-market fit achieved"],
       },
       {
         title: "Viral Coefficient",
@@ -529,10 +473,7 @@ const startupSections = [
           { label: "K < 1", value: "Requires paid acquisition to grow." },
         ],
         formula: "K = (Invites Sent × Invite Conversion Rate)",
-        tips: [
-          "Increase invites sent — make sharing natural, easy, incentivized",
-          "Improve conversion — optimize signup flow, landing pages",
-        ],
+        tips: ["Increase invites sent — make sharing natural, easy, incentivized", "Improve conversion — optimize signup flow, landing pages"],
       },
     ],
   },
@@ -554,10 +495,7 @@ const startupSections = [
           { label: "Vesting Schedule", value: "Standard: 4-year vesting with 1-year cliff — earn equity over time." },
           { label: "Founder Agreements", value: "IP assignment, roles, decision-making, dispute resolution in writing." },
         ],
-        tips: [
-          "Equal equity only if equal contribution and risk — otherwise differentiate",
-          "Founder conflict is #1 startup killer — address early",
-        ],
+        tips: ["Equal equity only if equal contribution and risk — otherwise differentiate", "Founder conflict is #1 startup killer — address early"],
         highlight: {
           label: "Co-Founder Chemistry",
           text: "Choose co-founders based on complementary skills, shared values, and conflict resolution style — not friendship. Test working together on a small project before committing.",
@@ -576,10 +514,7 @@ const startupSections = [
           { label: "Recruitment Channels", value: "Where to find candidates — networks, job boards, communities." },
           { label: "Culture Definition", value: "Values, operating principles, work style — attract aligned people." },
         ],
-        tips: [
-          "Hire slow, fire fast — one bad hire damages culture",
-          "First 10 employees set culture — choose carefully",
-        ],
+        tips: ["Hire slow, fire fast — one bad hire damages culture", "First 10 employees set culture — choose carefully"],
       },
       {
         title: "Advisory Board",
@@ -591,10 +526,7 @@ const startupSections = [
           { label: "Advisor Equity", value: "Standard: 0.5–2% equity vested over 2 years for meaningful advisors." },
           { label: "Meeting Cadence", value: "Monthly or quarterly structured calls — make it easy for them to help." },
         ],
-        tips: [
-          "Seek advisors who complement your team's weaknesses",
-          "Make it easy to help — specific asks, prepared materials",
-        ],
+        tips: ["Seek advisors who complement your team's weaknesses", "Make it easy to help — specific asks, prepared materials"],
       },
     ],
   },
@@ -603,7 +535,7 @@ const startupSections = [
     category: "Risk Management",
     color: "#B45309",
     bg: "#FFFBEB",
-    icon: "fa-shield-haltered",
+    icon: "fa-shield",
     items: [
       {
         title: "Risk Register",
@@ -622,10 +554,7 @@ const startupSections = [
           { range: "Medium", label: "Monitor and plan", color: "#CA8A04" },
           { range: "Low", label: "Acceptable risk", color: "#059669" },
         ],
-        tips: [
-          "Review risks monthly — they change as startup evolves",
-          "Don't ignore high risks hoping they disappear — they don't",
-        ],
+        tips: ["Review risks monthly — they change as startup evolves", "Don't ignore high risks hoping they disappear — they don't"],
       },
       {
         title: "Legal & Compliance",
@@ -638,10 +567,7 @@ const startupSections = [
           { label: "Founder Agreements", value: "Roles, equity, vesting, decision-making in writing." },
           { label: "Terms of Service / Privacy Policy", value: "Customer-facing legal documents — industry standard." },
         ],
-        tips: [
-          "Spend money on good legal early — fixing mistakes costs 10× more",
-          "IP must be owned by company — investors check this",
-        ],
+        tips: ["Spend money on good legal early — fixing mistakes costs 10× more", "IP must be owned by company — investors check this"],
       },
       {
         title: "Contingency Planning",
@@ -654,84 +580,97 @@ const startupSections = [
           { label: "Plan C", value: "Wind-down scenario — how to preserve value if all else fails." },
           { label: "Key Person Risk", value: "What happens if a critical founder or employee leaves?" },
         ],
-        tips: [
-          "Hope is not a strategy — have written contingency plans",
-          "Run 'pre-mortems' — assume your startup failed, then work backwards to find why",
-        ],
+        tips: ["Hope is not a strategy — have written contingency plans", "Run 'pre-mortems' — assume your startup failed, then work backwards to find why"],
       },
     ],
   },
-]
+];
 
 const Badge = ({ label, color }) => (
   <span
     style={{
-      display: 'inline-block',
-      padding: '2px 10px',
+      display: "inline-block",
+      padding: "2px 10px",
       borderRadius: 99,
       fontSize: 11,
       fontWeight: 600,
       letterSpacing: 0.3,
-      background: color + '18',
+      background: color + "18",
       color: color,
       border: `1px solid ${color}33`,
     }}
   >
     {label}
   </span>
-)
+);
 
 const ScoreRow = ({ range, label, color }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-    <span style={{
-      minWidth: 72, fontWeight: 700, fontSize: 12,
-      color, fontFamily: 'monospace',
-      background: color + '15', borderRadius: 4,
-      padding: '2px 8px', textAlign: 'center'
-    }}>{range}</span>
-    <span style={{ fontSize: 13, color: '#374151' }}>{label}</span>
+  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+    <span
+      style={{
+        minWidth: 72,
+        fontWeight: 700,
+        fontSize: 12,
+        color,
+        fontFamily: "monospace",
+        background: color + "15",
+        borderRadius: 4,
+        padding: "2px 8px",
+        textAlign: "center",
+      }}
+    >
+      {range}
+    </span>
+    <span style={{ fontSize: 13, color: "#374151" }}>{label}</span>
   </div>
-)
+);
 
 const Highlight = ({ item }) =>
   item.highlight ? (
-    <div style={{
-      marginTop: 16,
-      padding: '12px 16px',
-      borderRadius: 8,
-      background: item.highlight.color,
-      borderLeft: `4px solid ${item.highlight.border}`,
-    }}>
-      <div style={{ fontWeight: 700, fontSize: 12, color: item.highlight.border, marginBottom: 4 }}>
-        {item.highlight.label}
-      </div>
-      <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.6 }}>{item.highlight.text}</div>
+    <div
+      style={{
+        marginTop: 16,
+        padding: "12px 16px",
+        borderRadius: 8,
+        background: item.highlight.color,
+        borderLeft: `4px solid ${item.highlight.border}`,
+      }}
+    >
+      <div style={{ fontWeight: 700, fontSize: 12, color: item.highlight.border, marginBottom: 4 }}>{item.highlight.label}</div>
+      <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>{item.highlight.text}</div>
     </div>
-  ) : null
+  ) : null;
 
 const ItemCard = ({ item, accent }) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   return (
-    <div style={{
-      borderRadius: 12,
-      border: `1px solid ${accent}22`,
-      overflow: 'hidden',
-      marginBottom: 10,
-      background: '#fff',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-    }}>
+    <div
+      style={{
+        borderRadius: 12,
+        border: `1px solid ${accent}22`,
+        overflow: "hidden",
+        marginBottom: 10,
+        background: "#fff",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+      }}
+    >
       <button
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
         style={{
-          width: '100%', textAlign: 'left', background: 'none',
-          border: 'none', cursor: 'pointer',
-          padding: '14px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          width: "100%",
+          textAlign: "left",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "14px 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
           gap: 10,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>{item.title}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>{item.title}</span>
           <Badge label={item.badge} color={item.badgeColor} />
         </div>
         <i
@@ -739,41 +678,46 @@ const ItemCard = ({ item, accent }) => {
           style={{
             fontSize: 13,
             color: accent,
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform .2s',
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform .2s",
             flexShrink: 0,
           }}
         />
       </button>
 
       {open && (
-        <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${accent}18` }}>
-          <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.7, marginTop: 12, marginBottom: 12 }}>
-            {item.description}
-          </p>
+        <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${accent}18` }}>
+          <p style={{ fontSize: 14, color: "#4B5563", lineHeight: 1.7, marginTop: 12, marginBottom: 12 }}>{item.description}</p>
 
           {item.formula && (
-            <div style={{
-              fontFamily: 'monospace', fontSize: 13, fontWeight: 700,
-              background: '#F3F4F6', borderRadius: 6, padding: '8px 14px',
-              color: accent, marginBottom: 12,
-              border: `1px solid ${accent}30`,
-            }}>
+            <div
+              style={{
+                fontFamily: "monospace",
+                fontSize: 13,
+                fontWeight: 700,
+                background: "#F3F4F6",
+                borderRadius: 6,
+                padding: "8px 14px",
+                color: accent,
+                marginBottom: 12,
+                border: `1px solid ${accent}30`,
+              }}
+            >
               {item.formula}
             </div>
           )}
 
           {item.details && item.details.length > 0 && (
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
                 <i className="fa-solid fa-list-ul" style={{ marginRight: 6, fontSize: 10 }} />
                 Details
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {item.details.map((d, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 13, lineHeight: 1.6, flexWrap: 'wrap' }}>
+                  <div key={i} style={{ display: "flex", gap: 8, fontSize: 13, lineHeight: 1.6, flexWrap: "wrap" }}>
                     <span style={{ fontWeight: 600, color: accent, minWidth: 130, flexShrink: 0 }}>{d.label}:</span>
-                    <span style={{ color: '#374151', flex: 1, minWidth: 0 }}>{d.value}</span>
+                    <span style={{ color: "#374151", flex: 1, minWidth: 0 }}>{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -782,23 +726,27 @@ const ItemCard = ({ item, accent }) => {
 
           {item.scores && (
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
                 <i className="fa-solid fa-chart-simple" style={{ marginRight: 6, fontSize: 10 }} />
                 Score Guide
               </div>
-              {item.scores.map((s, i) => <ScoreRow key={i} {...s} />)}
+              {item.scores.map((s, i) => (
+                <ScoreRow key={i} {...s} />
+              ))}
             </div>
           )}
 
           {item.tips && item.tips.length > 0 && (
             <div style={{ marginBottom: 4 }}>
-              <div style={{ fontWeight: 700, fontSize: 12, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 12, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
                 <i className="fa-solid fa-lightbulb" style={{ marginRight: 6, fontSize: 10 }} />
                 Pro Tips
               </div>
               <ul style={{ margin: 0, paddingLeft: 18 }}>
                 {item.tips.map((t, i) => (
-                  <li key={i} style={{ fontSize: 13, color: '#374151', lineHeight: 1.65, marginBottom: 5 }}>{t}</li>
+                  <li key={i} style={{ fontSize: 13, color: "#374151", lineHeight: 1.65, marginBottom: 5 }}>
+                    {t}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -808,15 +756,16 @@ const ItemCard = ({ item, accent }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 const StartupDocumentation = () => {
-  const [activeSection, setActiveSection] = useState(null)
+  const [activeSection, setActiveSection] = useState(null);
 
   return (
-    <div style={{ background: '#fff', minHeight: '100vh' }}>
-      <style>{`
+    <Layout>
+      <div style={{ background: "#fff", minHeight: "100vh" }}>
+        <style>{`
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
         * { box-sizing: border-box; }
         .doc-wrapper {
@@ -870,89 +819,90 @@ const StartupDocumentation = () => {
         }
       `}</style>
 
-      <div className="doc-wrapper">
-        {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <i className="fa-solid fa-rocket" style={{ fontSize: 12, color: '#6B7280' }} />
-            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1.2, textTransform: 'uppercase', color: '#6B7280' }}>
-              Founder Playbook
-            </span>
-          </div>
-          <h1 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 800, color: '#111827', margin: 0, lineHeight: 1.2 }}>
-            Startup OS Documentation
-          </h1>
-          <p style={{ fontSize: 14, color: '#6B7280', marginTop: 8, lineHeight: 1.6, maxWidth: 560 }}>
-            Complete reference for every module, metric, and AI-powered insight in your Startup Operating System.
-          </p>
-        </div>
-
-        {/* Quick Nav */}
-        <div className="nav-scroll">
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#6B7280', alignSelf: 'center', marginRight: 2 }}>Jump to:</span>
-          {startupSections.map(s => (
-            <button
-              key={s.id}
-              className="nav-btn"
-              onClick={() => {
-                setActiveSection(activeSection === s.id ? null : s.id)
-                document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              style={{
-                border: `1px solid ${s.color}44`,
-                background: activeSection === s.id ? s.color : s.bg,
-                color: activeSection === s.id ? '#fff' : s.color,
-              }}
-            >
-              <i className={`fa-solid ${s.icon}`} style={{ fontSize: 11 }} />
-              {s.category}
-            </button>
-          ))}
-        </div>
-
-        {/* Sections */}
-        {startupSections.map(section => (
-          <div key={section.id} id={`section-${section.id}`} style={{ marginBottom: 36 }}>
-            <div
-              className="section-header"
-              style={{
-                background: section.bg,
-                border: `1px solid ${section.color}30`,
-              }}
-            >
-              <div
-                className="section-icon"
-                style={{ background: section.color + '18' }}
-              >
-                <i className={`fa-solid ${section.icon}`} style={{ fontSize: 16, color: section.color }} />
-              </div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 15, color: section.color }}>{section.category}</div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginTop: 1 }}>
-                  {section.items.length} topic{section.items.length > 1 ? 's' : ''}
-                </div>
-              </div>
+        <div className="doc-wrapper">
+          {/* Header */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <i className="fa-solid fa-rocket" style={{ fontSize: 12, color: "#6B7280" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1.2, textTransform: "uppercase", color: "#6B7280" }}>Founder Playbook</span>
             </div>
+            <h1 style={{ fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 800, color: "#111827", margin: 0, lineHeight: 1.2 }}>Startup OS Documentation</h1>
+            <p style={{ fontSize: 14, color: "#6B7280", marginTop: 8, lineHeight: 1.6, maxWidth: 560 }}>
+              Complete reference for every module, metric, and AI-powered insight in your Startup Operating System.
+            </p>
+          </div>
 
-            {section.items.map((item, i) => (
-              <ItemCard key={i} item={item} accent={section.color} />
+          {/* Quick Nav */}
+          <div className="nav-scroll">
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", alignSelf: "center", marginRight: 2 }}>Jump to:</span>
+            {startupSections.map((s) => (
+              <button
+                key={s.id}
+                className="nav-btn"
+                onClick={() => {
+                  setActiveSection(activeSection === s.id ? null : s.id);
+                  document.getElementById(`section-${s.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                style={{
+                  border: `1px solid ${s.color}44`,
+                  background: activeSection === s.id ? s.color : s.bg,
+                  color: activeSection === s.id ? "#fff" : s.color,
+                }}
+              >
+                <i className={`fa-solid ${s.icon}`} style={{ fontSize: 11 }} />
+                {s.category}
+              </button>
             ))}
           </div>
-        ))}
 
-        {/* Footer */}
-        <div style={{
-          textAlign: 'center', padding: '20px',
-          borderTop: '1px solid #E5E7EB',
-          fontSize: 13, color: '#9CA3AF',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        }}>
-          <i className="fa-solid fa-sync-alt" style={{ fontSize: 12 }} />
-          All sections update as you refine your business model and add real customer data.
+          {/* Sections */}
+          {startupSections.map((section) => (
+            <div key={section.id} id={`section-${section.id}`} style={{ marginBottom: 36 }}>
+              <div
+                className="section-header"
+                style={{
+                  background: section.bg,
+                  border: `1px solid ${section.color}30`,
+                }}
+              >
+                <div className="section-icon" style={{ background: section.color + "18" }}>
+                  <i className={`fa-solid ${section.icon}`} style={{ fontSize: 16, color: section.color }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: section.color }}>{section.category}</div>
+                  <div style={{ fontSize: 12, color: "#6B7280", marginTop: 1 }}>
+                    {section.items.length} topic{section.items.length > 1 ? "s" : ""}
+                  </div>
+                </div>
+              </div>
+
+              {section.items.map((item, i) => (
+                <ItemCard key={i} item={item} accent={section.color} />
+              ))}
+            </div>
+          ))}
+
+          {/* Footer */}
+          <div
+            style={{
+              textAlign: "center",
+              padding: "20px",
+              borderTop: "1px solid #E5E7EB",
+              fontSize: 13,
+              color: "#9CA3AF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
+          >
+            <i className="fa-solid fa-sync-alt" style={{ fontSize: 12 }} />
+            All sections update as you refine your business model and add real customer data.
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    </Layout>
+  );
+};
 
-export default StartupDocumentation
+export default StartupDocumentation;
