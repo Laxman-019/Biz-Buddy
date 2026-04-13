@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import IdeaValidation from "../pages/IdeaValidation";
-import { FaLightbulb, FaChartLine, FaCubes, FaRocket, FaChartPie, FaHandshake, FaBullhorn, FaBolt, FaUsers, FaShieldAlt, FaHome, FaChevronRight, FaCalendarAlt } from "react-icons/fa";
+import { FaLightbulb, FaChartLine, FaCubes, FaRocket, FaChartPie, FaHandshake, FaBullhorn, FaBolt, FaUsers, FaShieldAlt, FaHome, FaChevronRight, FaCalendarAlt, FaBook } from "react-icons/fa";
 import { HiTrendingUp } from "react-icons/hi";
 import { MdOutlineChevronRight } from "react-icons/md";
 import MarketIntelligence from "./MarketIntelligence";
@@ -14,6 +14,7 @@ import StartupKPIs from "./StartupKPIs";
 import TeamCulture from "./TeamCulture";
 import StartupRisks from "./StartupRisks";
 import StartupOverview from "./StartupOverview";
+import { Link } from "react-router-dom";
 
 const FEATURES = [
   {
@@ -235,11 +236,19 @@ const StartupDashboard = () => {
                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{activeFeatureData?.label}</h2>
               </div>
 
-              {/* Date Display - Moved to right */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 shadow-sm">
-                <FaCalendarAlt className="text-gray-400 text-sm" />
-                <span className="text-sm text-gray-600">{new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-              </div>
+<div className="flex items-center gap-3">
+  <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+    <FaCalendarAlt className="text-gray-400 text-sm" />
+    <span className="text-sm text-gray-600">{new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+  </div>
+  
+  <Link to="/startupdoc">
+    <button className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors">
+      <FaBook className="text-gray-400 text-sm" />
+      <span className="text-sm text-gray-600">Documentation</span>
+    </button>
+  </Link>
+</div>
             </div>
           </div>
 

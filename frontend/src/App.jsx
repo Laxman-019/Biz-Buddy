@@ -12,7 +12,7 @@ import ListRecords from './pages/ListRecord'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Documentation from './pages/Documentation'
-import NewDoc from './pages/StartupDocumentation'
+import StartupDocumentation from './pages/StartupDocumentation'
 import StartupDashboard from './pages/StartupDashboard'
 import IdeaValidation from './pages/IdeaValidation'
 
@@ -31,7 +31,7 @@ const App = () => {
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/doc" element={< Documentation/>} />
-      <Route path="/newdoc" element={< NewDoc/>} />
+      <Route path="/startupdoc" element={< StartupDocumentation/>} />
       <Route path="/startup/dashboard" element={<StartupDashboard/>} />
       <Route path="/idea/validation" element={<IdeaValidation/>} />
     </Routes>
