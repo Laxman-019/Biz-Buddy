@@ -5,7 +5,11 @@ from predictions.strategy_engine import generate_business_strategy
 from predictions.intelligence_engine import generate_intelligence
 from predictions.market_engine import calculate_market_metrics
 from predictions.competitor_engine import analyze_competitor_position
-from predictions.gemini_engine import generate_gemini_insights
+from predictions.gemini_engine import (
+    generate_gemini_insights,
+    generate_gemini_diagnostic_interpretation, 
+    generate_gemini_strategy,
+)
 from rest_framework import status
 from businesses.models import BusinessRecord
 from django.db.models import Sum, Avg, Count
@@ -103,10 +107,17 @@ def complete_business_intelligence(req):
             })
         else:
             strategies = generate_business_strategy(user)
+
+            # Gemini enhancements — run in parallel context
+            gemini_diagnostic = generate_gemini_diagnostic_interpretation(user, intelligence)
+            gemini_strategy   = generate_gemini_strategy(user, intelligence)
+
             response_data.update({
                 'data_sufficient': True,
                 'intelligence': intelligence,
-                'strategies': strategies,
+                'strategies': strategies,                    # rule-based (kept for fallback)
+                'gemini_diagnostic': gemini_diagnostic,      # for AI Insights tab
+                'gemini_strategy': gemini_strategy,          # for Growth Strategy tab
                 'market_share': intelligence.get('market', {}).get('market_share_percent', 0),
                 'risk_level': intelligence.get('risk', {}).get('risk_level', 'Unknown'),
                 'forecast_trend': intelligence.get('forecast', {}).get('trend', 'stable')
