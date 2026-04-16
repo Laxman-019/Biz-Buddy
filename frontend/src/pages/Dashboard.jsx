@@ -2,21 +2,47 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { Link } from "react-router-dom";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, CartesianGrid, Area, AreaChart,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  CartesianGrid,
+  Area,
+  AreaChart,
 } from "recharts";
 import Layout from "../components/Layout";
 import {
-  TrendingUp, TrendingDown, AlertTriangle, Lightbulb,
-  Target, Shield, Calendar, RefreshCw, BarChart2,
-  Brain, Zap, ChevronRight, ArrowUpRight, ArrowDownRight,
-  Building2, CheckCircle2, XCircle, ArrowLeft, Sparkles,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  Lightbulb,
+  Target,
+  Shield,
+  Calendar,
+  RefreshCw,
+  BarChart2,
+  Brain,
+  Zap,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  Building2,
+  CheckCircle2,
+  XCircle,
+  ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 
 const formatCurrency = (num) => {
   if (num === null || num === undefined) return "—";
   return new Intl.NumberFormat("en-IN", {
-    style: "currency", currency: "INR", maximumFractionDigits: 0,
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(num);
 };
 const formatPercent = (num) => {
@@ -39,19 +65,27 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const KPICard = ({ title, value, subtitle, icon, gradient, trend }) => (
-  <div className={`relative overflow-hidden rounded-2xl p-6 text-white ${gradient} shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}>
+  <div
+    className={`relative overflow-hidden rounded-2xl p-6 text-white ${gradient} shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}
+  >
     <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10" />
     <div className="absolute -bottom-4 -right-2 w-16 h-16 rounded-full bg-white/5" />
     <div className="relative z-10">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-white/70 text-xs font-semibold uppercase tracking-widest">{title}</span>
-        <div className="p-2 bg-white/15 rounded-xl backdrop-blur-sm">{icon}</div>
+        <span className="text-white/70 text-xs font-semibold uppercase tracking-widest">
+          {title}
+        </span>
+        <div className="p-2 bg-white/15 rounded-xl backdrop-blur-sm">
+          {icon}
+        </div>
       </div>
       <p className="text-3xl font-black tracking-tight mb-1">{value}</p>
       {subtitle && (
         <p className="text-white/60 text-xs font-medium flex items-center gap-1">
           {trend === "up" && <ArrowUpRight className="w-3 h-3 text-white/80" />}
-          {trend === "down" && <ArrowDownRight className="w-3 h-3 text-white/80" />}
+          {trend === "down" && (
+            <ArrowDownRight className="w-3 h-3 text-white/80" />
+          )}
           {subtitle}
         </p>
       )}
@@ -61,16 +95,40 @@ const KPICard = ({ title, value, subtitle, icon, gradient, trend }) => (
 
 const AIMetricCard = ({ title, value, subtitle, icon, color = "blue" }) => {
   const palette = {
-    blue: { card: "bg-blue-50 border-blue-100", icon: "bg-blue-100 text-blue-600", val: "text-blue-900", sub: "text-blue-500" },
-    green: { card: "bg-green-50 border-green-100", icon: "bg-green-100 text-green-600", val: "text-green-900", sub: "text-green-500" },
-    red: { card: "bg-red-50 border-red-100", icon: "bg-red-100 text-red-600", val: "text-red-900", sub: "text-red-500" },
-    yellow: { card: "bg-amber-50 border-amber-100", icon: "bg-amber-100 text-amber-600", val: "text-amber-900", sub: "text-amber-500" },
+    blue: {
+      card: "bg-blue-50 border-blue-100",
+      icon: "bg-blue-100 text-blue-600",
+      val: "text-blue-900",
+      sub: "text-blue-500",
+    },
+    green: {
+      card: "bg-green-50 border-green-100",
+      icon: "bg-green-100 text-green-600",
+      val: "text-green-900",
+      sub: "text-green-500",
+    },
+    red: {
+      card: "bg-red-50 border-red-100",
+      icon: "bg-red-100 text-red-600",
+      val: "text-red-900",
+      sub: "text-red-500",
+    },
+    yellow: {
+      card: "bg-amber-50 border-amber-100",
+      icon: "bg-amber-100 text-amber-600",
+      val: "text-amber-900",
+      sub: "text-amber-500",
+    },
   };
   const p = palette[color] || palette.blue;
   return (
-    <div className={`rounded-2xl border p-5 ${p.card} hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}>
+    <div
+      className={`rounded-2xl border p-5 ${p.card} hover:shadow-md transition-all duration-300 hover:-translate-y-0.5`}
+    >
       <div className="flex items-start justify-between mb-4">
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest">{title}</p>
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest">
+          {title}
+        </p>
         <div className={`p-2 rounded-xl ${p.icon}`}>{icon}</div>
       </div>
       <p className={`text-2xl font-black ${p.val} mb-1`}>{value}</p>
@@ -85,7 +143,9 @@ const InsufficientDataCard = ({ remaining, message }) => (
       <AlertTriangle className="w-8 h-8 text-amber-500" />
     </div>
     <h3 className="text-xl font-bold text-amber-900 mb-2">Insufficient Data</h3>
-    <p className="text-amber-700 mb-5 max-w-md mx-auto text-sm leading-relaxed">{message}</p>
+    <p className="text-amber-700 mb-5 max-w-md mx-auto text-sm leading-relaxed">
+      {message}
+    </p>
     {remaining > 0 && (
       <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-200 px-5 py-2.5 rounded-xl">
         <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
@@ -100,7 +160,11 @@ const InsufficientDataCard = ({ remaining, message }) => (
 const SectionHeading = ({ icon, title, subtitle, badge }) => (
   <div className="flex items-start justify-between mb-6">
     <div className="flex items-center gap-3">
-      {icon && <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">{icon}</div>}
+      {icon && (
+        <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
+          {icon}
+        </div>
+      )}
       <div>
         <h2 className="text-lg font-bold text-gray-900">{title}</h2>
         {subtitle && <p className="text-gray-400 text-xs mt-0.5">{subtitle}</p>}
@@ -118,7 +182,9 @@ const Pill = ({ color = "indigo", children }) => {
     amber: "bg-amber-50 text-amber-700 border-amber-100",
   };
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${c[color]}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${c[color]}`}
+    >
       {children}
     </span>
   );
@@ -126,14 +192,33 @@ const Pill = ({ color = "indigo", children }) => {
 
 const DiagRow = ({ text, type }) => {
   const styles = {
-    obs: { bg: "bg-indigo-50 border-indigo-100", dot: "bg-indigo-500", icon: "•", text: "text-indigo-800" },
-    risk: { bg: "bg-red-50 border-red-100", dot: "bg-red-500", icon: "⚠", text: "text-red-800" },
-    strength: { bg: "bg-green-50 border-green-100", dot: "bg-green-500", icon: "✓", text: "text-green-800" },
+    obs: {
+      bg: "bg-indigo-50 border-indigo-100",
+      dot: "bg-indigo-500",
+      icon: "•",
+      text: "text-indigo-800",
+    },
+    risk: {
+      bg: "bg-red-50 border-red-100",
+      dot: "bg-red-500",
+      icon: "⚠",
+      text: "text-red-800",
+    },
+    strength: {
+      bg: "bg-green-50 border-green-100",
+      dot: "bg-green-500",
+      icon: "✓",
+      text: "text-green-800",
+    },
   };
   const s = styles[type] || styles.obs;
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-xl border ${s.bg} mb-2 last:mb-0`}>
-      <span className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold shrink-0 ${s.dot}`}>
+    <div
+      className={`flex items-start gap-3 p-3 rounded-xl border ${s.bg} mb-2 last:mb-0`}
+    >
+      <span
+        className={`mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-white text-xs font-bold shrink-0 ${s.dot}`}
+      >
         {s.icon}
       </span>
       <p className={`text-sm ${s.text} leading-relaxed`}>{text}</p>
@@ -152,16 +237,19 @@ const Dashboard = () => {
   const [businessInsights, setBusinessInsights] = useState(null);
   const [selectedBusiness, setSelectedBusiness] = useState("all");
   const [filteredRecords, setFilteredRecords] = useState(null);
-  const [gemini, setGemini] = useState(null);
-  const [geminiLoading, setGeminiLoading] = useState(false);
 
   const fetchBusinessData = async (businessName) => {
     try {
       const response = await axiosInstance.get("/api/list/");
       const allRecords = response.data;
-      const businessRecords = allRecords.filter((r) => r.business_name === businessName);
+      const businessRecords = allRecords.filter(
+        (r) => r.business_name === businessName,
+      );
       const total_sales = businessRecords.reduce((s, r) => s + r.sales, 0);
-      const total_expenses = businessRecords.reduce((s, r) => s + r.expenses, 0);
+      const total_expenses = businessRecords.reduce(
+        (s, r) => s + r.expenses,
+        0,
+      );
       const total_profit = businessRecords.reduce((s, r) => s + r.profit, 0);
       const monthlyData = {};
       businessRecords.forEach((record) => {
@@ -171,33 +259,47 @@ const Dashboard = () => {
         monthlyData[month].profit += record.profit;
       });
       const monthly_trend = Object.keys(monthlyData)
-        .map((m) => ({ month: m, sales: monthlyData[m].sales, profit: monthlyData[m].profit }))
+        .map((m) => ({
+          month: m,
+          sales: monthlyData[m].sales,
+          profit: monthlyData[m].profit,
+        }))
         .sort((a, b) => a.month.localeCompare(b.month));
       let businessInsightsData = null;
       try {
         const res = await axiosInstance.get(
-          `/api/business-insights/by-name/?business_name=${encodeURIComponent(businessName)}`
+          `/api/business-insights/by-name/?business_name=${encodeURIComponent(businessName)}`,
         );
         businessInsightsData = res.data;
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+      }
       setFilteredRecords({
         overview: {
-          total_sales, total_expenses, total_profit,
+          total_sales,
+          total_expenses,
+          total_profit,
           total_records: businessRecords.length,
-          profit_margin: total_sales > 0 ? (total_profit / total_sales) * 100 : 0,
+          profit_margin:
+            total_sales > 0 ? (total_profit / total_sales) * 100 : 0,
           avg_daily_sales: total_sales / businessRecords.length,
         },
         monthly_trend,
         insights: businessInsightsData,
       });
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  useEffect(() => { loadDashboardData(); }, []);
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   const loadDashboardData = async () => {
     try {
-      setLoading(true); setError(null);
+      setLoading(true);
+      setError(null);
       const insightsRes = await axiosInstance.get("/api/business-insights/");
       setBusinessInsights(insightsRes.data);
       const statusRes = await axiosInstance.get("/api/intelligence/status/");
@@ -207,28 +309,26 @@ const Dashboard = () => {
       if (statusRes.data.has_enough_data) {
         const intelligenceRes = await axiosInstance.get("/api/intelligence/");
         setIntelligence(intelligenceRes.data);
-        setGeminiLoading(true);
-        try {
-          const geminiRes = await axiosInstance.get(
-            "/api/ai-recommendations/",
-          );
-          setGemini(geminiRes.data);
-        } catch (e) {
-          console.error("Gemini fetch failed:", e);
-        } finally {
-          setGeminiLoading(false);
-        }
       }
     } catch (err) {
-      if (err.response?.status === 404) setError(`API endpoint not found: ${err.config.url}`);
-      else if (err.response?.status === 401) setError("Authentication failed. Please login again.");
-      else setError(err.response?.data?.message || "Failed to load dashboard data");
+      if (err.response?.status === 404)
+        setError(`API endpoint not found: ${err.config.url}`);
+      else if (err.response?.status === 401)
+        setError("Authentication failed. Please login again.");
+      else
+        setError(
+          err.response?.data?.message || "Failed to load dashboard data",
+        );
     } finally {
-      setLoading(false); setRefreshing(false);
+      setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const handleRefresh = () => { setRefreshing(true); loadDashboardData(); };
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadDashboardData();
+  };
 
   if (loading && !refreshing) {
     return (
@@ -242,8 +342,12 @@ const Dashboard = () => {
                 <Brain className="w-5 h-5 text-indigo-600" />
               </div>
             </div>
-            <h3 className="text-gray-800 font-semibold text-lg">Loading Intelligence</h3>
-            <p className="text-gray-400 text-sm mt-1">Crunching your business data…</p>
+            <h3 className="text-gray-800 font-semibold text-lg">
+              Loading Intelligence
+            </h3>
+            <p className="text-gray-400 text-sm mt-1">
+              Crunching your business data…
+            </p>
           </div>
         </div>
       </Layout>
@@ -258,13 +362,23 @@ const Dashboard = () => {
             <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <XCircle className="w-7 h-7 text-red-500" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Failed to Load</h3>
-            <p className="text-gray-500 text-sm mb-6 leading-relaxed">{error}</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Failed to Load
+            </h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+              {error}
+            </p>
             <div className="space-y-3">
-              <button onClick={handleRefresh} className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={handleRefresh}
+                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors"
+              >
                 Try Again
               </button>
-              <button onClick={() => (window.location.href = "/dashboard")} className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors">
+              <button
+                onClick={() => (window.location.href = "/dashboard")}
+                className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+              >
                 Refresh Page
               </button>
             </div>
@@ -274,15 +388,33 @@ const Dashboard = () => {
     );
   }
 
-  const currentData = filteredRecords ? filteredRecords.overview : overview?.overview;
-  const currentTrend = filteredRecords ? filteredRecords.monthly_trend : overview?.monthly_trend;
-  const currentBizInsights = selectedBusiness !== "all" ? filteredRecords?.insights : businessInsights;
+  const currentData = filteredRecords
+    ? filteredRecords.overview
+    : overview?.overview;
+  const currentTrend = filteredRecords
+    ? filteredRecords.monthly_trend
+    : overview?.monthly_trend;
+  const currentBizInsights =
+    selectedBusiness !== "all" ? filteredRecords?.insights : businessInsights;
 
   const TABS = [
-    { id: "overview", label: "Overview", icon: <BarChart2 className="w-4 h-4" /> },
-    { id: "insights", label: "AI Insights", icon: <Brain className="w-4 h-4" />, dot: status?.has_enough_data },
-    { id: "strategy", label: "Growth Strategy", icon: <Zap className="w-4 h-4" />, dot: status?.has_enough_data },
-    { id: "gemini",    label: "Gemini Analysis", icon: <Sparkles className="w-4 h-4" />, dot: status?.has_enough_data },
+    {
+      id: "overview",
+      label: "Overview",
+      icon: <BarChart2 className="w-4 h-4" />,
+    },
+    {
+      id: "insights",
+      label: "AI Insights",
+      icon: <Brain className="w-4 h-4" />,
+      dot: status?.has_enough_data,
+    },
+    {
+      id: "strategy",
+      label: "Growth Strategy",
+      icon: <Zap className="w-4 h-4" />,
+      dot: status?.has_enough_data,
+    },
   ];
 
   return (
@@ -323,7 +455,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Tab Bar */}
+          
           <div className="px-4 flex gap-1">
             {TABS.map((t) => (
               <button
@@ -392,9 +524,10 @@ const Dashboard = () => {
             </div>
           )}
 
+          
           {activeTab === "overview" && overview && (
             <div className="space-y-6">
-              {/* KPI Row */}
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <KPICard
                   title="Total Sales"
@@ -655,11 +788,7 @@ const Dashboard = () => {
                             setSelectedBusiness(name);
                             fetchBusinessData(name);
                           }}
-                          className={`group w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                            isActive
-                              ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
-                              : "bg-gray-50 border-gray-100 text-gray-700 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm"
-                          }`}
+                          className={`group w-full text-left p-4 rounded-xl border transition-all duration-200 ${isActive ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200" : "bg-gray-50 border-gray-100 text-gray-700 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm"}`}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -706,6 +835,7 @@ const Dashboard = () => {
             </div>
           )}
 
+          
           {activeTab === "insights" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (
@@ -715,6 +845,7 @@ const Dashboard = () => {
                 />
               ) : (
                 <>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                     <AIMetricCard
                       title="Forecast Trend"
@@ -783,93 +914,162 @@ const Dashboard = () => {
                     />
                   </div>
 
-                  {intelligence?.intelligence?.diagnostics && (
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                      <SectionHeading
-                        title="Diagnostic Analysis"
-                        subtitle="Deep-dive into what's driving your results"
-                        icon={<Brain className="w-4 h-4" />}
-                      />
-                      <div className="grid md:grid-cols-3 gap-6">
-                        <div>
-                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">
-                            Key Observations
-                          </p>
-                          {intelligence.intelligence.diagnostics.diagnostics?.map(
-                            (d, i) => (
-                              <DiagRow key={i} text={d} type="obs" />
-                            ),
-                          )}
-                          {!intelligence.intelligence.diagnostics.diagnostics
-                            ?.length && (
-                            <p className="text-sm text-gray-400">
-                              No observations available
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">
-                            Risk Factors
-                          </p>
-                          {intelligence.intelligence.diagnostics.risks?.map(
-                            (r, i) => (
-                              <DiagRow key={i} text={r} type="risk" />
-                            ),
-                          )}
-                          {!intelligence.intelligence.diagnostics.risks
-                            ?.length && (
-                            <p className="text-sm text-gray-400">
-                              No major risks detected
-                            </p>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">
-                            Strengths
-                          </p>
-                          {intelligence.intelligence.diagnostics.strengths?.map(
-                            (s, i) => (
-                              <DiagRow key={i} text={s} type="strength" />
-                            ),
-                          )}
-                          {!intelligence.intelligence.diagnostics.strengths
-                            ?.length && (
-                            <p className="text-sm text-gray-400">
-                              No strengths identified yet
-                            </p>
-                          )}
-                        </div>
+                  
+                  {intelligence?.gemini_diagnostic?.status === "success" && (
+                    <div className="bg-linear-to-br from-violet-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-5 h-5 text-violet-200" />
+                        <p className="text-violet-200 text-xs font-bold uppercase tracking-widest">
+                          Gemini AI Diagnostic Summary
+                        </p>
                       </div>
+                      <p className="text-white text-base leading-relaxed font-medium">
+                        {intelligence.gemini_diagnostic.data.diagnostic_summary}
+                      </p>
                     </div>
                   )}
 
-                  {intelligence?.intelligence?.competitor && (
+                  
+                  {intelligence?.gemini_diagnostic?.status === "success" && (
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                       <SectionHeading
                         title="Competitive Position"
                         subtitle="How you compare in the broader market"
                         icon={<Shield className="w-4 h-4" />}
+                        badge={
+                          <Pill color="indigo">
+                            <Sparkles className="w-3 h-3" /> Gemini AI
+                          </Pill>
+                        }
                       />
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="bg-linear-to-br from-violet-50 to-purple-50 border border-violet-100 p-5 rounded-2xl">
-                          <p className="text-violet-500 text-xs font-bold uppercase tracking-widest mb-2">
-                            Your Business Cluster
-                          </p>
-                          <p className="text-3xl font-black text-violet-900">
-                            {intelligence.intelligence.competitor.user_cluster}
-                          </p>
-                        </div>
-                        <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 p-5 rounded-2xl">
-                          <p className="text-blue-500 text-xs font-bold uppercase tracking-widest mb-2">
-                            Competitors in Analysis
-                          </p>
-                          <p className="text-3xl font-black text-blue-900">
+                      <div className="bg-linear-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-5">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 bg-violet-100 rounded-xl shrink-0">
+                            <Sparkles className="w-4 h-4 text-violet-600" />
+                          </div>
+                          <p className="text-violet-900 text-sm leading-relaxed">
                             {
-                              intelligence.intelligence.competitor
-                                .total_competitors
+                              intelligence.gemini_diagnostic.data
+                                .competitive_insight
                             }
                           </p>
                         </div>
+                      </div>
+
+                     
+                      {intelligence?.intelligence?.competitor && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="bg-gray-50 rounded-xl p-3">
+                              <p className="text-gray-400 text-xs uppercase tracking-wider">
+                                Your Cluster
+                              </p>
+                              <p className="text-gray-800 font-semibold text-sm">
+                                {
+                                  intelligence.intelligence.competitor
+                                    .user_cluster
+                                }
+                              </p>
+                            </div>
+                            <div className="bg-gray-50 rounded-xl p-3">
+                              <p className="text-gray-400 text-xs uppercase tracking-wider">
+                                Competitors
+                              </p>
+                              <p className="text-gray-800 font-semibold text-sm">
+                                {
+                                  intelligence.intelligence.competitor
+                                    .total_competitors
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  
+                  {intelligence?.gemini_diagnostic?.status !== "success" &&
+                    intelligence?.intelligence?.diagnostics && (
+                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                        <SectionHeading
+                          title="Diagnostic Analysis"
+                          subtitle="ML-powered insights"
+                          icon={<Brain className="w-4 h-4" />}
+                        />
+                        <div className="grid md:grid-cols-3 gap-6">
+                          <div>
+                            <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                              Key Observations
+                            </p>
+                            {intelligence.intelligence.diagnostics.diagnostics?.map(
+                              (d, i) => (
+                                <DiagRow key={i} text={d} type="obs" />
+                              ),
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">
+                              Risk Factors
+                            </p>
+                            {intelligence.intelligence.diagnostics.risks?.map(
+                              (r, i) => (
+                                <DiagRow key={i} text={r} type="risk" />
+                              ),
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3">
+                              Strengths
+                            </p>
+                            {intelligence.intelligence.diagnostics.strengths?.map(
+                              (s, i) => (
+                                <DiagRow key={i} text={s} type="strength" />
+                              ),
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                  
+                  {intelligence?.gemini_strategy?.status === "success" && (
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <SectionHeading
+                          title="Strategy Snapshot"
+                          subtitle="Key recommendations from Gemini"
+                          icon={<Zap className="w-4 h-4" />}
+                        />
+                        <button
+                          onClick={() => setActiveTab("strategy")}
+                          className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1"
+                        >
+                          View Full Strategy{" "}
+                          <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {intelligence.gemini_strategy.data.recommended_strategies
+                          ?.slice(0, 2)
+                          .map((rec, i) => (
+                            <div
+                              key={i}
+                              className="flex items-start gap-3 p-3 bg-indigo-50 rounded-xl"
+                            >
+                              <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                {i + 1}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-indigo-900 text-sm">
+                                  {rec.title}
+                                </p>
+                                <p className="text-indigo-700 text-xs">
+                                  {rec.action}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -878,227 +1078,122 @@ const Dashboard = () => {
             </div>
           )}
 
+          
           {activeTab === "strategy" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (
                 <InsufficientDataCard
                   remaining={status?.remaining}
-                  message="Add more records to get personalized AI growth strategies tailored specifically to your business."
+                  message="Add more records to unlock personalized growth strategies for your business."
                 />
               ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                  <SectionHeading
-                    title="AI-Generated Growth Strategy"
-                    subtitle="Personalized action plan based on your data"
-                    icon={<Lightbulb className="w-4 h-4" />}
-                    badge={
-                      <Pill color="indigo">
-                        <Sparkles className="w-3 h-3" /> AI Powered
-                      </Pill>
-                    }
-                  />
+                (() => {
+                  const gemStrat = intelligence?.gemini_strategy;
+                  const gemData =
+                    gemStrat?.status === "success" ? gemStrat.data : null;
+                  const source = gemData || intelligence?.strategies;
 
-                  <div className="space-y-6">
-                    {intelligence?.strategies?.strengths?.length > 0 && (
-                      <div>
-                        <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4" /> Your Strengths
-                        </p>
-                        <div className="bg-linear-to-br from-green-50 to-emerald-50 border border-green-100 p-5 rounded-2xl space-y-2">
-                          {intelligence.strategies.strengths.map((s, i) => (
-                            <div key={i} className="flex items-start gap-3">
-                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-green-500 text-white text-xs flex items-center justify-center font-bold">
-                                ✓
-                              </span>
-                              <p className="text-green-800 text-sm leading-relaxed">
-                                {s}
-                              </p>
-                            </div>
-                          ))}
+                  const priorities = {
+                    High: "bg-red-500",
+                    Medium: "bg-amber-500",
+                    Low: "bg-green-500",
+                  };
+
+                  return (
+                    <div className="space-y-6">
+                      {gemData && (
+                        <div className="flex items-center gap-2 mb-1">
+                          <Sparkles className="w-4 h-4 text-violet-500" />
+                          <span className="text-xs font-bold text-violet-600 uppercase tracking-widest">
+                            Powered by Gemini AI
+                          </span>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {intelligence?.strategies?.warnings?.length > 0 && (
-                      <div>
-                        <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4" /> Areas to Address
-                        </p>
-                        <div className="bg-linear-to-br from-red-50 to-rose-50 border border-red-100 p-5 rounded-2xl space-y-2">
-                          {intelligence.strategies.warnings.map((w, i) => (
-                            <div key={i} className="flex items-start gap-3">
-                              <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-red-500 text-white text-xs flex items-center justify-center font-bold">
-                                ⚠
-                              </span>
-                              <p className="text-red-800 text-sm leading-relaxed">
-                                {w}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {intelligence?.strategies?.recommended_strategies?.length >
-                      0 && (
-                      <div>
-                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <Zap className="w-4 h-4" /> Recommended Actions
-                        </p>
-                        <div className="bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-5 rounded-2xl space-y-3">
-                          {intelligence.strategies.recommended_strategies.map(
-                            (r, i) => (
+                      {source?.strengths?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4" /> Your Strengths
+                          </p>
+                          <div className="bg-linear-to-br from-green-50 to-emerald-50 border border-green-100 p-5 rounded-2xl space-y-2">
+                            {source.strengths.map((s, i) => (
                               <div key={i} className="flex items-start gap-3">
-                                <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
-                                  {i + 1}
+                                <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-green-500 text-white text-xs flex items-center justify-center font-bold">
+                                  ✓
                                 </span>
-                                <p className="text-indigo-800 text-sm leading-relaxed">
-                                  {r}
+                                <p className="text-green-800 text-sm leading-relaxed">
+                                  {s}
                                 </p>
                               </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {!intelligence?.strategies?.strengths?.length &&
-                      !intelligence?.strategies?.warnings?.length &&
-                      !intelligence?.strategies?.recommended_strategies
-                        ?.length && (
-                        <div className="text-center py-8 text-gray-400">
-                          <Lightbulb className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">
-                            No strategies generated yet. Check back soon.
-                          </p>
-                        </div>
-                      )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "gemini" && (
-            <div className="space-y-6">
-              {!status?.has_enough_data ? (
-                <InsufficientDataCard
-                  remaining={status?.remaining}
-                  message="Add more records to unlock Gemini-powered AI analysis for your business."
-                />
-              ) : geminiLoading ? (
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-                  <div className="relative w-14 h-14 mx-auto mb-5">
-                    <div className="absolute inset-0 rounded-full border-4 border-violet-100" />
-                    <div className="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin" />
-                    <div className="absolute inset-3 rounded-full bg-violet-50 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-violet-600" />
-                    </div>
-                  </div>
-                  <p className="text-gray-700 font-semibold">
-                    Gemini is analysing your business…
-                  </p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    This may take a few seconds
-                  </p>
-                </div>
-              ) : gemini?.gemini_analysis?.status === "success" ? (
-                <>
-                  {/* Executive Summary */}
-                  <div className="bg-linear-to-br from-violet-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Sparkles className="w-5 h-5 text-violet-200" />
-                      <p className="text-violet-200 text-xs font-bold uppercase tracking-widest">
-                        Gemini Executive Summary
-                      </p>
-                    </div>
-                    <p className="text-white text-base leading-relaxed font-medium">
-                      {gemini.gemini_analysis.ai_insights.executive_summary}
-                    </p>
-                  </div>
-
-                  {/* Recommendations */}
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <SectionHeading
-                      title="AI Recommendations"
-                      subtitle="Gemini-generated action plan based on your full business context"
-                      icon={<Lightbulb className="w-4 h-4" />}
-                      badge={
-                        <Pill color="indigo">
-                          <Sparkles className="w-3 h-3" /> Gemini AI
-                        </Pill>
-                      }
-                    />
-                    <div className="space-y-4">
-                      {gemini.gemini_analysis.ai_insights.recommendations?.map(
-                        (rec, i) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-4 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl hover:shadow-sm transition-all"
-                          >
-                            <span className="shrink-0 w-8 h-8 rounded-xl bg-indigo-600 text-white text-sm font-black flex items-center justify-center shadow-sm">
-                              {i + 1}
-                            </span>
-                            <div>
-                              <p className="text-indigo-900 font-bold text-sm mb-0.5">
-                                {rec.title}
-                              </p>
-                              <p className="text-indigo-700 text-sm leading-relaxed">
-                                {rec.action}
-                              </p>
-                              <p className="text-indigo-400 text-xs mt-1 italic">
-                                {rec.reason}
-                              </p>
-                            </div>
+                            ))}
                           </div>
-                        ),
+                        </div>
+                      )}
+
+                      {source?.warnings?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" /> Areas to
+                            Address
+                          </p>
+                          <div className="bg-linear-to-br from-red-50 to-rose-50 border border-red-100 p-5 rounded-2xl space-y-2">
+                            {source.warnings.map((w, i) => (
+                              <div key={i} className="flex items-start gap-3">
+                                <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-red-500 text-white text-xs flex items-center justify-center font-bold">
+                                  ⚠
+                                </span>
+                                <p className="text-red-800 text-sm leading-relaxed">
+                                  {w}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                
+                      {source?.recommended_strategies?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <Zap className="w-4 h-4" /> Recommended Actions
+                          </p>
+                          <div className="bg-linear-to-br from-indigo-50 to-violet-50 border border-indigo-100 p-5 rounded-2xl space-y-3">
+                            {source.recommended_strategies.map((r, i) => (
+                              <div key={i} className="flex items-start gap-3">
+                                {gemData ? (
+                                  <>
+                                    <span
+                                      className={`mt-1 shrink-0 px-2 py-0.5 rounded-md text-white text-xs font-bold ${priorities[r.priority] || "bg-indigo-600"}`}
+                                    >
+                                      {r.priority}
+                                    </span>
+                                    <div>
+                                      <p className="text-indigo-900 font-bold text-sm">
+                                        {r.title}
+                                      </p>
+                                      <p className="text-indigo-700 text-sm leading-relaxed">
+                                        {r.action}
+                                      </p>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="mt-1 w-5 h-5 shrink-0 rounded-md bg-indigo-600 text-white text-xs flex items-center justify-center font-bold">
+                                      {i + 1}
+                                    </span>
+                                    <p className="text-indigo-800 text-sm leading-relaxed">
+                                      {r}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
-
-                  {/* Key Risk + Growth Opportunity side by side */}
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="bg-red-50 border border-red-100 rounded-2xl p-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="w-4 h-4 text-red-500" />
-                        <p className="text-xs font-bold text-red-500 uppercase tracking-widest">
-                          Key Risk to Watch
-                        </p>
-                      </div>
-                      <p className="text-red-800 text-sm leading-relaxed">
-                        {gemini.gemini_analysis.ai_insights.key_risk}
-                      </p>
-                    </div>
-                    <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5">
-                      <div className="flex items-center gap-2 mb-3">
-                        <TrendingUp className="w-4 h-4 text-emerald-600" />
-                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                          Growth Opportunity
-                        </p>
-                      </div>
-                      <p className="text-emerald-800 text-sm leading-relaxed">
-                        {gemini.gemini_analysis.ai_insights.growth_opportunity}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-10 text-center">
-                  <XCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-                  <p className="text-gray-700 font-semibold">
-                    Gemini analysis unavailable
-                  </p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {gemini?.gemini_analysis?.message ||
-                      "Check your Gemini API key in the backend .env file."}
-                  </p>
-                  <button
-                    onClick={handleRefresh}
-                    className="mt-4 px-5 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
-                  >
-                    Retry
-                  </button>
-                </div>
+                  );
+                })()
               )}
             </div>
           )}
