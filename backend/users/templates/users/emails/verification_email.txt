@@ -1,0 +1,24 @@
+Welcome to BizElix! 🚀
+========================================
+
+Hello {{ user_name }}!
+
+Thank you for registering with BizElix. We're excited to have you on board!
+
+Please verify your email address by clicking the link below:
+
+{{ verification_link }}
+
+⚠️ Important: This link will expire in {{ expiry_hours }} hours.
+
+If you didn't create an account with BizElix, please ignore this email.
+
+What's next?
+- Complete your business profile
+- Connect with investors or startups
+- Access personalized recommendations
+- Track your business growth
+
+========================================
+© {% now "Y" %} BizElix. All rights reserved.
+Empowering Businesses, Connecting Dreams
