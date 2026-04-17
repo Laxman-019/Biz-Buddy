@@ -1,0 +1,44 @@
+{% extends "users/emails/base_email.html" %}
+
+{% block title %}Verify Your Email - BizElix{% endblock %}
+
+{% block header_content %}
+<h1>Welcome to BizElix! 🚀</h1>
+{% endblock %}
+
+{% block content %}
+<h2>Hello {{ user_name }}!</h2>
+
+<p>Thank you for registering with <strong>BizElix</strong>. We're excited to have you on board!</p>
+
+<p>Please verify your email address to get started with your account. Click the button below:</p>
+
+<div style="text-align: center;">
+    <a href="{{ verification_link }}" class="button">Verify Email Address</a>
+</div>
+
+<p>Or copy and paste this link in your browser:</p>
+<div class="link-box">
+    {{ verification_link }}
+</div>
+
+<div class="warning">
+    <strong>⚠️ Important:</strong> This link will expire in <strong>{{ expiry_hours }} hours</strong>.
+    If you don't verify within this time, you'll need to request a new verification email.
+</div>
+
+<p>If you didn't create an account with BizElix, please ignore this email.</p>
+
+<hr>
+
+<p style="font-size: 14px; color: #666;">
+    <strong>What's next?</strong><br>
+    After verification, you can:
+</p>
+<ul style="color: #666;">
+    <li>Complete your business profile</li>
+    <li>Connect with investors or startups</li>
+    <li>Access personalized recommendations</li>
+    <li>Track your business growth</li>
+</ul>
+{% endblock %}
