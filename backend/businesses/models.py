@@ -10,6 +10,7 @@ class BusinessRecord(models.Model):
         related_name='business_records'
     )
     business_name = models.CharField(max_length=250)
+    category = models.CharField(max_length=100, blank=True, null=True, default='General')
     date = models.DateField()
     sales = models.FloatField()
     expenses = models.FloatField()

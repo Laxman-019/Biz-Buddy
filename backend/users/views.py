@@ -37,7 +37,7 @@ def send_verification_email(user, token):
         html_content = render_to_string('users/emails/verification_email.html', context)
         text_content = render_to_string('users/emails/verification_email.txt', context)
         
-        subject = "Verify Your Email Address - BizBuddy"
+        subject = "Verify Your Email Address - BizElix"
         email = EmailMultiAlternatives(
             subject, text_content, settings.DEFAULT_FROM_EMAIL, [user.email]
         )
@@ -68,7 +68,7 @@ def send_password_reset_email(user, token):
         html_content = render_to_string('users/emails/password_reset_email.html', context)
         text_content = render_to_string('users/emails/password_reset_email.txt', context)
         
-        subject = "Password Reset Request - BizBuddy"
+        subject = "Password Reset Request - BizElix"
         email = EmailMultiAlternatives(
             subject, text_content, settings.DEFAULT_FROM_EMAIL, [user.email]
         )
