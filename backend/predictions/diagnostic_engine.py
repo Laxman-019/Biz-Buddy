@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django.db.models import functions
 from businesses.models import BusinessRecord
 from ml.industry_intelligence_engine import load_industry_metrics
 import os
@@ -21,13 +22,15 @@ def generate_diagnostics(user, intelligence):
 
     # User Financial Metrics
     records = BusinessRecord.objects.filter(user=user)
-    
-    # Get time-series data for trend analysis
-    monthly_records = records.values('date__year', 'date__month').annotate(
+    record_count = records.count()
+
+    monthly_records = list(records.annotate(
+        month_date=functions.TruncMonth('date')
+    ).values('month_date').annotate(
         month_sales=Sum('sales'),
         month_expenses=Sum('expenses'),
         month_profit=Sum('profit')
-    ).order_by('date__year', 'date__month')
+    ).order_by('month_date'))
     
     total_sales = records.aggregate(total=Sum('sales'))['total'] or 0
     total_expenses = records.aggregate(total=Sum('expenses'))['total'] or 0
@@ -40,23 +43,31 @@ def generate_diagnostics(user, intelligence):
         profit_margin = 0
         expense_ratio = 0
 
-    # Calculate month-over-month growth
     monthly_growth_rate = 0
     if len(monthly_records) >= 2:
         latest = monthly_records[-1]['month_sales'] or 0
         previous = monthly_records[-2]['month_sales'] or 0
         if previous > 0:
             monthly_growth_rate = ((latest - previous) / previous) * 100
+    elif len(monthly_records) == 1:
+        monthly_growth_rate = 0  
 
-    # Forecast Growth Diagnosis
     user_growth = intelligence.get('forecast', {}).get('user_growth', 0)
     performance_gap = intelligence.get('industry', {}).get('performance_gap', 0)
     trend = intelligence.get('forecast', {}).get('trend', 'stable')
     confidence = intelligence.get('forecast', {}).get('confidence_score', 0)
 
     # Enhanced growth analysis
-    if user_growth < 0:
-        diagnostics.append("⚠️ Your projected demand is declining.")
+    if user_growth < -10:
+        diagnostics.append("  Your projected demand is declining rapidly.")
+        risks.append("Sharp negative growth trend may impact cash flow and sustainability.")
+        recommendations.append({
+            "title": "Reverse Growth Trend - URGENT",
+            "action": "Review customer feedback, analyze market changes, and adjust strategy",
+            "priority": "Critical"
+        })
+    elif user_growth < 0:
+        diagnostics.append("   Your projected demand is declining.")
         risks.append("Negative growth trend may impact cash flow and sustainability.")
         recommendations.append({
             "title": "Reverse Growth Trend",
@@ -72,9 +83,17 @@ def generate_diagnostics(user, intelligence):
             "priority": "High"
         })
 
-    if performance_gap < -10:
-        diagnostics.append("⚠️ You are significantly underperforming relative to industry growth.")
-        risks.append("Competitive positioning gap is widening.")
+    if performance_gap < -15:
+        diagnostics.append("   You are significantly underperforming relative to industry growth.")
+        risks.append("Competitive positioning gap is widening dangerously.")
+        recommendations.append({
+            "title": "Competitive Analysis - URGENT",
+            "action": "Conduct competitor benchmarking and identify differentiation opportunities",
+            "priority": "Critical"
+        })
+    elif performance_gap < -5:
+        diagnostics.append("   You are underperforming relative to industry growth.")
+        risks.append("Competitive positioning may need improvement.")
         recommendations.append({
             "title": "Competitive Analysis",
             "action": "Conduct competitor benchmarking and identify differentiation opportunities",
@@ -86,12 +105,20 @@ def generate_diagnostics(user, intelligence):
 
     # Profitability Diagnosis with deeper analysis
     if profit_margin < 0:
-        risks.append("🔴 Critical: Business is operating at a loss.")
+        risks.append("    Critical: Business is operating at a loss.")
         diagnostics.append("Immediate action needed to address negative profitability.")
         recommendations.append({
             "title": "Profitability Turnaround",
             "action": "Review pricing strategy and reduce operational costs",
             "priority": "Critical"
+        })
+    elif profit_margin < 0.05:
+        risks.append("   Critical: Profit margin is dangerously thin (<5%).")
+        diagnostics.append("Profit margin at critical levels - high risk of losses.")
+        recommendations.append({
+            "title": "Margin Improvement - URGENT",
+            "action": "Increase prices by 5-10% or reduce costs by 15%",
+            "priority": "High"
         })
     elif profit_margin < 0.10:
         diagnostics.append("Profit margin is thin (below 10%).")
@@ -106,31 +133,45 @@ def generate_diagnostics(user, intelligence):
         opportunities.append("Strong profitability provides resources for growth investment.")
 
     # Expense analysis
-    if expense_ratio > 0.8:
-        risks.append("🔥 Critical: Expense ratio is dangerously high (>80%).")
+    if expense_ratio > 0.85:
+        risks.append("  Critical: Expense ratio is dangerously high (>85%).")
         diagnostics.append("Cost structure needs immediate optimization.")
+        recommendations.append({
+            "title": "Cost Optimization - URGENT",
+            "action": "Audit all expenses and identify 30% cost reduction opportunities",
+            "priority": "Critical"
+        })
+    elif expense_ratio > 0.70:
+        risks.append("   High: Expense ratio is elevated (>70%).")
+        diagnostics.append("Cost structure needs optimization.")
         recommendations.append({
             "title": "Cost Optimization",
             "action": "Audit all expenses and identify 20% cost reduction opportunities",
             "priority": "High"
         })
-    elif expense_ratio > 0.65:
-        diagnostics.append("Expense ratio is elevated (>65%).")
+    elif expense_ratio > 0.60:
+        diagnostics.append("Expense ratio is elevated (>60%).")
         recommendations.append({
             "title": "Efficiency Review",
             "action": "Implement expense tracking and negotiate vendor contracts",
             "priority": "Medium"
         })
-    elif expense_ratio < 0.5:
-        strengths.append("✅ Lean cost structure - excellent operational efficiency!")
+    elif expense_ratio < 0.50:
+        strengths.append("  Lean cost structure - excellent operational efficiency!")
 
-    # Monthly growth momentum
-    if monthly_growth_rate > 10:
-        strengths.append(f"📈 Strong monthly momentum: {monthly_growth_rate:.1f}% growth")
-        opportunities.append("Current momentum suggests favorable conditions for expansion.")
-    elif monthly_growth_rate < -10:
-        risks.append(f"⚠️ Rapid monthly decline: {monthly_growth_rate:.1f}% drop")
-        diagnostics.append("Recent performance shows concerning downward trend.")
+    # Monthly growth momentum - FIXED: Only show if we have data
+    if len(monthly_records) >= 2:
+        if monthly_growth_rate > 15:
+            strengths.append(f"  Strong monthly momentum: {monthly_growth_rate:.1f}% growth")
+            opportunities.append("Current momentum suggests favorable conditions for expansion.")
+        elif monthly_growth_rate > 5:
+            strengths.append(f"  Positive monthly growth: {monthly_growth_rate:.1f}%")
+        elif monthly_growth_rate < -15:
+            risks.append(f"  Rapid monthly decline: {monthly_growth_rate:.1f}% drop")
+            diagnostics.append("Recent performance shows concerning downward trend.")
+        elif monthly_growth_rate < -5:
+            risks.append(f"  Monthly decline: {monthly_growth_rate:.1f}% drop")
+            diagnostics.append("Recent performance shows negative trend.")
 
     # Discount Intelligence with recommendations
     industry_discount_corr = industry["discount_intelligence"]["correlation"]
@@ -151,17 +192,24 @@ def generate_diagnostics(user, intelligence):
 
     # Festival Intelligence with timing recommendations
     festival_lift = industry["festival_intelligence"]["festival_lift_percent"]
-    next_festival = industry["festival_intelligence"].get("next_festival", "Unknown")
+    next_festival = industry["festival_intelligence"].get("next_festival", "upcoming festival")
     days_to_festival = industry["festival_intelligence"].get("days_until_next", 365)
 
     if festival_lift > 15:
         diagnostics.append(f"🎉 Industry revenue increases ~{festival_lift:.1f}% during festival events.")
         
-        if days_to_festival < 60:
-            opportunities.append(f"Only {days_to_festival} days until {next_festival} - prime preparation window!")
+        if days_to_festival < 45:
+            opportunities.append(f"  Only {days_to_festival} days until {next_festival} - CRITICAL preparation window!")
+            recommendations.append({
+                "title": "FESTIVAL CAMPAIGN - URGENT",
+                "action": f"Launch festival marketing campaign within {max(0, days_to_festival-30)} days",
+                "priority": "Critical"
+            })
+        elif days_to_festival < 90:
+            opportunities.append(f"📅 {days_to_festival} days until {next_festival} - prime preparation window!")
             recommendations.append({
                 "title": "Festival Campaign Ready",
-                "action": f"Launch festival-specific marketing campaign {days_to_festival-30} days before {next_festival}",
+                "action": f"Launch festival-specific marketing campaign before {next_festival}",
                 "priority": "High"
             })
         
@@ -180,7 +228,7 @@ def generate_diagnostics(user, intelligence):
     competition_intensity = industry["competition_intelligence"].get("intensity", "medium")
 
     if comp_drop > 20:
-        risks.append(f"⚠️ Revenue drops {comp_drop:.0f}% under high competition.")
+        risks.append(f"  Revenue drops {comp_drop:.0f}% under high competition.")
         diagnostics.append("Your industry is highly sensitive to competitive pressure.")
         recommendations.append({
             "title": "Competitive Moat Development",
@@ -199,7 +247,15 @@ def generate_diagnostics(user, intelligence):
     inventory_impact = industry["inventory_intelligence"]["inventory_pressure_revenue_change_percent"]
     inventory_optimization = industry["inventory_intelligence"].get("optimization_potential", 0)
 
-    if inventory_impact < 0:
+    if inventory_impact < -10:
+        risks.append("  Severe inventory pressure negatively impacts revenue in your industry.")
+        diagnostics.append("Inventory management is critical for your business success.")
+        recommendations.append({
+            "title": "Inventory Management System",
+            "action": "Implement demand forecasting and just-in-time inventory",
+            "priority": "High"
+        })
+    elif inventory_impact < 0:
         risks.append("Inventory pressure negatively impacts revenue in your industry.")
         if inventory_optimization > 10:
             opportunities.append(f"Optimizing inventory could improve revenue by {inventory_optimization:.0f}%.")
@@ -209,33 +265,34 @@ def generate_diagnostics(user, intelligence):
                 "priority": "Medium"
             })
 
-    # Category Benchmark with actionable insights
+    # Category Benchmark with actionable insights - FIXED: Removed category field reference
     top_categories = industry["category_intelligence"]["top_categories"][:3]
     emerging_categories = industry["category_intelligence"].get("emerging_categories", [])
     
     if top_categories:
         diagnostics.append(f"Top performing categories: {', '.join(top_categories)}.")
         
-        # Check if user's categories align
-        user_categories = set(records.values_list('category', flat=True).distinct())
-        if user_categories:
-            aligned = [cat for cat in top_categories if cat in user_categories]
-            if aligned:
-                strengths.append(f"✅ Operating in high-growth categories: {', '.join(aligned)}")
-            elif emerging_categories:
-                opportunities.append(f"Consider expanding into emerging categories: {', '.join(emerging_categories[:2])}")
+        # Check if user's businesses align with top categories (simplified without category field)
+        user_business_count = records.values('business_name').distinct().count()
+        if user_business_count > 0:
+            opportunities.append(f"Consider expanding into high-growth categories: {', '.join(top_categories[:2])}")
+            recommendations.append({
+                "title": "Category Expansion",
+                "action": f"Research entry opportunities in {top_categories[0]} category",
+                "priority": "Medium"
+            })
 
-    # New: Liquidity / Cash Flow Analysis
+    # Liquidity / Cash Flow Analysis
     cash_on_hand = intelligence.get('financial', {}).get('cash_on_hand', 0)
     monthly_burn = intelligence.get('financial', {}).get('monthly_burn_rate', 0)
     
     if monthly_burn > 0 and cash_on_hand > 0:
         runway_months = cash_on_hand / monthly_burn
         if runway_months < 3:
-            risks.append(f"🔴 Critical: Only {runway_months:.1f} months of runway remaining.")
+            risks.append(f"    Critical: Only {runway_months:.1f} months of runway remaining.")
             recommendations.append({
-                "title": "Extend Runway",
-                "action": "Reduce non-essential expenses or accelerate fundraising",
+                "title": "Extend Runway - URGENT",
+                "action": "Reduce non-essential expenses or accelerate fundraising immediately",
                 "priority": "Critical"
             })
         elif runway_months < 6:
@@ -245,23 +302,57 @@ def generate_diagnostics(user, intelligence):
                 "action": "Review budget and identify 15-20% cost reductions",
                 "priority": "High"
             })
+        elif runway_months < 12:
+            diagnostics.append(f"Runway: {runway_months:.1f} months - healthy but monitor.")
+        else:
+            strengths.append(f"  Strong runway: {runway_months:.0f}+ months of operating capital.")
 
-    # New: Customer Concentration Risk
-    top_customers = records.values('business_name').annotate(
+    # Customer/Business Concentration Risk - FIXED: Use business_name instead of customer_name
+    top_businesses = records.values('business_name').annotate(
         total=Sum('sales')
     ).order_by('-total')[:3]
     
-    if len(top_customers) >= 1:
-        top_concentration = (top_customers[0]['total'] / total_sales * 100) if total_sales > 0 else 0
-        if top_concentration > 40:
-            risks.append(f"⚠️ High customer concentration: Top customer = {top_concentration:.0f}% of revenue.")
+    if len(top_businesses) >= 1 and total_sales > 0:
+        top_concentration = (top_businesses[0]['total'] / total_sales * 100)
+        if top_concentration > 60:
+            risks.append(f"    Critical: Top business is {top_concentration:.0f}% of revenue. Extreme concentration risk.")
+            diagnostics.append("Extreme business concentration - single entity dominates revenue.")
+            recommendations.append({
+                "title": "Diversify Customer Base - URGENT",
+                "action": "Aggressively target new customer segments to reduce dependency",
+                "priority": "Critical"
+            })
+        elif top_concentration > 40:
+            risks.append(f"  High business concentration: Top business = {top_concentration:.0f}% of revenue.")
+            diagnostics.append(f"Revenue concentrated in single business ({top_concentration:.0f}%).")
             recommendations.append({
                 "title": "Diversify Customer Base",
                 "action": "Target new customer segments to reduce dependency",
                 "priority": "High"
             })
         elif top_concentration > 25:
-            diagnostics.append(f"Customer concentration risk: Top customer = {top_concentration:.0f}%.")
+            diagnostics.append(f"Moderate concentration: Top business = {top_concentration:.0f}% of revenue.")
+
+    # Data Quality Assessment
+    required_records = 14
+    if record_count < required_records:
+        diagnostics.append(f"📊 Data quality improving: {record_count}/{required_records} records. Add {required_records - record_count} more for full insights.")
+        risks.append(f"Incomplete data ({record_count}/{required_records} records) may affect insight accuracy.")
+    elif record_count >= required_records and record_count < 30:
+        strengths.append(f"  Sufficient data for basic insights ({record_count} records). Add 30+ for advanced analytics.")
+    elif record_count >= 30:
+        strengths.append(f"🏆 Excellent data coverage! ({record_count} records) - Full analytics available.")
+
+    # Forecast Confidence
+    if confidence < 50 and record_count >= 14:
+        diagnostics.append(f"📊 Forecast confidence is low ({confidence:.0f}%). Add more historical data for better predictions.")
+        recommendations.append({
+            "title": "Improve Forecast Accuracy",
+            "action": f"Add {max(0, 30 - record_count)} more records to increase prediction confidence",
+            "priority": "Medium"
+        })
+    elif confidence > 80:
+        strengths.append(f"🎯 High forecast confidence ({confidence:.0f}%) - predictions are reliable!")
 
     # Remove duplicates while preserving order
     diagnostics = list(dict.fromkeys(diagnostics))
@@ -285,7 +376,9 @@ def generate_diagnostics(user, intelligence):
             "monthly_growth": round(monthly_growth_rate, 1),
             "performance_gap": round(performance_gap, 1),
             "user_growth": round(user_growth, 1),
-            "confidence_score": confidence
+            "confidence_score": confidence,
+            "record_count": record_count,
+            "business_count": len(top_businesses)
         }
     }
 
@@ -320,16 +413,31 @@ Respond in JSON format:
 """
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model="gemini-2.5-flash",
             contents=prompt
         )
         text = response.text.strip()
         if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-            text = text.strip()
-        return json.loads(text)
+            lines = text.split('\n')
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            text = '\n'.join(lines).strip()
+        if text.startswith("json"):
+            text = text[4:].strip()
+        
+        # Try to parse JSON with regex fallback
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            json_match = re.search(r'\{.*\}', text, re.DOTALL)
+            if json_match:
+                data = json.loads(json_match.group())
+            else:
+                raise Exception(f"Failed to parse JSON: {text[:200]}")
+        
+        return data
     except Exception as e:
         print(f"AI recommendation error: {e}")
         return None
