@@ -11,6 +11,8 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  LineChart,
+  Line,
 } from "recharts";
 import Layout from "../components/Layout";
 import {
@@ -49,6 +51,39 @@ import {
   ShoppingCart,
   Instagram,
   TrendingUp as TrendIcon,
+  Award,
+  PieChart,
+  MessageCircle,
+  ThumbsUp,
+  HelpCircle,
+  Loader,
+  FileText,
+  ExternalLink,
+  Settings,
+  Filter,
+  Star,
+  Gift,
+  Rocket,
+  Heart,
+  Coffee,
+  Briefcase,
+  Home,
+  Layers,
+  Activity,
+  Radio,
+  Circle,
+  UserPlus,
+  PlusCircle,
+  Send,
+  Phone,
+  MapPin,
+  Sun,
+  Moon,
+  Plus,
+  Trash2,
+  Edit2,
+  PartyPopper,
+  Gift as GiftIcon,
 } from "lucide-react";
 import jsPDF from "jspdf";
 
@@ -293,6 +328,435 @@ const DiagRow = ({ text, type }) => {
   );
 };
 
+// Seasonal Events Data
+const SEASONAL_EVENTS = [
+  {
+    id: 1,
+    name: "Diwali Festival",
+    icon: <GiftIcon className="w-5 h-5" />,
+    date: "October - November",
+    expectedLift: 60,
+    category: "festival",
+    color: "orange",
+    bgGradient: "from-orange-500 to-red-600",
+    recommendedActions: [
+      "Launch festive collections 4 weeks before Diwali",
+      "Offer Diwali combo discounts (15-25% off)",
+      "Run social media countdown campaigns",
+      "Send personalized Diwali greeting emails",
+      "Create festive gift guides and bundles",
+      "Implement 'Shop now, pay later' options"
+    ],
+    budgetSuggestion: 50000,
+    roi: "3-4x",
+    preparationTime: "4 weeks before",
+  },
+  {
+    id: 2,
+    name: "New Year Sale",
+    icon: <PartyPopper className="w-5 h-5" />,
+    date: "December - January",
+    expectedLift: 45,
+    category: "sale",
+    color: "blue",
+    bgGradient: "from-blue-500 to-cyan-600",
+    recommendedActions: [
+      "Year-end clearance promotions (20-40% off)",
+      "New Year resolution themed campaigns",
+      "Limited time flash sales (24-48 hours)",
+      "Loyalty program double points event",
+      "Early bird booking discounts for Q1",
+      "'12 Days of Sales' campaign"
+    ],
+    budgetSuggestion: 40000,
+    roi: "2.5-3.5x",
+    preparationTime: "3 weeks before",
+  },
+  {
+    id: 3,
+    name: "Summer Splash",
+    icon: <Sun className="w-5 h-5" />,
+    date: "March - April",
+    expectedLift: 35,
+    category: "seasonal",
+    color: "yellow",
+    bgGradient: "from-yellow-500 to-orange-500",
+    recommendedActions: [
+      "Launch summer catalog in early March",
+      "Heat wave emergency flash sales",
+      "Beach/holiday themed content marketing",
+      "Collaborate with summer lifestyle influencers",
+      "Offer free shipping on summer items",
+      "Create summer lookbook videos"
+    ],
+    budgetSuggestion: 35000,
+    roi: "2-3x",
+    preparationTime: "3 weeks before",
+  },
+  {
+    id: 4,
+    name: "Black Friday",
+    icon: <ShoppingCart className="w-5 h-5" />,
+    date: "November",
+    expectedLift: 75,
+    category: "sale",
+    color: "purple",
+    bgGradient: "from-purple-600 to-pink-600",
+    recommendedActions: [
+      "Week-long daily deals with increasing discounts",
+      "Doorbuster midnight offers (first 100 customers)",
+      "Email list VIP early access (24 hours early)",
+      "Buy more, save more campaigns (₹5000 = 10% off)",
+      "Social media flash giveaways every hour",
+      "Abandoned cart recovery with extra 5% off"
+    ],
+    budgetSuggestion: 60000,
+    roi: "4-5x",
+    preparationTime: "5 weeks before",
+  },
+  {
+    id: 5,
+    name: "Holi Celebration",
+    icon: <Heart className="w-5 h-5" />,
+    date: "March",
+    expectedLift: 40,
+    category: "festival",
+    color: "pink",
+    bgGradient: "from-pink-500 to-rose-600",
+    recommendedActions: [
+      "Colorful product collection launch",
+      "Group buying discounts (buy 3 get 1 free)",
+      "Social media color splash contest",
+      "Festival recipe/user-generated content campaign",
+      "Same-day delivery promise for Holi",
+      "Referral program double rewards"
+    ],
+    budgetSuggestion: 30000,
+    roi: "2.5-3.5x",
+    preparationTime: "3 weeks before",
+  },
+  {
+    id: 6,
+    name: "Year End Clearance",
+    icon: <Rocket className="w-5 h-5" />,
+    date: "December",
+    expectedLift: 50,
+    category: "sale",
+    color: "teal",
+    bgGradient: "from-teal-500 to-emerald-600",
+    recommendedActions: [
+      "Up to 70% off on old inventory",
+      "Mystery boxes with surprise products",
+      "Last chance email reminders",
+      "Social media stock countdown",
+      "Bundle deals with free gift wrapping",
+      "Loyalty points redemption event"
+    ],
+    budgetSuggestion: 45000,
+    roi: "3-4x",
+    preparationTime: "2 weeks before",
+  },
+];
+
+// Seasonal Campaign Planner Component
+const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => {
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [customBudget, setCustomBudget] = useState(25000);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [selectedEventForBudget, setSelectedEventForBudget] = useState(null);
+
+  const calculateProjectedRevenue = (event, budget) => {
+    const baseMultiplier = event.expectedLift / 100;
+    const budgetMultiplier = budget / event.budgetSuggestion;
+    const currentSales = currentData?.total_sales || 100000;
+    return currentSales * baseMultiplier * Math.min(budgetMultiplier, 2);
+  };
+
+  const handlePlanCampaign = (event) => {
+    setSelectedEventForBudget(event);
+    setCustomBudget(event.budgetSuggestion);
+    setShowBudgetModal(true);
+  };
+
+  const handleConfirmPlan = () => {
+    if (selectedEventForBudget) {
+      alert(`✅ Campaign "${selectedEventForBudget.name}" planned with budget ₹${customBudget.toLocaleString()}!\n\nProjected additional revenue: ${formatCurrency(calculateProjectedRevenue(selectedEventForBudget, customBudget))}\n\nCheck your email for the detailed campaign guide.`);
+    }
+    setShowBudgetModal(false);
+    if (onPlanClick) onPlanClick();
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <SectionHeading
+        title="🎊 Seasonal & Festival Campaign Planner"
+        subtitle="Plan your marketing around upcoming events"
+        icon={<Calendar className="w-4 h-4" />}
+        badge={<Pill color="purple"><Sparkles className="w-3 h-3" /> Maximize ROI</Pill>}
+      />
+
+      {/* Upcoming Events Grid */}
+      <div className="mb-6">
+        <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-orange-500" />
+          Upcoming Opportunities
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {SEASONAL_EVENTS.map((event) => (
+            <div
+              key={event.id}
+              className={`relative overflow-hidden rounded-xl border-2 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer ${selectedEvent?.id === event.id ? "border-indigo-500 shadow-md" : "border-gray-100"}`}
+              onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
+            >
+              <div className={`bg-linear-to-r ${event.bgGradient} p-4 text-white`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-white/20 rounded-lg">
+                      {event.icon}
+                    </div>
+                    <p className="font-bold text-sm">{event.name}</p>
+                  </div>
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                    +{event.expectedLift}% lift
+                  </span>
+                </div>
+                <p className="text-xs text-white/80 mt-2">{event.date}</p>
+              </div>
+              <div className="p-4">
+                <div className="flex justify-between text-xs mb-2">
+                  <span className="text-gray-500">Budget range:</span>
+                  <span className="font-semibold text-gray-700">
+                    ₹{(event.budgetSuggestion * 0.7).toLocaleString()} - ₹{(event.budgetSuggestion * 1.3).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs mb-3">
+                  <span className="text-gray-500">Expected ROI:</span>
+                  <span className="font-semibold text-green-600">{event.roi}</span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlanCampaign(event);
+                  }}
+                  className="w-full mt-2 py-2 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-700 transition flex items-center justify-center gap-1"
+                >
+                  <Rocket className="w-3 h-3" /> Plan Campaign
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Selected Event Details */}
+      {selectedEvent && (
+        <div className="mt-6 p-5 bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                {selectedEvent.icon}
+              </div>
+              <h3 className="font-bold text-indigo-900">{selectedEvent.name} Strategy</h3>
+            </div>
+            <span className="text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded-full">
+              Prepare {selectedEvent.preparationTime}
+            </span>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-indigo-700 mb-2">📋 Recommended Actions:</p>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {selectedEvent.recommendedActions.map((action, i) => (
+                  <li key={i} className="text-xs text-indigo-800 flex items-start gap-2">
+                    <span className="text-indigo-500 mt-0.5">✓</span>
+                    <span>{action}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-indigo-100">
+              <div>
+                <p className="text-xs text-indigo-500">Expected Lift</p>
+                <p className="text-lg font-bold text-indigo-800">+{selectedEvent.expectedLift}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-indigo-500">Suggested Budget</p>
+                <p className="text-lg font-bold text-indigo-800">{formatCurrency(selectedEvent.budgetSuggestion)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-indigo-500">Expected ROI</p>
+                <p className="text-lg font-bold text-green-600">{selectedEvent.roi}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Tips Banner */}
+      <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
+        <p className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+          <Lightbulb className="w-4 h-4" /> Seasonal Success Tips
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-amber-700">
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600">1.</span>
+            <span>Start planning 4-6 weeks before the event</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600">2.</span>
+            <span>Create event-specific landing pages</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600">3.</span>
+            <span>Build email sequences for each phase</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600">4.</span>
+            <span>Retarget past customers with special offers</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Budget Planning Modal */}
+      {showBudgetModal && selectedEventForBudget && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowBudgetModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Plan {selectedEventForBudget.name} Campaign</h3>
+              <button
+                onClick={() => setShowBudgetModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-gray-600 flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4" /> Campaign Budget: ₹{customBudget.toLocaleString()}
+                </label>
+                <input
+                  type="range"
+                  min={selectedEventForBudget.budgetSuggestion * 0.5}
+                  max={selectedEventForBudget.budgetSuggestion * 2}
+                  step={5000}
+                  value={customBudget}
+                  onChange={(e) => setCustomBudget(Number(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>₹{(selectedEventForBudget.budgetSuggestion * 0.5).toLocaleString()}</span>
+                  <span>₹{(selectedEventForBudget.budgetSuggestion).toLocaleString()}</span>
+                  <span>₹{(selectedEventForBudget.budgetSuggestion * 2).toLocaleString()}</span>
+                </div>
+              </div>
+              <div className="bg-indigo-50 rounded-xl p-4">
+                <p className="text-sm font-semibold text-indigo-800 mb-2">Projected Impact</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-indigo-600">Expected Lift:</span>
+                  <span className="font-bold text-indigo-800">+{selectedEventForBudget.expectedLift}%</span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-indigo-600">Projected Revenue:</span>
+                  <span className="font-bold text-indigo-800">
+                    {formatCurrency(calculateProjectedRevenue(selectedEventForBudget, customBudget))}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleConfirmPlan}
+              className="w-full mt-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold"
+            >
+              Confirm Campaign Plan
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Performance Comparison Component
+const PerformanceComparison = ({ currentData, intelligence }) => {
+  const userGrowth = intelligence?.intelligence?.forecast?.user_growth || 0;
+  const industryGrowth = intelligence?.intelligence?.industry?.industry_growth || 0;
+  const performanceGap = userGrowth - industryGrowth;
+  const profitMargin = currentData?.profit_margin || 0;
+
+  const metrics = [
+    {
+      label: "Profit Margin",
+      yourValue: profitMargin,
+      industryAvg: 18,
+      unit: "%",
+    },
+    {
+      label: "Growth Rate",
+      yourValue: userGrowth,
+      industryAvg: industryGrowth,
+      unit: "%",
+    },
+    {
+      label: "Market Share",
+      yourValue: intelligence?.intelligence?.market?.market_share_percent || 0,
+      industryAvg: 10,
+      unit: "%",
+    },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <SectionHeading
+        title="Performance vs Industry"
+        subtitle="How you stack up against benchmarks"
+        icon={<Award className="w-4 h-4" />}
+      />
+      <div className="space-y-4">
+        {metrics.map((metric, i) => (
+          <div key={i}>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-gray-600">{metric.label}</span>
+              <div className="flex gap-4">
+                <span className="text-gray-400 text-xs">
+                  You: {metric.yourValue.toFixed(1)}{metric.unit}
+                </span>
+                <span className="text-gray-400 text-xs">
+                  Avg: {metric.industryAvg.toFixed(1)}{metric.unit}
+                </span>
+              </div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                className={`h-2.5 rounded-full ${metric.yourValue >= metric.industryAvg ? "bg-green-500" : "bg-red-500"}`}
+                style={{
+                  width: `${Math.min(100, (metric.yourValue / Math.max(metric.industryAvg, 1)) * 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div
+        className={`mt-4 p-3 rounded-xl ${performanceGap >= 0 ? "bg-green-50" : "bg-red-50"}`}
+      >
+        <p className={`text-xs ${performanceGap >= 0 ? "text-green-700" : "text-red-700"}`}>
+          {performanceGap >= 0
+            ? `✨ You're outperforming industry by ${performanceGap.toFixed(1)}%`
+            : `⚠️ Industry is growing ${Math.abs(performanceGap).toFixed(1)}% faster than you`}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Customer Acquisition Strategies
 const CUSTOMER_ACQUISITION_STRATEGIES = [
   {
     channel: "Social Media Marketing",
@@ -362,8 +826,6 @@ const CUSTOMER_ACQUISITION_STRATEGIES = [
 ];
 
 const CustomerAcquisitionStrategies = ({ currentData, intelligence }) => {
-  const strategies = CUSTOMER_ACQUISITION_STRATEGIES;
-
   const getPersonalizedRecommendation = () => {
     const profitMargin = currentData?.profit_margin || 0;
     if (profitMargin > 20) {
@@ -393,7 +855,7 @@ const CustomerAcquisitionStrategies = ({ currentData, intelligence }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {strategies.map((s, idx) => (
+        {CUSTOMER_ACQUISITION_STRATEGIES.map((s, idx) => (
           <div
             key={idx}
             className="border rounded-xl p-4 hover:shadow-md transition"
@@ -468,6 +930,35 @@ const CustomerAcquisitionStrategies = ({ currentData, intelligence }) => {
   );
 };
 
+// Critical Alert Component
+const CriticalAlert = ({ riskLevel, riskScore, warnings }) => {
+  if (riskLevel !== "High Risk" && riskScore < 50) return null;
+
+  return (
+    <div className="bg-red-50 border-l-4 border-red-500 rounded-xl p-4">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="font-bold text-red-800">Critical Alert</p>
+          <p className="text-red-700 text-sm">
+            {riskLevel === "High Risk"
+              ? `Your business is at ${riskLevel.toLowerCase()} with a score of ${riskScore}/100. `
+              : `Your risk score is ${riskScore}/100. `}
+            Review the Growth Strategy tab immediately for recommended actions.
+          </p>
+          {warnings && warnings.length > 0 && (
+            <ul className="mt-2 text-xs text-red-600 list-disc list-inside">
+              {warnings.slice(0, 2).map((w, i) => (
+                <li key={i}>{w}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const [overview, setOverview] = useState(null);
   const [intelligence, setIntelligence] = useState(null);
@@ -487,11 +978,32 @@ const Dashboard = () => {
   const [showWhatIf, setShowWhatIf] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showAcquisitionStrategies, setShowAcquisitionStrategies] =
-    useState(false);
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [activeDateFilter, setActiveDateFilter] = useState("all");
   const [filteredTrend, setFilteredTrend] = useState([]);
+  const [customers, setCustomers] = useState([
+    {
+      id: 1,
+      name: "Rajesh Kumar",
+      source: "Referral",
+      date: "2024-04-15",
+      value: 15000,
+    },
+    {
+      id: 2,
+      name: "Priya Sharma",
+      source: "Social Media",
+      date: "2024-04-14",
+      value: 25000,
+    },
+    {
+      id: 3,
+      name: "Amit Patel",
+      source: "Organic",
+      date: "2024-04-13",
+      value: 10000,
+    },
+  ]);
   const [goals, setGoals] = useState([
     {
       id: 1,
@@ -504,8 +1016,8 @@ const Dashboard = () => {
     {
       id: 2,
       name: "Customer Acquisition",
-      target: 100,
-      current: 0,
+      target: 50,
+      current: 3,
       deadline: "2024-04-30",
       completed: false,
     },
@@ -523,7 +1035,14 @@ const Dashboard = () => {
       time: "Just now",
     },
   ]);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    source: "Organic",
+    value: 0,
+  });
 
+  // Filter data based on date range
   const applyDateFilter = (data, range) => {
     if (!range.start || !data) return data;
     return data.filter((item) => {
@@ -581,12 +1100,11 @@ const Dashboard = () => {
       timeframe: item.timeframe,
       strategies: item.strategies,
     })),
-    diagnosticAnalysis: intelligence?.gemini_diagnostic?.data || {},
+    seasonalEvents: SEASONAL_EVENTS,
     exportedAt: new Date().toISOString(),
   });
 
-  // ==================== EXPORT FUNCTIONS ====================
-
+  // EXPORT FUNCTIONS
   // CSV Export
   const downloadCsv = (payload) => {
     const csvRows = [];
@@ -657,6 +1175,18 @@ const Dashboard = () => {
     }
     addRow([]);
     
+    // Seasonal Events Section
+    addRow(['=== SEASONAL & FESTIVAL EVENTS ===']);
+    payload.seasonalEvents.forEach((event, idx) => {
+      addRow([`Event ${idx + 1}`, event.name]);
+      addRow([`  Date`, event.date]);
+      addRow([`  Expected Lift`, `+${event.expectedLift}%`]);
+      addRow([`  Expected ROI`, event.roi]);
+      addRow([`  Suggested Budget`, formatCurrency(event.budgetSuggestion)]);
+      addRow([`  Recommended Actions`, event.recommendedActions.join('; ')]);
+    });
+    addRow([]);
+    
     // Customer Acquisition Section
     addRow(['=== CUSTOMER ACQUISITION ===']);
     payload.customerAcquisition.forEach((channel, idx) => {
@@ -665,24 +1195,6 @@ const Dashboard = () => {
       addRow([`  Timeframe`, channel.timeframe]);
       addRow([`  Strategies`, channel.strategies.join('; ')]);
     });
-    addRow([]);
-    
-    // Diagnostic Analysis Section
-    addRow(['=== DIAGNOSTIC ANALYSIS ===']);
-    if (payload.diagnosticAnalysis) {
-      if (payload.diagnosticAnalysis.observations?.length) {
-        addRow(['Observations', payload.diagnosticAnalysis.observations.join('; ')]);
-      }
-      if (payload.diagnosticAnalysis.risks?.length) {
-        addRow(['Risks', payload.diagnosticAnalysis.risks.join('; ')]);
-      }
-      if (payload.diagnosticAnalysis.strengths?.length) {
-        addRow(['Strengths', payload.diagnosticAnalysis.strengths.join('; ')]);
-      }
-      if (payload.diagnosticAnalysis.diagnostic_summary) {
-        addRow(['Summary', payload.diagnosticAnalysis.diagnostic_summary]);
-      }
-    }
     
     const csvContent = csvRows.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -724,10 +1236,12 @@ const Dashboard = () => {
       if (level === 1) {
         doc.setFontSize(20);
         doc.setFont('helvetica', 'bold');
+        doc.setTextColor(79, 70, 229);
         printText(text);
         y += 8;
         doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
       } else if (level === 2) {
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
@@ -766,7 +1280,7 @@ const Dashboard = () => {
     doc.setFontSize(26);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(79, 70, 229);
-    doc.text('BizElix Business Report', margin, y);
+    doc.text('Biz Buddy Business Report', margin, y);
     y += 35;
     
     // Metadata
@@ -840,8 +1354,24 @@ const Dashboard = () => {
     }
     y += 20;
     
-    // 4. Customer Acquisition
-    printHeading('4. Customer Acquisition Strategies', 1);
+    // 4. Seasonal & Festival Events
+    printHeading('4. Seasonal & Festival Opportunities', 1);
+    payload.seasonalEvents.forEach((event, idx) => {
+      printHeading(`${idx + 1}. ${event.name}`, 2);
+      printText(`Date: ${event.date}`);
+      printText(`Expected Lift: +${event.expectedLift}%`);
+      printText(`Expected ROI: ${event.roi}`);
+      printText(`Suggested Budget: ${formatCurrency(event.budgetSuggestion)}`);
+      printHeading('Recommended Actions:', 3);
+      event.recommendedActions.forEach(action => {
+        printText(`  • ${action}`);
+      });
+      y += 12;
+    });
+    y += 20;
+    
+    // 5. Customer Acquisition
+    printHeading('5. Customer Acquisition Strategies', 1);
     payload.customerAcquisition.forEach((channel, idx) => {
       printHeading(`${idx + 1}. ${channel.channel}`, 2);
       printText(`Expected ROI: ${channel.expectedROI}`);
@@ -852,24 +1382,6 @@ const Dashboard = () => {
       });
       y += 12;
     });
-    y += 20;
-    
-    // 5. Diagnostic Analysis
-    printHeading('5. Diagnostic Analysis', 1);
-    if (payload.diagnosticAnalysis) {
-      if (payload.diagnosticAnalysis.observations?.length) {
-        printSubSection('Key Observations', payload.diagnosticAnalysis.observations);
-      }
-      if (payload.diagnosticAnalysis.risks?.length) {
-        printSubSection('Risk Factors', payload.diagnosticAnalysis.risks);
-      }
-      if (payload.diagnosticAnalysis.strengths?.length) {
-        printSubSection('Strengths', payload.diagnosticAnalysis.strengths);
-      }
-      if (payload.diagnosticAnalysis.diagnostic_summary) {
-        printSubSection('AI Summary', payload.diagnosticAnalysis.diagnostic_summary);
-      }
-    }
     
     // Footer
     const pageCount = doc.internal.getNumberOfPages();
@@ -877,7 +1389,7 @@ const Dashboard = () => {
       doc.setPage(i);
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by BizElix - Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.height - 20);
+      doc.text(`Generated by Biz Buddy - Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.height - 20);
     }
     
     doc.save(`business_report_${new Date().toISOString().split('T')[0]}.pdf`);
@@ -894,15 +1406,17 @@ const Dashboard = () => {
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
         h2 { color: #4F46E5; margin-top: 30px; background-color: #EEF2FF; padding: 8px; }
+        h3 { color: #6B21A5; margin-top: 20px; }
         table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
         th { background-color: #4F46E5; color: white; padding: 10px; text-align: left; }
         td { padding: 8px; border: 1px solid #ddd; }
         .section { margin-bottom: 30px; }
         .label { font-weight: bold; width: 200px; background-color: #F3F4F6; }
+        .event-card { background-color: #FEF3C7; margin-bottom: 15px; padding: 10px; border-radius: 8px; }
       </style>
     </head>
     <body>
-      <h1>BizElix Business Report</h1>
+      <h1>Biz Buddy Business Report</h1>
       <p><strong>Generated:</strong> ${new Date(payload.exportedAt).toLocaleString()}</p>
       <p><strong>Business:</strong> ${payload.businessName}</p>
       <p><strong>Date Range:</strong> ${payload.dateRange === 'all' ? 'All Time' : payload.dateRange}</p>
@@ -976,9 +1490,28 @@ const Dashboard = () => {
     }
     htmlContent += `</div>`;
     
+    // Seasonal Events Section
+    htmlContent += `<div class="section">
+      <h2>4. Seasonal & Festival Opportunities</h2>`;
+    payload.seasonalEvents.forEach(event => {
+      htmlContent += `
+        <div class="event-card">
+          <h3>🎊 ${event.name}</h3>
+          <table>
+            <tr><td class="label">Date</td><td>${event.date}</td></tr>
+            <tr><td class="label">Expected Lift</td><td>+${event.expectedLift}%</td></tr>
+            <tr><td class="label">Expected ROI</td><td>${event.roi}</td></tr>
+            <tr><td class="label">Suggested Budget</td><td>${formatCurrency(event.budgetSuggestion)}</td></tr>
+            <tr><td class="label">Preparation Time</td><td>${event.preparationTime}</td></tr>
+            <tr><td class="label">Recommended Actions</td><td>${event.recommendedActions.join('; ')}</td></tr>
+          </table>
+        </div>`;
+    });
+    htmlContent += `</div>`;
+    
     // Customer Acquisition Section
     htmlContent += `<div class="section">
-      <h2>4. Customer Acquisition Strategies</h2>
+      <h2>5. Customer Acquisition Strategies</h2>
       <table>
         <tr><th>Channel</th><th>Expected ROI</th><th>Timeframe</th><th>Strategies</th></tr>`;
     payload.customerAcquisition.forEach(channel => {
@@ -990,27 +1523,6 @@ const Dashboard = () => {
           <td>${channel.strategies.join('; ')}</td>
         </tr>`;
     });
-    htmlContent += `</table></div>`;
-    
-    // Diagnostic Analysis Section
-    htmlContent += `<div class="section">
-      <h2>5. Diagnostic Analysis</h2>
-      <table>
-        <tr><th class="label">Category</th><th>Items</th></tr>`;
-    if (payload.diagnosticAnalysis) {
-      if (payload.diagnosticAnalysis.observations?.length) {
-        htmlContent += `<tr><td class="label">Key Observations</td><td>${payload.diagnosticAnalysis.observations.join('; ')}</td></tr>`;
-      }
-      if (payload.diagnosticAnalysis.risks?.length) {
-        htmlContent += `<tr><td class="label">Risk Factors</td><td>${payload.diagnosticAnalysis.risks.join('; ')}</td></tr>`;
-      }
-      if (payload.diagnosticAnalysis.strengths?.length) {
-        htmlContent += `<tr><td class="label">Strengths</td><td>${payload.diagnosticAnalysis.strengths.join('; ')}</td></tr>`;
-      }
-      if (payload.diagnosticAnalysis.diagnostic_summary) {
-        htmlContent += `<tr><td class="label">AI Summary</td><td>${payload.diagnosticAnalysis.diagnostic_summary}</td></tr>`;
-      }
-    }
     htmlContent += `</table></div>`;
     
     htmlContent += `
@@ -1090,7 +1602,6 @@ const Dashboard = () => {
     alert("✅ Link copied to clipboard!");
   };
 
-  // Goal handlers
   const handleAddGoal = () => {
     const goalName = document.getElementById("goalName")?.value;
     const goalTarget = parseFloat(document.getElementById("goalTarget")?.value);
@@ -1141,6 +1652,64 @@ const Dashboard = () => {
     const recordCount = status?.current_records || 0;
     const required = status?.required_records || 14;
     return Math.min(100, Math.floor((recordCount / required) * 100));
+  };
+
+  const addCustomer = () => {
+    if (!newCustomer.name) {
+      alert("Please enter customer name");
+      return;
+    }
+
+    const customer = {
+      id: customers.length + 1,
+      name: newCustomer.name,
+      source: newCustomer.source,
+      date: new Date().toISOString().split("T")[0],
+      value: newCustomer.value || Math.floor(Math.random() * 20000) + 5000,
+    };
+
+    setCustomers([customer, ...customers]);
+
+    const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
+    if (
+      customerGoal &&
+      !customerGoal.completed &&
+      customerGoal.current < customerGoal.target
+    ) {
+      setGoals((prev) =>
+        prev.map((g) =>
+          g.id === customerGoal.id ? { ...g, current: g.current + 1 } : g,
+        ),
+      );
+    }
+
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        message: `🎉 New customer added: ${newCustomer.name} (via ${newCustomer.source})`,
+        read: false,
+        time: "Just now",
+      },
+      ...prev,
+    ]);
+
+    setNewCustomer({ name: "", source: "Organic", value: 0 });
+    setShowAddCustomerModal(false);
+    alert(`✅ Customer "${customer.name}" added successfully!`);
+  };
+
+  const deleteCustomer = (id) => {
+    setCustomers(customers.filter((c) => c.id !== id));
+    const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
+    if (customerGoal && customerGoal.current > 0) {
+      setGoals((prev) =>
+        prev.map((g) =>
+          g.id === customerGoal.id
+            ? { ...g, current: Math.max(0, g.current - 1) }
+            : g,
+        ),
+      );
+    }
   };
 
   const fetchBusinessData = useCallback(async (businessName) => {
@@ -1359,6 +1928,10 @@ const Dashboard = () => {
   })();
 
   const dataQualityScore = getDataQualityScore();
+  const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
+  const customerProgress = customerGoal
+    ? (customerGoal.current / customerGoal.target) * 100
+    : 0;
 
   const TABS = [
     {
@@ -1497,6 +2070,70 @@ const Dashboard = () => {
               className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
             >
               Create Goal
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Customer Modal */}
+      {showAddCustomerModal && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowAddCustomerModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">Add New Customer</h3>
+              <button
+                onClick={() => setShowAddCustomerModal(false)}
+                className="p-1 hover:bg-gray-100 rounded-lg"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="Customer name"
+              value={newCustomer.name}
+              onChange={(e) =>
+                setNewCustomer({ ...newCustomer, name: e.target.value })
+              }
+              className="w-full border rounded-lg p-2 mb-3"
+            />
+            <select
+              value={newCustomer.source}
+              onChange={(e) =>
+                setNewCustomer({ ...newCustomer, source: e.target.value })
+              }
+              className="w-full border rounded-lg p-2 mb-3"
+            >
+              <option value="Organic">Organic</option>
+              <option value="Referral">Referral</option>
+              <option value="Social Media">Social Media</option>
+              <option value="Paid Ads">Paid Ads</option>
+              <option value="Email">Email</option>
+              <option value="Walk-in">Walk-in</option>
+            </select>
+            <input
+              type="number"
+              placeholder="Order value (₹)"
+              value={newCustomer.value}
+              onChange={(e) =>
+                setNewCustomer({
+                  ...newCustomer,
+                  value: parseInt(e.target.value) || 0,
+                })
+              }
+              className="w-full border rounded-lg p-2 mb-4"
+            />
+            <button
+              onClick={addCustomer}
+              className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            >
+              Add Customer
             </button>
           </div>
         </div>
@@ -1796,6 +2433,12 @@ const Dashboard = () => {
             </div>
           </div>
 
+          <CriticalAlert
+            riskLevel={intelligence?.intelligence?.risk?.risk_level}
+            riskScore={intelligence?.intelligence?.risk?.risk_score}
+            warnings={risks}
+          />
+
           {status && !status.has_enough_data && (
             <div className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
               <div className="flex items-start gap-4">
@@ -1849,13 +2492,14 @@ const Dashboard = () => {
                           {goal.name}
                         </span>
                         <span className="text-gray-500">
-                          {formatCurrency(goal.current)} /{" "}
-                          {formatCurrency(goal.target)}
+                          {goal.name === "Customer Acquisition"
+                            ? `${formatNumber(goal.current)} / ${formatNumber(goal.target)}`
+                            : `${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}`}
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-indigo-600 rounded-full h-2 transition-all"
+                          className={`h-2 rounded-full transition-all ${goal.name === "Customer Acquisition" ? "bg-amber-500" : "bg-indigo-600"}`}
                           style={{
                             width: `${Math.min(100, (goal.current / goal.target) * 100)}%`,
                           }}
@@ -1869,15 +2513,187 @@ const Dashboard = () => {
                           )}
                           % complete
                         </span>
-                        <button
-                          onClick={() => handleGoalComplete(goal.id)}
-                          className="text-indigo-500 hover:text-indigo-700"
-                        >
-                          {goal.completed ? "Undo" : "Mark Complete"}
-                        </button>
+                        <div className="flex gap-2">
+                          {goal.name === "Customer Acquisition" && (
+                            <button
+                              onClick={() => setShowAddCustomerModal(true)}
+                              className="text-green-600 hover:text-green-800 text-xs font-medium"
+                              disabled={
+                                goal.completed || goal.current >= goal.target
+                              }
+                            >
+                              + Add Customer
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (goal.current >= goal.target) {
+                                handleGoalComplete(goal.id);
+                                setNotifications((prev) => [
+                                  {
+                                    id: Date.now(),
+                                    message: `🏆 Goal "${goal.name}" completed!`,
+                                    read: false,
+                                    time: "Just now",
+                                  },
+                                  ...prev,
+                                ]);
+                              } else if (goal.name === "Customer Acquisition") {
+                                alert(
+                                  `Need ${goal.target - goal.current} more customers to complete this goal!`,
+                                );
+                              } else {
+                                alert(
+                                  `Need ${formatCurrency(goal.target - goal.current)} more in sales to complete this goal!`,
+                                );
+                              }
+                            }}
+                            className="text-indigo-500 hover:text-indigo-700 text-xs font-medium"
+                            disabled={goal.completed}
+                          >
+                            {goal.completed ? "✓ Completed" : "Mark Complete"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <SectionHeading
+                    title="Customer Acquisition"
+                    subtitle="Track your customer growth"
+                    icon={<Users className="w-4 h-4" />}
+                  />
+                  <button
+                    onClick={() => setShowAddCustomerModal(true)}
+                    className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Customer
+                  </button>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-gray-700">
+                      Monthly Customer Goal
+                    </span>
+                    <span className="text-gray-500">
+                      {formatNumber(customerGoal?.current || 0)} /{" "}
+                      {formatNumber(customerGoal?.target || 50)}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-amber-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${customerProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {customerProgress.toFixed(0)}% complete
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-gray-700 mb-3">
+                    Recent Customers
+                  </p>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {customers.length > 0 ? (
+                      customers.map((customer) => (
+                        <div
+                          key={customer.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-sm text-gray-800">
+                              {customer.name}
+                            </p>
+                            <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
+                              <span>Source: {customer.source}</span>
+                              <span>
+                                Value: {formatCurrency(customer.value)}
+                              </span>
+                              <span>Date: {customer.date}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => deleteCustomer(customer.id)}
+                            className="p-1 text-red-400 hover:text-red-600 transition"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 text-center py-4">
+                        No customers added yet. Click "Add Customer" to start
+                        tracking.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <p className="text-xs text-gray-400">Total Customers</p>
+                    <p className="text-lg font-bold text-gray-800">
+                      {customers.length}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-400">Total Value</p>
+                    <p className="text-lg font-bold text-gray-800">
+                      {formatCurrency(
+                        customers.reduce((sum, c) => sum + c.value, 0),
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-gray-400">Avg. Value</p>
+                    <p className="text-lg font-bold text-gray-800">
+                      {formatCurrency(
+                        customers.length > 0
+                          ? customers.reduce((sum, c) => sum + c.value, 0) /
+                              customers.length
+                          : 0,
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <p className="text-xs font-semibold text-gray-700 mb-2">
+                    Acquisition Sources
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Organic",
+                      "Referral",
+                      "Social Media",
+                      "Paid Ads",
+                      "Email",
+                      "Walk-in",
+                    ].map((source) => {
+                      const count = customers.filter(
+                        (c) => c.source === source,
+                      ).length;
+                      if (count === 0) return null;
+                      return (
+                        <span
+                          key={source}
+                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
+                        >
+                          {source}: {count}
+                        </span>
+                      );
+                    })}
+                    {customers.length === 0 && (
+                      <span className="text-xs text-gray-400">No data yet</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -2012,6 +2828,11 @@ const Dashboard = () => {
                   )}
                 </div>
               </div>
+
+              <PerformanceComparison
+                currentData={currentData}
+                intelligence={intelligence}
+              />
 
               {overview.business_names?.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -2427,48 +3248,27 @@ const Dashboard = () => {
                           </div>
                         </div>
                       )}
-                      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                        <SectionHeading
-                          title="Industry Benchmarks"
-                          subtitle="How you compare"
-                          icon={<Globe className="w-4 h-4" />}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="text-center p-4 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500">Your Growth</p>
-                            <p
-                              className={`text-xl font-bold ${(intelligence?.intelligence?.forecast?.user_growth || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
-                            >
-                              {intelligence?.intelligence?.forecast
-                                ?.user_growth > 0
-                                ? "+"
-                                : ""}
-                              {intelligence?.intelligence?.forecast
-                                ?.user_growth || 0}
-                              %
-                            </p>
-                          </div>
-                          <div className="text-center p-4 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500">
-                              Industry Growth
-                            </p>
-                            <p className="text-xl font-bold text-blue-600">
-                              +
-                              {intelligence?.intelligence?.industry
-                                ?.industry_growth || 0}
-                              %
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-4 p-3 bg-amber-50 rounded-xl">
-                          <p className="text-xs text-amber-700">
-                            {intelligence?.intelligence?.industry
-                              ?.performance_gap > 0
-                              ? `You're outperforming industry by ${intelligence.intelligence.industry.performance_gap}%`
-                              : `Industry is growing ${Math.abs(intelligence?.intelligence?.industry?.performance_gap || 0)}% faster than you`}
-                          </p>
-                        </div>
-                      </div>
+                      
+                      <PerformanceComparison
+                        currentData={currentData}
+                        intelligence={intelligence}
+                      />
+
+                      <SeasonalCampaignPlanner
+                        currentData={currentData}
+                        intelligence={intelligence}
+                        onPlanClick={() => {
+                          setNotifications((prev) => [
+                            {
+                              id: Date.now(),
+                              message: "🎯 New seasonal campaign planned! Check your dashboard.",
+                              read: false,
+                              time: "Just now",
+                            },
+                            ...prev,
+                          ]);
+                        }}
+                      />
                     </div>
                   );
                 })()
@@ -2485,10 +3285,16 @@ const Dashboard = () => {
                   onRefresh={handleRefresh}
                 />
               ) : (
-                <CustomerAcquisitionStrategies
-                  currentData={currentData}
-                  intelligence={intelligence}
-                />
+                <>
+                  <CustomerAcquisitionStrategies
+                    currentData={currentData}
+                    intelligence={intelligence}
+                  />
+                  <PerformanceComparison
+                    currentData={currentData}
+                    intelligence={intelligence}
+                  />
+                </>
               )}
             </div>
           )}
