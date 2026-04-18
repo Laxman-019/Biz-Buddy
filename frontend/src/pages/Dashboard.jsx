@@ -47,10 +47,7 @@ import {
   Users,
   Mail,
   ShoppingCart,
-  Facebook,
   Instagram,
-  Linkedin,
-  Youtube,
   TrendingUp as TrendIcon,
 } from "lucide-react";
 import jsPDF from "jspdf";
@@ -72,6 +69,12 @@ const formatPercent = (num) => {
 const formatNumber = (num) => {
   if (num === null || num === undefined || isNaN(num)) return "—";
   return new Intl.NumberFormat("en-IN").format(num);
+};
+
+const formatCsvValue = (value) => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -304,59 +307,59 @@ const CUSTOMER_ACQUISITION_STRATEGIES = [
     expectedROI: "2-3x",
     timeframe: "2-4 weeks",
   },
-    {
-      channel: "Email Marketing",
-      icon: <Mail className="w-5 h-5" />,
-      color: "bg-blue-100 text-blue-600",
-      strategies: [
-        "Build email list from website visitors",
-        "Send weekly newsletters with offers",
-        "Create automated welcome sequences",
-        "Segment customers for personalized campaigns",
-      ],
-      expectedROI: "3-4x",
-      timeframe: "4-6 weeks",
-    },
-    {
-      channel: "Google Ads",
-      icon: <ShoppingCart className="w-5 h-5" />,
-      color: "bg-orange-100 text-orange-600",
-      strategies: [
-        "Target high-intent keywords related to your product",
-        "Start with ₹10,000-15,000 monthly budget",
-        "Use retargeting ads for website visitors",
-        "Optimize for conversions, not just clicks",
-      ],
-      expectedROI: "2-3x",
-      timeframe: "3-5 weeks",
-    },
-    {
-      channel: "Referral Program",
-      icon: <Users className="w-5 h-5" />,
-      color: "bg-green-100 text-green-600",
-      strategies: [
-        "Offer discounts for customer referrals",
-        "Create a two-sided incentive program",
-        "Make sharing easy with unique referral links",
-        "Track and reward top referrers monthly",
-      ],
-      expectedROI: "4-5x",
-      timeframe: "6-8 weeks",
-    },
-    {
-      channel: "Content Marketing",
-      icon: <TrendIcon className="w-5 h-5" />,
-      color: "bg-purple-100 text-purple-600",
-      strategies: [
-        "Start a blog with SEO-optimized articles",
-        "Create YouTube tutorials about your product",
-        "Guest post on industry websites",
-        "Repurpose content across all platforms",
-      ],
-      expectedROI: "3-4x",
-      timeframe: "8-12 weeks",
-    },
-  ];
+  {
+    channel: "Email Marketing",
+    icon: <Mail className="w-5 h-5" />,
+    color: "bg-blue-100 text-blue-600",
+    strategies: [
+      "Build email list from website visitors",
+      "Send weekly newsletters with offers",
+      "Create automated welcome sequences",
+      "Segment customers for personalized campaigns",
+    ],
+    expectedROI: "3-4x",
+    timeframe: "4-6 weeks",
+  },
+  {
+    channel: "Google Ads",
+    icon: <ShoppingCart className="w-5 h-5" />,
+    color: "bg-orange-100 text-orange-600",
+    strategies: [
+      "Target high-intent keywords related to your product",
+      "Start with ₹10,000-15,000 monthly budget",
+      "Use retargeting ads for website visitors",
+      "Optimize for conversions, not just clicks",
+    ],
+    expectedROI: "2-3x",
+    timeframe: "3-5 weeks",
+  },
+  {
+    channel: "Referral Program",
+    icon: <Users className="w-5 h-5" />,
+    color: "bg-green-100 text-green-600",
+    strategies: [
+      "Offer discounts for customer referrals",
+      "Create a two-sided incentive program",
+      "Make sharing easy with unique referral links",
+      "Track and reward top referrers monthly",
+    ],
+    expectedROI: "4-5x",
+    timeframe: "6-8 weeks",
+  },
+  {
+    channel: "Content Marketing",
+    icon: <TrendIcon className="w-5 h-5" />,
+    color: "bg-purple-100 text-purple-600",
+    strategies: [
+      "Start a blog with SEO-optimized articles",
+      "Create YouTube tutorials about your product",
+      "Guest post on industry websites",
+      "Repurpose content across all platforms",
+    ],
+    expectedROI: "3-4x",
+    timeframe: "8-12 weeks",
+  },
+];
 
 const CustomerAcquisitionStrategies = ({ currentData, intelligence }) => {
   const strategies = CUSTOMER_ACQUISITION_STRATEGIES;
@@ -521,7 +524,6 @@ const Dashboard = () => {
     },
   ]);
 
-  // Filter data based on date range
   const applyDateFilter = (data, range) => {
     if (!range.start || !data) return data;
     return data.filter((item) => {
@@ -530,7 +532,6 @@ const Dashboard = () => {
     });
   };
 
-  // Date filter handlers - WORKING
   const getDateRange = (filter) => {
     const end = new Date();
     const start = new Date();
@@ -580,151 +581,454 @@ const Dashboard = () => {
       timeframe: item.timeframe,
       strategies: item.strategies,
     })),
+    diagnosticAnalysis: intelligence?.gemini_diagnostic?.data || {},
     exportedAt: new Date().toISOString(),
   });
 
-  const formatCsvValue = (value) => {
-    if (value === null || value === undefined) return "";
-    if (typeof value === "object") return JSON.stringify(value);
-    return String(value);
-  };
+  // ==================== EXPORT FUNCTIONS ====================
 
-  const createCsvRows = (payload) => {
-    const rows = [["Section", "Key", "Value"]];
+  // CSV Export
+  const downloadCsv = (payload) => {
+    const csvRows = [];
+    
+    const addRow = (cells) => {
+      csvRows.push(cells.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(','));
+    };
 
-    rows.push(["Metadata", "Business", payload.businessName]);
-    rows.push(["Metadata", "Date Range", payload.dateRange]);
-    rows.push(["Metadata", "Exported At", payload.exportedAt]);
-
-    rows.push(["Overview", "Overview Data", ""]);
-    if (payload.overview) {
-      Object.entries(payload.overview).forEach(([key, value]) => {
-        rows.push(["Overview", key, formatCsvValue(value)]);
-      });
+    addRow(['=== BUSINESS REPORT ===']);
+    addRow([]);
+    addRow(['Report Information']);
+    addRow(['Business', payload.businessName]);
+    addRow(['Date Range', payload.dateRange]);
+    addRow(['Exported At', payload.exportedAt]);
+    addRow([]);
+    
+    // Overview Section
+    addRow(['=== OVERVIEW ===']);
+    if (payload.overview?.overview) {
+      const ov = payload.overview.overview;
+      addRow(['Total Sales', formatCurrency(ov.total_sales)]);
+      addRow(['Total Expenses', formatCurrency(ov.total_expenses)]);
+      addRow(['Total Profit', formatCurrency(ov.total_profit)]);
+      addRow(['Profit Margin', formatPercent(ov.profit_margin / 100)]);
+      addRow(['Total Records', ov.total_records || 'N/A']);
+      addRow(['Average Daily Sales', formatCurrency(ov.avg_daily_sales)]);
     }
-
-    rows.push(["AI Insights", "AI Intelligence", ""]);
-    if (payload.intelligence) {
-      Object.entries(payload.intelligence).forEach(([key, value]) => {
-        rows.push(["AI Insights", key, formatCsvValue(value)]);
-      });
-    }
-
-    rows.push(["Growth Strategy", "Growth Strategy", ""]);
-    if (payload.growthStrategy) {
-      if (Array.isArray(payload.growthStrategy)) {
-        payload.growthStrategy.forEach((item, index) => {
-          rows.push([
-            "Growth Strategy",
-            `Strategy ${index + 1}`,
-            formatCsvValue(item),
-          ]);
-        });
-      } else {
-        Object.entries(payload.growthStrategy).forEach(([key, value]) => {
-          rows.push([
-            "Growth Strategy",
-            key,
-            formatCsvValue(value),
-          ]);
-        });
+    addRow([]);
+    
+    // AI Insights Section
+    addRow(['=== AI INSIGHTS ===']);
+    if (payload.intelligence?.intelligence) {
+      const ins = payload.intelligence.intelligence;
+      if (ins.forecast) {
+        addRow(['Forecast - Trend', ins.forecast.trend?.toUpperCase() || 'N/A']);
+        addRow(['Forecast - 30-Day Demand', formatCurrency(ins.forecast.predicted_30_day_demand)]);
+        addRow(['Forecast - Confidence', `${ins.forecast.confidence_score || 0}%`]);
+        addRow(['Forecast - User Growth', `${ins.forecast.user_growth > 0 ? '+' : ''}${ins.forecast.user_growth || 0}%`]);
+      }
+      if (ins.risk) {
+        addRow(['Risk - Score', `${ins.risk.risk_score || 0}/100`]);
+        addRow(['Risk - Level', ins.risk.risk_level || 'N/A']);
+      }
+      if (ins.market) {
+        addRow(['Market - Share', `${ins.market.market_share_percent || 0}%`]);
+        addRow(['Market - Status', ins.market.share_status || 'N/A']);
       }
     }
-
-    rows.push(["Customer Acquisition", "Strategies", ""]);
-    payload.customerAcquisition.forEach((entry, index) => {
-      rows.push([
-        "Customer Acquisition",
-        `Channel ${index + 1}`,
-        entry.channel,
-      ]);
-      rows.push([
-        "Customer Acquisition",
-        `Channel ${index + 1} ROI`,
-        entry.expectedROI,
-      ]);
-      rows.push([
-        "Customer Acquisition",
-        `Channel ${index + 1} Timeframe`,
-        entry.timeframe,
-      ]);
-      rows.push([
-        "Customer Acquisition",
-        `Channel ${index + 1} Steps`,
-        formatCsvValue(entry.strategies),
-      ]);
+    addRow([]);
+    
+    // Growth Strategy Section
+    addRow(['=== GROWTH STRATEGY ===']);
+    if (payload.growthStrategy) {
+      if (payload.growthStrategy.recommended_strategies) {
+        addRow(['Recommended Actions']);
+        payload.growthStrategy.recommended_strategies.forEach((strategy, idx) => {
+          addRow([`Strategy ${idx + 1}`, strategy.title || strategy]);
+          if (strategy.action) addRow([`  Action`, strategy.action]);
+          if (strategy.priority) addRow([`  Priority`, strategy.priority]);
+        });
+      }
+      if (payload.growthStrategy.strengths?.length) {
+        addRow(['Strengths', payload.growthStrategy.strengths.join('; ')]);
+      }
+      if (payload.growthStrategy.warnings?.length) {
+        addRow(['Areas to Address', payload.growthStrategy.warnings.join('; ')]);
+      }
+    }
+    addRow([]);
+    
+    // Customer Acquisition Section
+    addRow(['=== CUSTOMER ACQUISITION ===']);
+    payload.customerAcquisition.forEach((channel, idx) => {
+      addRow([`Channel ${idx + 1}`, channel.channel]);
+      addRow([`  Expected ROI`, channel.expectedROI]);
+      addRow([`  Timeframe`, channel.timeframe]);
+      addRow([`  Strategies`, channel.strategies.join('; ')]);
     });
-
-    return rows;
-  };
-
-  const downloadCsv = (payload) => {
-    const csvRows = createCsvRows(payload);
-    const csvContent = csvRows
-      .map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    addRow([]);
+    
+    // Diagnostic Analysis Section
+    addRow(['=== DIAGNOSTIC ANALYSIS ===']);
+    if (payload.diagnosticAnalysis) {
+      if (payload.diagnosticAnalysis.observations?.length) {
+        addRow(['Observations', payload.diagnosticAnalysis.observations.join('; ')]);
+      }
+      if (payload.diagnosticAnalysis.risks?.length) {
+        addRow(['Risks', payload.diagnosticAnalysis.risks.join('; ')]);
+      }
+      if (payload.diagnosticAnalysis.strengths?.length) {
+        addRow(['Strengths', payload.diagnosticAnalysis.strengths.join('; ')]);
+      }
+      if (payload.diagnosticAnalysis.diagnostic_summary) {
+        addRow(['Summary', payload.diagnosticAnalysis.diagnostic_summary]);
+      }
+    }
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.setAttribute(
-      "download",
-      `business_report_${new Date().toISOString().split("T")[0]}.csv`,
-    );
+    link.setAttribute('download', `business_report_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
+  // PDF Export
   const downloadPdf = (payload) => {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     let y = 40;
     const pageWidth = doc.internal.pageSize.width;
+    const margin = 40;
+    const maxWidth = pageWidth - (margin * 2);
+    
     const printText = (text, options = {}) => {
-      const maxWidth = pageWidth - 40;
       const lines = doc.splitTextToSize(text, maxWidth);
       lines.forEach((line) => {
-        if (y > doc.internal.pageSize.height - 40) {
+        if (y > doc.internal.pageSize.height - 50) {
           doc.addPage();
           y = 40;
         }
-        doc.text(line, 20, y, options);
-        y += 14;
+        doc.text(line, margin, y, options);
+        y += 16;
       });
     };
-
-    doc.setFontSize(18);
-    doc.text("Biz Buddy Dashboard Export", 20, y);
-    y += 24;
+    
+    const printHeading = (text, level = 1) => {
+      if (y > doc.internal.pageSize.height - 60) {
+        doc.addPage();
+        y = 40;
+      }
+      if (level === 1) {
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        printText(text);
+        y += 8;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+      } else if (level === 2) {
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        printText(text);
+        y += 6;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+      } else {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        printText(text);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+      }
+    };
+    
+    const printSubSection = (title, content) => {
+      printHeading(title, 3);
+      if (typeof content === 'string') {
+        printText(content);
+      } else if (Array.isArray(content)) {
+        content.forEach(item => {
+          printText(`• ${item}`);
+        });
+      } else if (typeof content === 'object') {
+        Object.entries(content).forEach(([key, value]) => {
+          if (typeof value !== 'object' && value !== null && value !== undefined) {
+            printText(`${key}: ${value}`);
+          }
+        });
+      }
+      y += 8;
+    };
+    
+    // Title
+    doc.setFontSize(26);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(79, 70, 229);
+    doc.text('BizElix Business Report', margin, y);
+    y += 35;
+    
+    // Metadata
     doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
     printText(`Business: ${payload.businessName}`);
-    printText(`Date Range: ${payload.dateRange}`);
+    printText(`Date Range: ${payload.dateRange === 'all' ? 'All Time' : payload.dateRange}`);
     printText(`Exported At: ${new Date(payload.exportedAt).toLocaleString()}`);
-    y += 10;
-
-    printText("Overview:");
-    if (payload.overview) {
-      printText(JSON.stringify(payload.overview, null, 2));
+    y += 20;
+    
+    // 1. Overview
+    printHeading('1. Overview', 1);
+    if (payload.overview?.overview) {
+      const overview = payload.overview.overview;
+      printText(`Total Sales: ${formatCurrency(overview.total_sales)}`);
+      printText(`Total Expenses: ${formatCurrency(overview.total_expenses)}`);
+      printText(`Total Profit: ${formatCurrency(overview.total_profit)}`);
+      printText(`Profit Margin: ${formatPercent(overview.profit_margin / 100)}`);
+      printText(`Total Records: ${overview.total_records || 'N/A'}`);
+      printText(`Average Daily Sales: ${formatCurrency(overview.avg_daily_sales)}`);
     }
-    y += 8;
-
-    printText("AI Insights:");
-    if (payload.intelligence) {
-      printText(JSON.stringify(payload.intelligence, null, 2));
+    y += 20;
+    
+    // 2. AI Insights
+    printHeading('2. AI Insights', 1);
+    if (payload.intelligence?.intelligence) {
+      const insights = payload.intelligence.intelligence;
+      if (insights.forecast) {
+        printSubSection('Forecast Analysis', {
+          'Trend': insights.forecast.trend?.toUpperCase() || 'N/A',
+          '30-Day Demand': formatCurrency(insights.forecast.predicted_30_day_demand),
+          'Confidence': `${insights.forecast.confidence_score || 0}%`,
+          'User Growth': `${insights.forecast.user_growth > 0 ? '+' : ''}${insights.forecast.user_growth || 0}%`
+        });
+      }
+      if (insights.risk) {
+        printSubSection('Risk Assessment', {
+          'Risk Score': `${insights.risk.risk_score || 0}/100`,
+          'Risk Level': insights.risk.risk_level || 'N/A'
+        });
+      }
+      if (insights.market) {
+        printSubSection('Market Position', {
+          'Market Share': `${insights.market.market_share_percent || 0}%`,
+          'Share Status': insights.market.share_status || 'N/A'
+        });
+      }
     }
-    y += 8;
-
-    printText("Growth Strategy:");
-    printText(JSON.stringify(payload.growthStrategy, null, 2));
-    y += 8;
-
-    printText("Customer Acquisition:");
-    printText(JSON.stringify(payload.customerAcquisition, null, 2));
-
-    doc.save(`business_report_${new Date().toISOString().split("T")[0]}.pdf`);
+    y += 20;
+    
+    // 3. Growth Strategy
+    printHeading('3. Growth Strategy', 1);
+    if (payload.growthStrategy) {
+      if (payload.growthStrategy.recommended_strategies) {
+        printHeading('Recommended Actions', 2);
+        payload.growthStrategy.recommended_strategies.forEach((strategy, idx) => {
+          printText(`${idx + 1}. ${strategy.title || strategy}`);
+          if (strategy.action) printText(`   Action: ${strategy.action}`);
+          if (strategy.priority) printText(`   Priority: ${strategy.priority}`);
+          y += 6;
+        });
+        y += 8;
+      }
+      if (payload.growthStrategy.strengths?.length) {
+        printSubSection('Your Strengths', payload.growthStrategy.strengths);
+      }
+      if (payload.growthStrategy.warnings?.length) {
+        printSubSection('Areas to Address', payload.growthStrategy.warnings);
+      }
+    }
+    y += 20;
+    
+    // 4. Customer Acquisition
+    printHeading('4. Customer Acquisition Strategies', 1);
+    payload.customerAcquisition.forEach((channel, idx) => {
+      printHeading(`${idx + 1}. ${channel.channel}`, 2);
+      printText(`Expected ROI: ${channel.expectedROI}`);
+      printText(`Timeframe: ${channel.timeframe}`);
+      printHeading('Key Strategies:', 3);
+      channel.strategies.forEach(strategy => {
+        printText(`  • ${strategy}`);
+      });
+      y += 12;
+    });
+    y += 20;
+    
+    // 5. Diagnostic Analysis
+    printHeading('5. Diagnostic Analysis', 1);
+    if (payload.diagnosticAnalysis) {
+      if (payload.diagnosticAnalysis.observations?.length) {
+        printSubSection('Key Observations', payload.diagnosticAnalysis.observations);
+      }
+      if (payload.diagnosticAnalysis.risks?.length) {
+        printSubSection('Risk Factors', payload.diagnosticAnalysis.risks);
+      }
+      if (payload.diagnosticAnalysis.strengths?.length) {
+        printSubSection('Strengths', payload.diagnosticAnalysis.strengths);
+      }
+      if (payload.diagnosticAnalysis.diagnostic_summary) {
+        printSubSection('AI Summary', payload.diagnosticAnalysis.diagnostic_summary);
+      }
+    }
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by BizElix - Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.height - 20);
+    }
+    
+    doc.save(`business_report_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
+  // Excel Export (HTML format)
+  const downloadExcel = (payload) => {
+    let htmlContent = `<!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Business Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
+        h2 { color: #4F46E5; margin-top: 30px; background-color: #EEF2FF; padding: 8px; }
+        table { border-collapse: collapse; margin-bottom: 20px; width: 100%; }
+        th { background-color: #4F46E5; color: white; padding: 10px; text-align: left; }
+        td { padding: 8px; border: 1px solid #ddd; }
+        .section { margin-bottom: 30px; }
+        .label { font-weight: bold; width: 200px; background-color: #F3F4F6; }
+      </style>
+    </head>
+    <body>
+      <h1>BizElix Business Report</h1>
+      <p><strong>Generated:</strong> ${new Date(payload.exportedAt).toLocaleString()}</p>
+      <p><strong>Business:</strong> ${payload.businessName}</p>
+      <p><strong>Date Range:</strong> ${payload.dateRange === 'all' ? 'All Time' : payload.dateRange}</p>
+    `;
+    
+    // Overview Section
+    htmlContent += `<div class="section">
+      <h2>1. Overview</h2>
+      <table>
+        <tr><th class="label">Metric</th><th>Value</th></tr>`;
+    if (payload.overview?.overview) {
+      const ov = payload.overview.overview;
+      htmlContent += `
+        <tr><td class="label">Total Sales</td><td>${formatCurrency(ov.total_sales)}</td></tr>
+        <tr><td class="label">Total Expenses</td><td>${formatCurrency(ov.total_expenses)}</td></tr>
+        <tr><td class="label">Total Profit</td><td>${formatCurrency(ov.total_profit)}</td></tr>
+        <tr><td class="label">Profit Margin</td><td>${formatPercent(ov.profit_margin / 100)}</td></tr>
+        <tr><td class="label">Total Records</td><td>${ov.total_records || 'N/A'}</td></tr>
+        <tr><td class="label">Average Daily Sales</td><td>${formatCurrency(ov.avg_daily_sales)}</td></tr>`;
+    }
+    htmlContent += `</table></div>`;
+    
+    // AI Insights Section
+    htmlContent += `<div class="section">
+      <h2>2. AI Insights</h2>
+      <table>
+        <tr><th class="label">Category</th><th>Metric</th><th>Value</th></tr>`;
+    if (payload.intelligence?.intelligence) {
+      const ins = payload.intelligence.intelligence;
+      if (ins.forecast) {
+        htmlContent += `
+          <tr><td rowspan="4">Forecast</td><td>Trend</td><td>${ins.forecast.trend?.toUpperCase() || 'N/A'}</td></tr>
+          <tr><td>30-Day Demand</td><td>${formatCurrency(ins.forecast.predicted_30_day_demand)}</td></tr>
+          <tr><td>Confidence</td><td>${ins.forecast.confidence_score || 0}%</td></tr>
+          <tr><td>User Growth</td><td>${ins.forecast.user_growth > 0 ? '+' : ''}${ins.forecast.user_growth || 0}%</td></tr>`;
+      }
+      if (ins.risk) {
+        htmlContent += `
+          <tr><td rowspan="2">Risk</td><td>Risk Score</td><td>${ins.risk.risk_score || 0}/100</td></tr>
+          <tr><td>Risk Level</td><td>${ins.risk.risk_level || 'N/A'}</td></tr>`;
+      }
+      if (ins.market) {
+        htmlContent += `
+          <tr><td rowspan="2">Market</td><td>Market Share</td><td>${ins.market.market_share_percent || 0}%</td></tr>
+          <tr><td>Share Status</td><td>${ins.market.share_status || 'N/A'}</td></tr>`;
+      }
+    }
+    htmlContent += `</table></div>`;
+    
+    // Growth Strategy Section
+    htmlContent += `<div class="section">
+      <h2>3. Growth Strategy</h2>`;
+    if (payload.growthStrategy?.recommended_strategies) {
+      htmlContent += `<table>
+        <tr><th>Priority</th><th>Strategy</th><th>Action</th></tr>`;
+      payload.growthStrategy.recommended_strategies.forEach(strategy => {
+        htmlContent += `
+          <tr>
+            <td>${strategy.priority || 'N/A'}</td>
+            <td>${strategy.title || ''}</td>
+            <td>${strategy.action || ''}</td>
+          </tr>`;
+      });
+      htmlContent += `</table>`;
+    }
+    if (payload.growthStrategy?.strengths?.length) {
+      htmlContent += `<p><strong>Strengths:</strong> ${payload.growthStrategy.strengths.join('; ')}</p>`;
+    }
+    if (payload.growthStrategy?.warnings?.length) {
+      htmlContent += `<p><strong>Areas to Address:</strong> ${payload.growthStrategy.warnings.join('; ')}</p>`;
+    }
+    htmlContent += `</div>`;
+    
+    // Customer Acquisition Section
+    htmlContent += `<div class="section">
+      <h2>4. Customer Acquisition Strategies</h2>
+      <table>
+        <tr><th>Channel</th><th>Expected ROI</th><th>Timeframe</th><th>Strategies</th></tr>`;
+    payload.customerAcquisition.forEach(channel => {
+      htmlContent += `
+        <tr>
+          <td>${channel.channel}</td>
+          <td>${channel.expectedROI}</td>
+          <td>${channel.timeframe}</td>
+          <td>${channel.strategies.join('; ')}</td>
+        </tr>`;
+    });
+    htmlContent += `</table></div>`;
+    
+    // Diagnostic Analysis Section
+    htmlContent += `<div class="section">
+      <h2>5. Diagnostic Analysis</h2>
+      <table>
+        <tr><th class="label">Category</th><th>Items</th></tr>`;
+    if (payload.diagnosticAnalysis) {
+      if (payload.diagnosticAnalysis.observations?.length) {
+        htmlContent += `<tr><td class="label">Key Observations</td><td>${payload.diagnosticAnalysis.observations.join('; ')}</td></tr>`;
+      }
+      if (payload.diagnosticAnalysis.risks?.length) {
+        htmlContent += `<tr><td class="label">Risk Factors</td><td>${payload.diagnosticAnalysis.risks.join('; ')}</td></tr>`;
+      }
+      if (payload.diagnosticAnalysis.strengths?.length) {
+        htmlContent += `<tr><td class="label">Strengths</td><td>${payload.diagnosticAnalysis.strengths.join('; ')}</td></tr>`;
+      }
+      if (payload.diagnosticAnalysis.diagnostic_summary) {
+        htmlContent += `<tr><td class="label">AI Summary</td><td>${payload.diagnosticAnalysis.diagnostic_summary}</td></tr>`;
+      }
+    }
+    htmlContent += `</table></div>`;
+    
+    htmlContent += `
+    </body>
+    </html>`;
+    
+    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `business_report_${new Date().toISOString().split('T')[0]}.xls`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // Main Export Handler
   const handleExport = async (format) => {
     setShowExportMenu(false);
     try {
@@ -752,8 +1056,8 @@ const Dashboard = () => {
         downloadPdf(payload);
         alert("✅ Report exported as PDF!");
       } else if (format === "excel") {
-        downloadCsv(payload);
-        alert("✅ Report exported as Excel-compatible CSV!");
+        downloadExcel(payload);
+        alert("✅ Report exported as Excel!");
       } else {
         alert("❌ Unknown export format");
       }
@@ -768,7 +1072,6 @@ const Dashboard = () => {
     const shareId = Date.now();
     const fakeLink = `${window.location.origin}/shared-report/${shareId}`;
     setShareLink(fakeLink);
-    // Store in localStorage for demo
     localStorage.setItem(
       `share_${shareId}`,
       JSON.stringify({
@@ -1294,7 +1597,6 @@ const Dashboard = () => {
                 </span>
               )}
 
-              {/* Documentation Link - WORKING */}
               <Link
                 to="/doc"
                 className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-all"
@@ -1302,7 +1604,6 @@ const Dashboard = () => {
                 Documentation
               </Link>
 
-              {/* Export Dropdown - WORKING */}
               <div className="relative">
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
@@ -1372,7 +1673,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Notifications Panel */}
           {showNotifications && (
             <div className="absolute right-4 mt-2 w-80 bg-white border rounded-xl shadow-lg z-30">
               <div className="p-3 border-b">
@@ -1396,7 +1696,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Tabs */}
           <div className="px-4 flex gap-1 overflow-x-auto">
             {TABS.map((t) => (
               <button
@@ -1415,7 +1714,6 @@ const Dashboard = () => {
         </div>
 
         <div className="py-5 px-4 space-y-6">
-          {/* Date Range Filter - WORKING */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-gray-400" />
@@ -1468,7 +1766,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Data Quality Score */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1528,7 +1825,6 @@ const Dashboard = () => {
 
           {activeTab === "overview" && overview && (
             <div className="space-y-6">
-              {/* Goals Section */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <div className="flex items-center justify-between mb-4">
                   <SectionHeading
@@ -1585,7 +1881,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* KPI Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <KPICard
                   title="Total Sales"
@@ -1621,7 +1916,6 @@ const Dashboard = () => {
                 />
               </div>
 
-              {/* Charts */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
@@ -1719,7 +2013,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Business Names */}
               {overview.business_names?.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
@@ -1963,7 +2256,6 @@ const Dashboard = () => {
                     )}
                   </div>
 
-                  {/* Action Items */}
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                     <SectionHeading
                       title="Action Items"
@@ -2184,7 +2476,6 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Customer Acquisition Tab - NEW WORKING TAB */}
           {activeTab === "acquisition" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (
