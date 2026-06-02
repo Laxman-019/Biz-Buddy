@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 import { CSVLink } from "react-csv";
 
-const RECORDS_PER_PAGE = 20;
+const RECORDS_PER_PAGE = 15;
 
 const ListRecords = () => {
 
