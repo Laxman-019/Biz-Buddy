@@ -11,8 +11,6 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  LineChart,
-  Line,
 } from "recharts";
 import Layout from "../components/Layout";
 import {
@@ -45,20 +43,9 @@ import {
   Check,
   Sliders,
   DollarSign,
-  Globe,
-  Users,
-  Mail,
-  ShoppingCart,
-  Instagram,
-  TrendingUp as TrendIcon,
   Award,
-  PieChart,
-  MessageCircle,
-  ThumbsUp,
   HelpCircle,
   Loader,
-  FileText,
-  ExternalLink,
   Settings,
   Filter,
   Star,
@@ -72,7 +59,6 @@ import {
   Activity,
   Radio,
   Circle,
-  UserPlus,
   PlusCircle,
   Send,
   Phone,
@@ -80,10 +66,14 @@ import {
   Sun,
   Moon,
   Plus,
-  Trash2,
-  Edit2,
   PartyPopper,
   Gift as GiftIcon,
+  ShoppingCart,
+  Instagram,
+  Mail,
+  Users,
+  TrendingDownIcon,
+
 } from "lucide-react";
 import jsPDF from "jspdf";
 
@@ -328,7 +318,6 @@ const DiagRow = ({ text, type }) => {
   );
 };
 
-// Seasonal Events Data
 const SEASONAL_EVENTS = [
   {
     id: 1,
@@ -345,7 +334,7 @@ const SEASONAL_EVENTS = [
       "Run social media countdown campaigns",
       "Send personalized Diwali greeting emails",
       "Create festive gift guides and bundles",
-      "Implement 'Shop now, pay later' options"
+      "Implement 'Shop now, pay later' options",
     ],
     budgetSuggestion: 50000,
     roi: "3-4x",
@@ -366,7 +355,7 @@ const SEASONAL_EVENTS = [
       "Limited time flash sales (24-48 hours)",
       "Loyalty program double points event",
       "Early bird booking discounts for Q1",
-      "'12 Days of Sales' campaign"
+      "'12 Days of Sales' campaign",
     ],
     budgetSuggestion: 40000,
     roi: "2.5-3.5x",
@@ -387,7 +376,7 @@ const SEASONAL_EVENTS = [
       "Beach/holiday themed content marketing",
       "Collaborate with summer lifestyle influencers",
       "Offer free shipping on summer items",
-      "Create summer lookbook videos"
+      "Create summer lookbook videos",
     ],
     budgetSuggestion: 35000,
     roi: "2-3x",
@@ -408,7 +397,7 @@ const SEASONAL_EVENTS = [
       "Email list VIP early access (24 hours early)",
       "Buy more, save more campaigns (₹5000 = 10% off)",
       "Social media flash giveaways every hour",
-      "Abandoned cart recovery with extra 5% off"
+      "Abandoned cart recovery with extra 5% off",
     ],
     budgetSuggestion: 60000,
     roi: "4-5x",
@@ -429,7 +418,7 @@ const SEASONAL_EVENTS = [
       "Social media color splash contest",
       "Festival recipe/user-generated content campaign",
       "Same-day delivery promise for Holi",
-      "Referral program double rewards"
+      "Referral program double rewards",
     ],
     budgetSuggestion: 30000,
     roi: "2.5-3.5x",
@@ -450,7 +439,7 @@ const SEASONAL_EVENTS = [
       "Last chance email reminders",
       "Social media stock countdown",
       "Bundle deals with free gift wrapping",
-      "Loyalty points redemption event"
+      "Loyalty points redemption event",
     ],
     budgetSuggestion: 45000,
     roi: "3-4x",
@@ -458,8 +447,11 @@ const SEASONAL_EVENTS = [
   },
 ];
 
-// Seasonal Campaign Planner Component
-const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => {
+const SeasonalCampaignPlanner = ({
+  currentData,
+  intelligence,
+  onPlanClick,
+}) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [customBudget, setCustomBudget] = useState(25000);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -480,7 +472,9 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
 
   const handleConfirmPlan = () => {
     if (selectedEventForBudget) {
-      alert(`✅ Campaign "${selectedEventForBudget.name}" planned with budget ₹${customBudget.toLocaleString()}!\n\nProjected additional revenue: ${formatCurrency(calculateProjectedRevenue(selectedEventForBudget, customBudget))}\n\nCheck your email for the detailed campaign guide.`);
+      alert(
+        `Campaign "${selectedEventForBudget.name}" planned with budget ₹${customBudget.toLocaleString()}!\n\nProjected additional revenue: ${formatCurrency(calculateProjectedRevenue(selectedEventForBudget, customBudget))}\n\nCheck your email for the detailed campaign guide.`,
+      );
     }
     setShowBudgetModal(false);
     if (onPlanClick) onPlanClick();
@@ -489,13 +483,16 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
       <SectionHeading
-        title="🎊 Seasonal & Festival Campaign Planner"
+        title="Seasonal & Festival Campaign Planner"
         subtitle="Plan your marketing around upcoming events"
         icon={<Calendar className="w-4 h-4" />}
-        badge={<Pill color="purple"><Sparkles className="w-3 h-3" /> Maximize ROI</Pill>}
+        badge={
+          <Pill color="purple">
+            <Sparkles className="w-3 h-3" /> Maximize ROI
+          </Pill>
+        }
       />
 
-      {/* Upcoming Events Grid */}
       <div className="mb-6">
         <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-orange-500" />
@@ -506,9 +503,13 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
             <div
               key={event.id}
               className={`relative overflow-hidden rounded-xl border-2 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer ${selectedEvent?.id === event.id ? "border-indigo-500 shadow-md" : "border-gray-100"}`}
-              onClick={() => setSelectedEvent(selectedEvent?.id === event.id ? null : event)}
+              onClick={() =>
+                setSelectedEvent(selectedEvent?.id === event.id ? null : event)
+              }
             >
-              <div className={`bg-linear-to-r ${event.bgGradient} p-4 text-white`}>
+              <div
+                className={`bg-linear-to-r ${event.bgGradient} p-4 text-white`}
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-white/20 rounded-lg">
@@ -526,12 +527,15 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
                 <div className="flex justify-between text-xs mb-2">
                   <span className="text-gray-500">Budget range:</span>
                   <span className="font-semibold text-gray-700">
-                    ₹{(event.budgetSuggestion * 0.7).toLocaleString()} - ₹{(event.budgetSuggestion * 1.3).toLocaleString()}
+                    ₹{(event.budgetSuggestion * 0.7).toLocaleString()} - ₹
+                    {(event.budgetSuggestion * 1.3).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs mb-3">
                   <span className="text-gray-500">Expected ROI:</span>
-                  <span className="font-semibold text-green-600">{event.roi}</span>
+                  <span className="font-semibold text-green-600">
+                    {event.roi}
+                  </span>
                 </div>
                 <button
                   onClick={(e) => {
@@ -548,7 +552,6 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
         </div>
       </div>
 
-      {/* Selected Event Details */}
       {selectedEvent && (
         <div className="mt-6 p-5 bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
           <div className="flex items-center justify-between mb-4">
@@ -556,7 +559,9 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
               <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
                 {selectedEvent.icon}
               </div>
-              <h3 className="font-bold text-indigo-900">{selectedEvent.name} Strategy</h3>
+              <h3 className="font-bold text-indigo-900">
+                {selectedEvent.name} Strategy
+              </h3>
             </div>
             <span className="text-xs bg-indigo-200 text-indigo-800 px-2 py-1 rounded-full">
               Prepare {selectedEvent.preparationTime}
@@ -564,10 +569,15 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
           </div>
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-semibold text-indigo-700 mb-2">📋 Recommended Actions:</p>
+              <p className="text-xs font-semibold text-indigo-700 mb-2">
+                Recommended Actions:
+              </p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {selectedEvent.recommendedActions.map((action, i) => (
-                  <li key={i} className="text-xs text-indigo-800 flex items-start gap-2">
+                  <li
+                    key={i}
+                    className="text-xs text-indigo-800 flex items-start gap-2"
+                  >
                     <span className="text-indigo-500 mt-0.5">✓</span>
                     <span>{action}</span>
                   </li>
@@ -577,22 +587,27 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
             <div className="grid grid-cols-3 gap-3 pt-3 border-t border-indigo-100">
               <div>
                 <p className="text-xs text-indigo-500">Expected Lift</p>
-                <p className="text-lg font-bold text-indigo-800">+{selectedEvent.expectedLift}%</p>
+                <p className="text-lg font-bold text-indigo-800">
+                  +{selectedEvent.expectedLift}%
+                </p>
               </div>
               <div>
                 <p className="text-xs text-indigo-500">Suggested Budget</p>
-                <p className="text-lg font-bold text-indigo-800">{formatCurrency(selectedEvent.budgetSuggestion)}</p>
+                <p className="text-lg font-bold text-indigo-800">
+                  {formatCurrency(selectedEvent.budgetSuggestion)}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-indigo-500">Expected ROI</p>
-                <p className="text-lg font-bold text-green-600">{selectedEvent.roi}</p>
+                <p className="text-lg font-bold text-green-600">
+                  {selectedEvent.roi}
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Quick Tips Banner */}
       <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
         <p className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
           <Lightbulb className="w-4 h-4" /> Seasonal Success Tips
@@ -617,7 +632,6 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
         </div>
       </div>
 
-      {/* Budget Planning Modal */}
       {showBudgetModal && selectedEventForBudget && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -628,7 +642,9 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">Plan {selectedEventForBudget.name} Campaign</h3>
+              <h3 className="font-bold text-lg">
+                Plan {selectedEventForBudget.name} Campaign
+              </h3>
               <button
                 onClick={() => setShowBudgetModal(false)}
                 className="p-1 hover:bg-gray-100 rounded-lg"
@@ -639,7 +655,8 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
             <div className="space-y-4">
               <div>
                 <label className="text-sm text-gray-600 flex items-center gap-2 mb-2">
-                  <DollarSign className="w-4 h-4" /> Campaign Budget: ₹{customBudget.toLocaleString()}
+                  <DollarSign className="w-4 h-4" /> Campaign Budget: ₹
+                  {customBudget.toLocaleString()}
                 </label>
                 <input
                   type="range"
@@ -651,21 +668,42 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>₹{(selectedEventForBudget.budgetSuggestion * 0.5).toLocaleString()}</span>
-                  <span>₹{(selectedEventForBudget.budgetSuggestion).toLocaleString()}</span>
-                  <span>₹{(selectedEventForBudget.budgetSuggestion * 2).toLocaleString()}</span>
+                  <span>
+                    ₹
+                    {(
+                      selectedEventForBudget.budgetSuggestion * 0.5
+                    ).toLocaleString()}
+                  </span>
+                  <span>
+                    ₹{selectedEventForBudget.budgetSuggestion.toLocaleString()}
+                  </span>
+                  <span>
+                    ₹
+                    {(
+                      selectedEventForBudget.budgetSuggestion * 2
+                    ).toLocaleString()}
+                  </span>
                 </div>
               </div>
               <div className="bg-indigo-50 rounded-xl p-4">
-                <p className="text-sm font-semibold text-indigo-800 mb-2">Projected Impact</p>
+                <p className="text-sm font-semibold text-indigo-800 mb-2">
+                  Projected Impact
+                </p>
                 <div className="flex justify-between text-sm">
                   <span className="text-indigo-600">Expected Lift:</span>
-                  <span className="font-bold text-indigo-800">+{selectedEventForBudget.expectedLift}%</span>
+                  <span className="font-bold text-indigo-800">
+                    +{selectedEventForBudget.expectedLift}%
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-indigo-600">Projected Revenue:</span>
                   <span className="font-bold text-indigo-800">
-                    {formatCurrency(calculateProjectedRevenue(selectedEventForBudget, customBudget))}
+                    {formatCurrency(
+                      calculateProjectedRevenue(
+                        selectedEventForBudget,
+                        customBudget,
+                      ),
+                    )}
                   </span>
                 </div>
               </div>
@@ -683,10 +721,10 @@ const SeasonalCampaignPlanner = ({ currentData, intelligence, onPlanClick }) => 
   );
 };
 
-// Performance Comparison Component
 const PerformanceComparison = ({ currentData, intelligence }) => {
   const userGrowth = intelligence?.intelligence?.forecast?.user_growth || 0;
-  const industryGrowth = intelligence?.intelligence?.industry?.industry_growth || 0;
+  const industryGrowth =
+    intelligence?.intelligence?.industry?.industry_growth || 0;
   const performanceGap = userGrowth - industryGrowth;
   const profitMargin = currentData?.profit_margin || 0;
 
@@ -725,10 +763,12 @@ const PerformanceComparison = ({ currentData, intelligence }) => {
               <span className="text-gray-600">{metric.label}</span>
               <div className="flex gap-4">
                 <span className="text-gray-400 text-xs">
-                  You: {metric.yourValue.toFixed(1)}{metric.unit}
+                  You: {metric.yourValue.toFixed(1)}
+                  {metric.unit}
                 </span>
                 <span className="text-gray-400 text-xs">
-                  Avg: {metric.industryAvg.toFixed(1)}{metric.unit}
+                  Avg: {metric.industryAvg.toFixed(1)}
+                  {metric.unit}
                 </span>
               </div>
             </div>
@@ -746,10 +786,12 @@ const PerformanceComparison = ({ currentData, intelligence }) => {
       <div
         className={`mt-4 p-3 rounded-xl ${performanceGap >= 0 ? "bg-green-50" : "bg-red-50"}`}
       >
-        <p className={`text-xs ${performanceGap >= 0 ? "text-green-700" : "text-red-700"}`}>
+        <p
+          className={`text-xs ${performanceGap >= 0 ? "text-green-700" : "text-red-700"}`}
+        >
           {performanceGap >= 0
-            ? `✨ You're outperforming industry by ${performanceGap.toFixed(1)}%`
-            : `⚠️ Industry is growing ${Math.abs(performanceGap).toFixed(1)}% faster than you`}
+            ? `You're outperforming industry by ${performanceGap.toFixed(1)}%`
+            : `Industry is growing ${Math.abs(performanceGap).toFixed(1)}% faster than you`}
         </p>
       </div>
     </div>
@@ -812,7 +854,7 @@ const CUSTOMER_ACQUISITION_STRATEGIES = [
   },
   {
     channel: "Content Marketing",
-    icon: <TrendIcon className="w-5 h-5" />,
+    icon: <TrendingDownIcon className="w-5 h-5" />,
     color: "bg-purple-100 text-purple-600",
     strategies: [
       "Start a blog with SEO-optimized articles",
@@ -930,7 +972,6 @@ const CustomerAcquisitionStrategies = ({ currentData, intelligence }) => {
   );
 };
 
-// Critical Alert Component
 const CriticalAlert = ({ riskLevel, riskScore, warnings }) => {
   if (riskLevel !== "High Risk" && riskScore < 50) return null;
 
@@ -981,43 +1022,12 @@ const Dashboard = () => {
   const [dateRange, setDateRange] = useState({ start: null, end: null });
   const [activeDateFilter, setActiveDateFilter] = useState("all");
   const [filteredTrend, setFilteredTrend] = useState([]);
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: "Rajesh Kumar",
-      source: "Referral",
-      date: "2024-04-15",
-      value: 15000,
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      source: "Social Media",
-      date: "2024-04-14",
-      value: 25000,
-    },
-    {
-      id: 3,
-      name: "Amit Patel",
-      source: "Organic",
-      date: "2024-04-13",
-      value: 10000,
-    },
-  ]);
   const [goals, setGoals] = useState([
     {
       id: 1,
       name: "Monthly Sales Target",
       target: 500000,
       current: 0,
-      deadline: "2024-04-30",
-      completed: false,
-    },
-    {
-      id: 2,
-      name: "Customer Acquisition",
-      target: 50,
-      current: 3,
       deadline: "2024-04-30",
       completed: false,
     },
@@ -1035,14 +1045,7 @@ const Dashboard = () => {
       time: "Just now",
     },
   ]);
-  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({
-    name: "",
-    source: "Organic",
-    value: 0,
-  });
 
-  // Filter data based on date range
   const applyDateFilter = (data, range) => {
     if (!range.start || !data) return data;
     return data.filter((item) => {
@@ -1094,128 +1097,129 @@ const Dashboard = () => {
     intelligence,
     growthStrategy:
       intelligence?.gemini_strategy?.data || intelligence?.strategies || {},
-    customerAcquisition: CUSTOMER_ACQUISITION_STRATEGIES.map((item) => ({
-      channel: item.channel,
-      expectedROI: item.expectedROI,
-      timeframe: item.timeframe,
-      strategies: item.strategies,
-    })),
     seasonalEvents: SEASONAL_EVENTS,
     exportedAt: new Date().toISOString(),
   });
 
-  // EXPORT FUNCTIONS
-  // CSV Export
   const downloadCsv = (payload) => {
     const csvRows = [];
-    
+
     const addRow = (cells) => {
-      csvRows.push(cells.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(','));
+      csvRows.push(
+        cells
+          .map((cell) => `"${String(cell || "").replace(/"/g, '""')}"`)
+          .join(","),
+      );
     };
 
-    addRow(['=== BUSINESS REPORT ===']);
+    addRow(["=== BUSINESS REPORT ==="]);
     addRow([]);
-    addRow(['Report Information']);
-    addRow(['Business', payload.businessName]);
-    addRow(['Date Range', payload.dateRange]);
-    addRow(['Exported At', payload.exportedAt]);
+    addRow(["Report Information"]);
+    addRow(["Business", payload.businessName]);
+    addRow(["Date Range", payload.dateRange]);
+    addRow(["Exported At", payload.exportedAt]);
     addRow([]);
-    
-    // Overview Section
-    addRow(['=== OVERVIEW ===']);
+
+    addRow(["=== OVERVIEW ==="]);
     if (payload.overview?.overview) {
       const ov = payload.overview.overview;
-      addRow(['Total Sales', formatCurrency(ov.total_sales)]);
-      addRow(['Total Expenses', formatCurrency(ov.total_expenses)]);
-      addRow(['Total Profit', formatCurrency(ov.total_profit)]);
-      addRow(['Profit Margin', formatPercent(ov.profit_margin / 100)]);
-      addRow(['Total Records', ov.total_records || 'N/A']);
-      addRow(['Average Daily Sales', formatCurrency(ov.avg_daily_sales)]);
+      addRow(["Total Sales", formatCurrency(ov.total_sales)]);
+      addRow(["Total Expenses", formatCurrency(ov.total_expenses)]);
+      addRow(["Total Profit", formatCurrency(ov.total_profit)]);
+      addRow(["Profit Margin", formatPercent(ov.profit_margin / 100)]);
+      addRow(["Total Records", ov.total_records || "N/A"]);
+      addRow(["Average Daily Sales", formatCurrency(ov.avg_daily_sales)]);
     }
     addRow([]);
-    
-    // AI Insights Section
-    addRow(['=== AI INSIGHTS ===']);
+
+    addRow(["=== AI INSIGHTS ==="]);
     if (payload.intelligence?.intelligence) {
       const ins = payload.intelligence.intelligence;
       if (ins.forecast) {
-        addRow(['Forecast - Trend', ins.forecast.trend?.toUpperCase() || 'N/A']);
-        addRow(['Forecast - 30-Day Demand', formatCurrency(ins.forecast.predicted_30_day_demand)]);
-        addRow(['Forecast - Confidence', `${ins.forecast.confidence_score || 0}%`]);
-        addRow(['Forecast - User Growth', `${ins.forecast.user_growth > 0 ? '+' : ''}${ins.forecast.user_growth || 0}%`]);
+        addRow([
+          "Forecast - Trend",
+          ins.forecast.trend?.toUpperCase() || "N/A",
+        ]);
+        addRow([
+          "Forecast - 30-Day Demand",
+          formatCurrency(ins.forecast.predicted_30_day_demand),
+        ]);
+        addRow([
+          "Forecast - Confidence",
+          `${ins.forecast.confidence_score || 0}%`,
+        ]);
+        addRow([
+          "Forecast - User Growth",
+          `${ins.forecast.user_growth > 0 ? "+" : ""}${ins.forecast.user_growth || 0}%`,
+        ]);
       }
       if (ins.risk) {
-        addRow(['Risk - Score', `${ins.risk.risk_score || 0}/100`]);
-        addRow(['Risk - Level', ins.risk.risk_level || 'N/A']);
+        addRow(["Risk - Score", `${ins.risk.risk_score || 0}/100`]);
+        addRow(["Risk - Level", ins.risk.risk_level || "N/A"]);
       }
       if (ins.market) {
-        addRow(['Market - Share', `${ins.market.market_share_percent || 0}%`]);
-        addRow(['Market - Status', ins.market.share_status || 'N/A']);
+        addRow(["Market - Share", `${ins.market.market_share_percent || 0}%`]);
+        addRow(["Market - Status", ins.market.share_status || "N/A"]);
       }
     }
     addRow([]);
-    
-    // Growth Strategy Section
-    addRow(['=== GROWTH STRATEGY ===']);
+
+    addRow(["=== GROWTH STRATEGY ==="]);
     if (payload.growthStrategy) {
       if (payload.growthStrategy.recommended_strategies) {
-        addRow(['Recommended Actions']);
-        payload.growthStrategy.recommended_strategies.forEach((strategy, idx) => {
-          addRow([`Strategy ${idx + 1}`, strategy.title || strategy]);
-          if (strategy.action) addRow([`  Action`, strategy.action]);
-          if (strategy.priority) addRow([`  Priority`, strategy.priority]);
-        });
+        addRow(["Recommended Actions"]);
+        payload.growthStrategy.recommended_strategies.forEach(
+          (strategy, idx) => {
+            addRow([`Strategy ${idx + 1}`, strategy.title || strategy]);
+            if (strategy.action) addRow([`  Action`, strategy.action]);
+            if (strategy.priority) addRow([`  Priority`, strategy.priority]);
+          },
+        );
       }
       if (payload.growthStrategy.strengths?.length) {
-        addRow(['Strengths', payload.growthStrategy.strengths.join('; ')]);
+        addRow(["Strengths", payload.growthStrategy.strengths.join("; ")]);
       }
       if (payload.growthStrategy.warnings?.length) {
-        addRow(['Areas to Address', payload.growthStrategy.warnings.join('; ')]);
+        addRow([
+          "Areas to Address",
+          payload.growthStrategy.warnings.join("; "),
+        ]);
       }
     }
     addRow([]);
-    
-    // Seasonal Events Section
-    addRow(['=== SEASONAL & FESTIVAL EVENTS ===']);
+
+    addRow(["=== SEASONAL & FESTIVAL EVENTS ==="]);
     payload.seasonalEvents.forEach((event, idx) => {
       addRow([`Event ${idx + 1}`, event.name]);
       addRow([`  Date`, event.date]);
       addRow([`  Expected Lift`, `+${event.expectedLift}%`]);
       addRow([`  Expected ROI`, event.roi]);
       addRow([`  Suggested Budget`, formatCurrency(event.budgetSuggestion)]);
-      addRow([`  Recommended Actions`, event.recommendedActions.join('; ')]);
+      addRow([`  Recommended Actions`, event.recommendedActions.join("; ")]);
     });
-    addRow([]);
-    
-    // Customer Acquisition Section
-    addRow(['=== CUSTOMER ACQUISITION ===']);
-    payload.customerAcquisition.forEach((channel, idx) => {
-      addRow([`Channel ${idx + 1}`, channel.channel]);
-      addRow([`  Expected ROI`, channel.expectedROI]);
-      addRow([`  Timeframe`, channel.timeframe]);
-      addRow([`  Strategies`, channel.strategies.join('; ')]);
-    });
-    
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', `business_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `business_report_${new Date().toISOString().split("T")[0]}.csv`,
+    );
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
-  // PDF Export
   const downloadPdf = (payload) => {
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
     let y = 40;
     const pageWidth = doc.internal.pageSize.width;
     const margin = 40;
-    const maxWidth = pageWidth - (margin * 2);
-    
+    const maxWidth = pageWidth - margin * 2;
+
     const printText = (text, options = {}) => {
       const lines = doc.splitTextToSize(text, maxWidth);
       lines.forEach((line) => {
@@ -1227,7 +1231,7 @@ const Dashboard = () => {
         y += 16;
       });
     };
-    
+
     const printHeading = (text, level = 1) => {
       if (y > doc.internal.pageSize.height - 60) {
         doc.addPage();
@@ -1235,167 +1239,164 @@ const Dashboard = () => {
       }
       if (level === 1) {
         doc.setFontSize(20);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         doc.setTextColor(79, 70, 229);
         printText(text);
         y += 8;
         doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
         doc.setTextColor(0, 0, 0);
       } else if (level === 2) {
         doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         printText(text);
         y += 6;
         doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
       } else {
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         printText(text);
         doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
       }
     };
-    
+
     const printSubSection = (title, content) => {
       printHeading(title, 3);
-      if (typeof content === 'string') {
+      if (typeof content === "string") {
         printText(content);
       } else if (Array.isArray(content)) {
-        content.forEach(item => {
+        content.forEach((item) => {
           printText(`• ${item}`);
         });
-      } else if (typeof content === 'object') {
+      } else if (typeof content === "object") {
         Object.entries(content).forEach(([key, value]) => {
-          if (typeof value !== 'object' && value !== null && value !== undefined) {
+          if (
+            typeof value !== "object" &&
+            value !== null &&
+            value !== undefined
+          ) {
             printText(`${key}: ${value}`);
           }
         });
       }
       y += 8;
     };
-    
-    // Title
+
     doc.setFontSize(26);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(79, 70, 229);
-    doc.text('Biz Buddy Business Report', margin, y);
+    doc.text("Biz Buddy Business Report", margin, y);
     y += 35;
-    
-    // Metadata
+
     doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont("helvetica", "normal");
     doc.setTextColor(0, 0, 0);
     printText(`Business: ${payload.businessName}`);
-    printText(`Date Range: ${payload.dateRange === 'all' ? 'All Time' : payload.dateRange}`);
+    printText(
+      `Date Range: ${payload.dateRange === "all" ? "All Time" : payload.dateRange}`,
+    );
     printText(`Exported At: ${new Date(payload.exportedAt).toLocaleString()}`);
     y += 20;
-    
-    // 1. Overview
-    printHeading('1. Overview', 1);
+
+    printHeading("1. Overview", 1);
     if (payload.overview?.overview) {
       const overview = payload.overview.overview;
       printText(`Total Sales: ${formatCurrency(overview.total_sales)}`);
       printText(`Total Expenses: ${formatCurrency(overview.total_expenses)}`);
       printText(`Total Profit: ${formatCurrency(overview.total_profit)}`);
-      printText(`Profit Margin: ${formatPercent(overview.profit_margin / 100)}`);
-      printText(`Total Records: ${overview.total_records || 'N/A'}`);
-      printText(`Average Daily Sales: ${formatCurrency(overview.avg_daily_sales)}`);
+      printText(
+        `Profit Margin: ${formatPercent(overview.profit_margin / 100)}`,
+      );
+      printText(`Total Records: ${overview.total_records || "N/A"}`);
+      printText(
+        `Average Daily Sales: ${formatCurrency(overview.avg_daily_sales)}`,
+      );
     }
     y += 20;
-    
-    // 2. AI Insights
-    printHeading('2. AI Insights', 1);
+
+    printHeading("2. AI Insights", 1);
     if (payload.intelligence?.intelligence) {
       const insights = payload.intelligence.intelligence;
       if (insights.forecast) {
-        printSubSection('Forecast Analysis', {
-          'Trend': insights.forecast.trend?.toUpperCase() || 'N/A',
-          '30-Day Demand': formatCurrency(insights.forecast.predicted_30_day_demand),
-          'Confidence': `${insights.forecast.confidence_score || 0}%`,
-          'User Growth': `${insights.forecast.user_growth > 0 ? '+' : ''}${insights.forecast.user_growth || 0}%`
+        printSubSection("Forecast Analysis", {
+          Trend: insights.forecast.trend?.toUpperCase() || "N/A",
+          "30-Day Demand": formatCurrency(
+            insights.forecast.predicted_30_day_demand,
+          ),
+          Confidence: `${insights.forecast.confidence_score || 0}%`,
+          "User Growth": `${insights.forecast.user_growth > 0 ? "+" : ""}${insights.forecast.user_growth || 0}%`,
         });
       }
       if (insights.risk) {
-        printSubSection('Risk Assessment', {
-          'Risk Score': `${insights.risk.risk_score || 0}/100`,
-          'Risk Level': insights.risk.risk_level || 'N/A'
+        printSubSection("Risk Assessment", {
+          "Risk Score": `${insights.risk.risk_score || 0}/100`,
+          "Risk Level": insights.risk.risk_level || "N/A",
         });
       }
       if (insights.market) {
-        printSubSection('Market Position', {
-          'Market Share': `${insights.market.market_share_percent || 0}%`,
-          'Share Status': insights.market.share_status || 'N/A'
+        printSubSection("Market Position", {
+          "Market Share": `${insights.market.market_share_percent || 0}%`,
+          "Share Status": insights.market.share_status || "N/A",
         });
       }
     }
     y += 20;
-    
-    // 3. Growth Strategy
-    printHeading('3. Growth Strategy', 1);
+
+    printHeading("3. Growth Strategy", 1);
     if (payload.growthStrategy) {
       if (payload.growthStrategy.recommended_strategies) {
-        printHeading('Recommended Actions', 2);
-        payload.growthStrategy.recommended_strategies.forEach((strategy, idx) => {
-          printText(`${idx + 1}. ${strategy.title || strategy}`);
-          if (strategy.action) printText(`   Action: ${strategy.action}`);
-          if (strategy.priority) printText(`   Priority: ${strategy.priority}`);
-          y += 6;
-        });
+        printHeading("Recommended Actions", 2);
+        payload.growthStrategy.recommended_strategies.forEach(
+          (strategy, idx) => {
+            printText(`${idx + 1}. ${strategy.title || strategy}`);
+            if (strategy.action) printText(`   Action: ${strategy.action}`);
+            if (strategy.priority)
+              printText(`   Priority: ${strategy.priority}`);
+            y += 6;
+          },
+        );
         y += 8;
       }
       if (payload.growthStrategy.strengths?.length) {
-        printSubSection('Your Strengths', payload.growthStrategy.strengths);
+        printSubSection("Your Strengths", payload.growthStrategy.strengths);
       }
       if (payload.growthStrategy.warnings?.length) {
-        printSubSection('Areas to Address', payload.growthStrategy.warnings);
+        printSubSection("Areas to Address", payload.growthStrategy.warnings);
       }
     }
     y += 20;
-    
-    // 4. Seasonal & Festival Events
-    printHeading('4. Seasonal & Festival Opportunities', 1);
+
+    printHeading("4. Seasonal & Festival Opportunities", 1);
     payload.seasonalEvents.forEach((event, idx) => {
       printHeading(`${idx + 1}. ${event.name}`, 2);
       printText(`Date: ${event.date}`);
       printText(`Expected Lift: +${event.expectedLift}%`);
       printText(`Expected ROI: ${event.roi}`);
       printText(`Suggested Budget: ${formatCurrency(event.budgetSuggestion)}`);
-      printHeading('Recommended Actions:', 3);
-      event.recommendedActions.forEach(action => {
+      printHeading("Recommended Actions:", 3);
+      event.recommendedActions.forEach((action) => {
         printText(`  • ${action}`);
       });
       y += 12;
     });
-    y += 20;
-    
-    // 5. Customer Acquisition
-    printHeading('5. Customer Acquisition Strategies', 1);
-    payload.customerAcquisition.forEach((channel, idx) => {
-      printHeading(`${idx + 1}. ${channel.channel}`, 2);
-      printText(`Expected ROI: ${channel.expectedROI}`);
-      printText(`Timeframe: ${channel.timeframe}`);
-      printHeading('Key Strategies:', 3);
-      channel.strategies.forEach(strategy => {
-        printText(`  • ${strategy}`);
-      });
-      y += 12;
-    });
-    
-    // Footer
+
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by Biz Buddy - Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.height - 20);
+      doc.text(
+        `Generated by Biz Buddy - Page ${i} of ${pageCount}`,
+        margin,
+        doc.internal.pageSize.height - 20,
+      );
     }
-    
-    doc.save(`business_report_${new Date().toISOString().split('T')[0]}.pdf`);
+
+    doc.save(`business_report_${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
-  // Excel Export (HTML format)
   const downloadExcel = (payload) => {
     let htmlContent = `<!DOCTYPE html>
     <html>
@@ -1419,10 +1420,9 @@ const Dashboard = () => {
       <h1>Biz Buddy Business Report</h1>
       <p><strong>Generated:</strong> ${new Date(payload.exportedAt).toLocaleString()}</p>
       <p><strong>Business:</strong> ${payload.businessName}</p>
-      <p><strong>Date Range:</strong> ${payload.dateRange === 'all' ? 'All Time' : payload.dateRange}</p>
+      <p><strong>Date Range:</strong> ${payload.dateRange === "all" ? "All Time" : payload.dateRange}</p>
     `;
-    
-    // Overview Section
+
     htmlContent += `<div class="section">
       <h2>1. Overview</h2>
       <table>
@@ -1434,12 +1434,11 @@ const Dashboard = () => {
         <tr><td class="label">Total Expenses</td><td>${formatCurrency(ov.total_expenses)}</td></tr>
         <tr><td class="label">Total Profit</td><td>${formatCurrency(ov.total_profit)}</td></tr>
         <tr><td class="label">Profit Margin</td><td>${formatPercent(ov.profit_margin / 100)}</td></tr>
-        <tr><td class="label">Total Records</td><td>${ov.total_records || 'N/A'}</td></tr>
+        <tr><td class="label">Total Records</td><td>${ov.total_records || "N/A"}</td></tr>
         <tr><td class="label">Average Daily Sales</td><td>${formatCurrency(ov.avg_daily_sales)}</td></tr>`;
     }
     htmlContent += `</table></div>`;
-    
-    // AI Insights Section
+
     htmlContent += `<div class="section">
       <h2>2. AI Insights</h2>
       <table>
@@ -1448,99 +1447,83 @@ const Dashboard = () => {
       const ins = payload.intelligence.intelligence;
       if (ins.forecast) {
         htmlContent += `
-          <tr><td rowspan="4">Forecast</td><td>Trend</td><td>${ins.forecast.trend?.toUpperCase() || 'N/A'}</td></tr>
+          <tr><td rowspan="4">Forecast</td><td>Trend</td><td>${ins.forecast.trend?.toUpperCase() || "N/A"}</td></tr>
           <tr><td>30-Day Demand</td><td>${formatCurrency(ins.forecast.predicted_30_day_demand)}</td></tr>
           <tr><td>Confidence</td><td>${ins.forecast.confidence_score || 0}%</td></tr>
-          <tr><td>User Growth</td><td>${ins.forecast.user_growth > 0 ? '+' : ''}${ins.forecast.user_growth || 0}%</td></tr>`;
+          <tr><td>User Growth</td><td>${ins.forecast.user_growth > 0 ? "+" : ""}${ins.forecast.user_growth || 0}%</td></tr>`;
       }
       if (ins.risk) {
         htmlContent += `
           <tr><td rowspan="2">Risk</td><td>Risk Score</td><td>${ins.risk.risk_score || 0}/100</td></tr>
-          <tr><td>Risk Level</td><td>${ins.risk.risk_level || 'N/A'}</td></tr>`;
+          <tr><td>Risk Level</td><td>${ins.risk.risk_level || "N/A"}</td></tr>`;
       }
       if (ins.market) {
         htmlContent += `
           <tr><td rowspan="2">Market</td><td>Market Share</td><td>${ins.market.market_share_percent || 0}%</td></tr>
-          <tr><td>Share Status</td><td>${ins.market.share_status || 'N/A'}</td></tr>`;
+          <tr><td>Share Status</td><td>${ins.market.share_status || "N/A"}</td></tr>`;
       }
     }
     htmlContent += `</table></div>`;
-    
-    // Growth Strategy Section
+
     htmlContent += `<div class="section">
       <h2>3. Growth Strategy</h2>`;
     if (payload.growthStrategy?.recommended_strategies) {
       htmlContent += `<table>
         <tr><th>Priority</th><th>Strategy</th><th>Action</th></tr>`;
-      payload.growthStrategy.recommended_strategies.forEach(strategy => {
+      payload.growthStrategy.recommended_strategies.forEach((strategy) => {
         htmlContent += `
           <tr>
-            <td>${strategy.priority || 'N/A'}</td>
-            <td>${strategy.title || ''}</td>
-            <td>${strategy.action || ''}</td>
+            <td>${strategy.priority || "N/A"}</td>
+            <td>${strategy.title || ""}</td>
+            <td>${strategy.action || ""}</td>
           </tr>`;
       });
       htmlContent += `</table>`;
     }
     if (payload.growthStrategy?.strengths?.length) {
-      htmlContent += `<p><strong>Strengths:</strong> ${payload.growthStrategy.strengths.join('; ')}</p>`;
+      htmlContent += `<p><strong>Strengths:</strong> ${payload.growthStrategy.strengths.join("; ")}</p>`;
     }
     if (payload.growthStrategy?.warnings?.length) {
-      htmlContent += `<p><strong>Areas to Address:</strong> ${payload.growthStrategy.warnings.join('; ')}</p>`;
+      htmlContent += `<p><strong>Areas to Address:</strong> ${payload.growthStrategy.warnings.join("; ")}</p>`;
     }
     htmlContent += `</div>`;
-    
-    // Seasonal Events Section
+
     htmlContent += `<div class="section">
       <h2>4. Seasonal & Festival Opportunities</h2>`;
-    payload.seasonalEvents.forEach(event => {
+    payload.seasonalEvents.forEach((event) => {
       htmlContent += `
         <div class="event-card">
-          <h3>🎊 ${event.name}</h3>
+          <h3>${event.name}</h3>
           <table>
             <tr><td class="label">Date</td><td>${event.date}</td></tr>
             <tr><td class="label">Expected Lift</td><td>+${event.expectedLift}%</td></tr>
             <tr><td class="label">Expected ROI</td><td>${event.roi}</td></tr>
             <tr><td class="label">Suggested Budget</td><td>${formatCurrency(event.budgetSuggestion)}</td></tr>
             <tr><td class="label">Preparation Time</td><td>${event.preparationTime}</td></tr>
-            <tr><td class="label">Recommended Actions</td><td>${event.recommendedActions.join('; ')}</td></tr>
+            <tr><td class="label">Recommended Actions</td><td>${event.recommendedActions.join("; ")}</td></tr>
           </table>
         </div>`;
     });
     htmlContent += `</div>`;
-    
-    // Customer Acquisition Section
-    htmlContent += `<div class="section">
-      <h2>5. Customer Acquisition Strategies</h2>
-      <table>
-        <tr><th>Channel</th><th>Expected ROI</th><th>Timeframe</th><th>Strategies</th></tr>`;
-    payload.customerAcquisition.forEach(channel => {
-      htmlContent += `
-        <tr>
-          <td>${channel.channel}</td>
-          <td>${channel.expectedROI}</td>
-          <td>${channel.timeframe}</td>
-          <td>${channel.strategies.join('; ')}</td>
-        </tr>`;
-    });
-    htmlContent += `</table></div>`;
-    
+
     htmlContent += `
     </body>
     </html>`;
-    
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+
+    const blob = new Blob([htmlContent], { type: "application/vnd.ms-excel" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', `business_report_${new Date().toISOString().split('T')[0]}.xls`);
+    link.setAttribute(
+      "download",
+      `business_report_${new Date().toISOString().split("T")[0]}.xls`,
+    );
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
-  // Main Export Handler
   const handleExport = async (format) => {
     setShowExportMenu(false);
     try {
@@ -1560,26 +1543,25 @@ const Dashboard = () => {
         link.click();
         link.remove();
         URL.revokeObjectURL(url);
-        alert("✅ Report exported as JSON!");
+        alert("Report exported as JSON!");
       } else if (format === "csv") {
         downloadCsv(payload);
-        alert("✅ Report exported as CSV!");
+        alert("Report exported as CSV!");
       } else if (format === "pdf") {
         downloadPdf(payload);
-        alert("✅ Report exported as PDF!");
+        alert("Report exported as PDF!");
       } else if (format === "excel") {
         downloadExcel(payload);
-        alert("✅ Report exported as Excel!");
+        alert("Report exported as Excel!");
       } else {
-        alert("❌ Unknown export format");
+        alert("Unknown export format");
       }
     } catch (error) {
       console.error("Export failed:", error);
-      alert("❌ Export failed. Please try again.");
+      alert("Export failed. Please try again.");
     }
   };
 
-  // Share handlers
   const generateShareLink = () => {
     const shareId = Date.now();
     const fakeLink = `${window.location.origin}/shared-report/${shareId}`;
@@ -1592,14 +1574,14 @@ const Dashboard = () => {
         createdAt: new Date().toISOString(),
       }),
     );
-    alert("✅ Shareable link generated! Share this link with your team.");
+    alert("Shareable link generated! Share this link with your team.");
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    alert("✅ Link copied to clipboard!");
+    alert("Link copied to clipboard!");
   };
 
   const handleAddGoal = () => {
@@ -1622,7 +1604,7 @@ const Dashboard = () => {
     };
     setGoals([...goals, newGoal]);
     setShowGoalModal(false);
-    alert(`✅ Goal "${goalName}" added successfully!`);
+    alert(`Goal "${goalName}" added successfully!`);
   };
 
   const handleGoalComplete = (goalId) => {
@@ -1652,64 +1634,6 @@ const Dashboard = () => {
     const recordCount = status?.current_records || 0;
     const required = status?.required_records || 14;
     return Math.min(100, Math.floor((recordCount / required) * 100));
-  };
-
-  const addCustomer = () => {
-    if (!newCustomer.name) {
-      alert("Please enter customer name");
-      return;
-    }
-
-    const customer = {
-      id: customers.length + 1,
-      name: newCustomer.name,
-      source: newCustomer.source,
-      date: new Date().toISOString().split("T")[0],
-      value: newCustomer.value || Math.floor(Math.random() * 20000) + 5000,
-    };
-
-    setCustomers([customer, ...customers]);
-
-    const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
-    if (
-      customerGoal &&
-      !customerGoal.completed &&
-      customerGoal.current < customerGoal.target
-    ) {
-      setGoals((prev) =>
-        prev.map((g) =>
-          g.id === customerGoal.id ? { ...g, current: g.current + 1 } : g,
-        ),
-      );
-    }
-
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        message: `🎉 New customer added: ${newCustomer.name} (via ${newCustomer.source})`,
-        read: false,
-        time: "Just now",
-      },
-      ...prev,
-    ]);
-
-    setNewCustomer({ name: "", source: "Organic", value: 0 });
-    setShowAddCustomerModal(false);
-    alert(`✅ Customer "${customer.name}" added successfully!`);
-  };
-
-  const deleteCustomer = (id) => {
-    setCustomers(customers.filter((c) => c.id !== id));
-    const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
-    if (customerGoal && customerGoal.current > 0) {
-      setGoals((prev) =>
-        prev.map((g) =>
-          g.id === customerGoal.id
-            ? { ...g, current: Math.max(0, g.current - 1) }
-            : g,
-        ),
-      );
-    }
   };
 
   const fetchBusinessData = useCallback(async (businessName) => {
@@ -1928,11 +1852,6 @@ const Dashboard = () => {
   })();
 
   const dataQualityScore = getDataQualityScore();
-  const customerGoal = goals.find((g) => g.name === "Customer Acquisition");
-  const customerProgress = customerGoal
-    ? (customerGoal.current / customerGoal.target) * 100
-    : 0;
-
   const TABS = [
     {
       id: "overview",
@@ -1975,7 +1894,6 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      {/* Share Modal */}
       {showShareModal && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -2029,7 +1947,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Goal Modal */}
       {showGoalModal && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -2075,71 +1992,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Add Customer Modal */}
-      {showAddCustomerModal && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowAddCustomerModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl p-6 max-w-md w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">Add New Customer</h3>
-              <button
-                onClick={() => setShowAddCustomerModal(false)}
-                className="p-1 hover:bg-gray-100 rounded-lg"
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="Customer name"
-              value={newCustomer.name}
-              onChange={(e) =>
-                setNewCustomer({ ...newCustomer, name: e.target.value })
-              }
-              className="w-full border rounded-lg p-2 mb-3"
-            />
-            <select
-              value={newCustomer.source}
-              onChange={(e) =>
-                setNewCustomer({ ...newCustomer, source: e.target.value })
-              }
-              className="w-full border rounded-lg p-2 mb-3"
-            >
-              <option value="Organic">Organic</option>
-              <option value="Referral">Referral</option>
-              <option value="Social Media">Social Media</option>
-              <option value="Paid Ads">Paid Ads</option>
-              <option value="Email">Email</option>
-              <option value="Walk-in">Walk-in</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Order value (₹)"
-              value={newCustomer.value}
-              onChange={(e) =>
-                setNewCustomer({
-                  ...newCustomer,
-                  value: parseInt(e.target.value) || 0,
-                })
-              }
-              className="w-full border rounded-lg p-2 mb-4"
-            />
-            <button
-              onClick={addCustomer}
-              className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            >
-              Add Customer
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* What-If Modal */}
       {showWhatIf && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -2254,25 +2106,25 @@ const Dashboard = () => {
                       onClick={() => handleExport("pdf")}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 rounded-t-xl"
                     >
-                      📄 PDF Report
+                      PDF Report
                     </button>
                     <button
                       onClick={() => handleExport("excel")}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                     >
-                      📊 Excel Export
+                      Excel Export
                     </button>
                     <button
                       onClick={() => handleExport("csv")}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50"
                     >
-                      📑 CSV Export
+                      CSV Export
                     </button>
                     <button
                       onClick={() => handleExport("json")}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 rounded-b-xl"
                     >
-                      🔧 JSON Export
+                      JSON Export
                     </button>
                   </div>
                 )}
@@ -2492,14 +2344,13 @@ const Dashboard = () => {
                           {goal.name}
                         </span>
                         <span className="text-gray-500">
-                          {goal.name === "Customer Acquisition"
-                            ? `${formatNumber(goal.current)} / ${formatNumber(goal.target)}`
-                            : `${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}`}
+                          {formatCurrency(goal.current)} /{" "}
+                          {formatCurrency(goal.target)}
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full transition-all ${goal.name === "Customer Acquisition" ? "bg-amber-500" : "bg-indigo-600"}`}
+                          className="h-2 rounded-full bg-indigo-600 transition-all"
                           style={{
                             width: `${Math.min(100, (goal.current / goal.target) * 100)}%`,
                           }}
@@ -2513,187 +2364,33 @@ const Dashboard = () => {
                           )}
                           % complete
                         </span>
-                        <div className="flex gap-2">
-                          {goal.name === "Customer Acquisition" && (
-                            <button
-                              onClick={() => setShowAddCustomerModal(true)}
-                              className="text-green-600 hover:text-green-800 text-xs font-medium"
-                              disabled={
-                                goal.completed || goal.current >= goal.target
-                              }
-                            >
-                              + Add Customer
-                            </button>
-                          )}
-                          <button
-                            onClick={() => {
-                              if (goal.current >= goal.target) {
-                                handleGoalComplete(goal.id);
-                                setNotifications((prev) => [
-                                  {
-                                    id: Date.now(),
-                                    message: `🏆 Goal "${goal.name}" completed!`,
-                                    read: false,
-                                    time: "Just now",
-                                  },
-                                  ...prev,
-                                ]);
-                              } else if (goal.name === "Customer Acquisition") {
-                                alert(
-                                  `Need ${goal.target - goal.current} more customers to complete this goal!`,
-                                );
-                              } else {
-                                alert(
-                                  `Need ${formatCurrency(goal.target - goal.current)} more in sales to complete this goal!`,
-                                );
-                              }
-                            }}
-                            className="text-indigo-500 hover:text-indigo-700 text-xs font-medium"
-                            disabled={goal.completed}
-                          >
-                            {goal.completed ? "✓ Completed" : "Mark Complete"}
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => {
+                            if (goal.current >= goal.target) {
+                              handleGoalComplete(goal.id);
+                              setNotifications((prev) => [
+                                {
+                                  id: Date.now(),
+                                  message: `Goal "${goal.name}" completed!`,
+                                  read: false,
+                                  time: "Just now",
+                                },
+                                ...prev,
+                              ]);
+                            } else {
+                              alert(
+                                `Need ${formatCurrency(goal.target - goal.current)} more in sales to complete this goal!`,
+                              );
+                            }
+                          }}
+                          className="text-indigo-500 hover:text-indigo-700 text-xs font-medium"
+                          disabled={goal.completed}
+                        >
+                          {goal.completed ? "Completed" : "Mark Complete"}
+                        </button>
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <SectionHeading
-                    title="Customer Acquisition"
-                    subtitle="Track your customer growth"
-                    icon={<Users className="w-4 h-4" />}
-                  />
-                  <button
-                    onClick={() => setShowAddCustomerModal(true)}
-                    className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Add Customer
-                  </button>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-gray-700">
-                      Monthly Customer Goal
-                    </span>
-                    <span className="text-gray-500">
-                      {formatNumber(customerGoal?.current || 0)} /{" "}
-                      {formatNumber(customerGoal?.target || 50)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div
-                      className="bg-amber-500 h-3 rounded-full transition-all duration-500"
-                      style={{ width: `${customerProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {customerProgress.toFixed(0)}% complete
-                  </p>
-                </div>
-
-                <div className="mt-4">
-                  <p className="text-xs font-semibold text-gray-700 mb-3">
-                    Recent Customers
-                  </p>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {customers.length > 0 ? (
-                      customers.map((customer) => (
-                        <div
-                          key={customer.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
-                        >
-                          <div className="flex-1">
-                            <p className="font-medium text-sm text-gray-800">
-                              {customer.name}
-                            </p>
-                            <div className="flex gap-3 text-xs text-gray-400 mt-0.5">
-                              <span>Source: {customer.source}</span>
-                              <span>
-                                Value: {formatCurrency(customer.value)}
-                              </span>
-                              <span>Date: {customer.date}</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => deleteCustomer(customer.id)}
-                            className="p-1 text-red-400 hover:text-red-600 transition"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-gray-400 text-center py-4">
-                        No customers added yet. Click "Add Customer" to start
-                        tracking.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-3 gap-3">
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">Total Customers</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {customers.length}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">Total Value</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {formatCurrency(
-                        customers.reduce((sum, c) => sum + c.value, 0),
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">Avg. Value</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {formatCurrency(
-                        customers.length > 0
-                          ? customers.reduce((sum, c) => sum + c.value, 0) /
-                              customers.length
-                          : 0,
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">
-                    Acquisition Sources
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "Organic",
-                      "Referral",
-                      "Social Media",
-                      "Paid Ads",
-                      "Email",
-                      "Walk-in",
-                    ].map((source) => {
-                      const count = customers.filter(
-                        (c) => c.source === source,
-                      ).length;
-                      if (count === 0) return null;
-                      return (
-                        <span
-                          key={source}
-                          className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-                        >
-                          {source}: {count}
-                        </span>
-                      );
-                    })}
-                    {customers.length === 0 && (
-                      <span className="text-xs text-gray-400">No data yet</span>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -3248,7 +2945,7 @@ const Dashboard = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       <PerformanceComparison
                         currentData={currentData}
                         intelligence={intelligence}
@@ -3261,7 +2958,8 @@ const Dashboard = () => {
                           setNotifications((prev) => [
                             {
                               id: Date.now(),
-                              message: "🎯 New seasonal campaign planned! Check your dashboard.",
+                              message:
+                                "New seasonal campaign planned! Check your dashboard.",
                               read: false,
                               time: "Just now",
                             },
@@ -3275,7 +2973,6 @@ const Dashboard = () => {
               )}
             </div>
           )}
-
           {activeTab === "acquisition" && (
             <div className="space-y-6">
               {!status?.has_enough_data ? (

@@ -6,12 +6,14 @@ import { BsShieldCheck } from "react-icons/bs";
 import { HiOutlineDocumentText } from "react-icons/hi";
 import { FaCogs, FaChartLine } from "react-icons/fa";
 import "../app.css"
+import { useNavigate } from "react-router-dom";
+
 
 const Home = () => {
+  const navigate = useNavigate()
   return (
     <Layout>
       <div className="min-h-screen bg-[#E3FEF7] text-[#283046] px-3 sm:px-6 lg:px-8">
-
         {/* HERO */}
         <section className="max-w-7xl mx-auto py-10 sm:py-20 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-snug text-[#1E293B]">
@@ -26,11 +28,17 @@ const Home = () => {
           </p>
 
           <div className="mt-6 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3">
-            <button className="w-full sm:w-auto bg-[#4F46E5] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition">
+            <button
+              className="w-full sm:w-auto bg-[#4F46E5] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition"
+              onClick={() => navigate("/login")}
+            >
               Get Started
             </button>
 
-            <button className="w-full sm:w-auto bg-white border-2 border-[#4F46E5] text-[#4F46E5] px-6 py-3 rounded-xl font-semibold hover:bg-[#EEF0FF] transition">
+            <button
+              className="w-full sm:w-auto bg-white border-2 border-[#4F46E5] text-[#4F46E5] px-6 py-3 rounded-xl font-semibold hover:bg-[#EEF0FF] transition"
+              onClick={() => navigate("/about")}
+            >
               Learn More
             </button>
           </div>
@@ -89,7 +97,9 @@ const Home = () => {
                     {step.icon}
                   </div>
 
-                  <h3 className="text-lg font-semibold text-center">{step.title}</h3>
+                  <h3 className="text-lg font-semibold text-center">
+                    {step.title}
+                  </h3>
 
                   <p className="text-gray-600 mt-2 text-center text-sm">
                     {step.desc}
@@ -125,7 +135,9 @@ const Home = () => {
                 <div className="flex justify-center mb-4 text-indigo-600 text-4xl">
                   {step.icon}
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-center">{step.title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-center">
+                  {step.title}
+                </h3>
                 <p className="text-gray-600 mt-2 text-center text-sm sm:text-base">
                   {step.desc}
                 </p>
@@ -136,7 +148,9 @@ const Home = () => {
 
         {/* FEATURES */}
         <section className="max-w-7xl mx-auto py-10 sm:py-20">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center">Features</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center">
+            Features
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10 mt-10 px-2">
             <Feature
@@ -168,7 +182,10 @@ const Home = () => {
             Ready to Take the Next Step?
           </h2>
 
-          <button className="mt-6 sm:mt-10 w-full sm:w-auto bg-[#22C55E] text-white px-8 py-3 rounded-xl text-lg sm:text-xl font-semibold shadow-md hover:shadow-lg transition">
+          <button
+            className="mt-6 sm:mt-10 w-full sm:w-auto bg-[#22C55E] text-white px-8 py-3 rounded-xl text-lg sm:text-xl font-semibold shadow-md hover:shadow-lg transition"
+            onClick={() => navigate("/signup")}
+          >
             Start Your Journey
           </button>
         </section>
