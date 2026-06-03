@@ -73,7 +73,6 @@ import {
   Mail,
   Users,
   TrendingDownIcon,
-
 } from "lucide-react";
 import jsPDF from "jspdf";
 
@@ -1437,7 +1436,7 @@ const Dashboard = () => {
         <tr><td class="label">Total Records</td><td>${ov.total_records || "N/A"}</td></tr>
         <tr><td class="label">Average Daily Sales</td><td>${formatCurrency(ov.avg_daily_sales)}</td></tr>`;
     }
-    htmlContent += `</table></div>`;
+    htmlContent += `</div>`;
 
     htmlContent += `<div class="section">
       <h2>2. AI Insights</h2>
@@ -1463,7 +1462,7 @@ const Dashboard = () => {
           <tr><td>Share Status</td><td>${ins.market.share_status || "N/A"}</td></tr>`;
       }
     }
-    htmlContent += `</table></div>`;
+    htmlContent += `</div>`;
 
     htmlContent += `<div class="section">
       <h2>3. Growth Strategy</h2>`;
@@ -1478,7 +1477,7 @@ const Dashboard = () => {
             <td>${strategy.action || ""}</td>
           </tr>`;
       });
-      htmlContent += `</table>`;
+      htmlContent += `</div>`;
     }
     if (payload.growthStrategy?.strengths?.length) {
       htmlContent += `<p><strong>Strengths:</strong> ${payload.growthStrategy.strengths.join("; ")}</p>`;
@@ -1501,8 +1500,7 @@ const Dashboard = () => {
             <tr><td class="label">Suggested Budget</td><td>${formatCurrency(event.budgetSuggestion)}</td></tr>
             <tr><td class="label">Preparation Time</td><td>${event.preparationTime}</td></tr>
             <tr><td class="label">Recommended Actions</td><td>${event.recommendedActions.join("; ")}</td></tr>
-          </table>
-        </div>`;
+          </div>`;
     });
     htmlContent += `</div>`;
 
@@ -2526,11 +2524,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <PerformanceComparison
-                currentData={currentData}
-                intelligence={intelligence}
-              />
-
               {overview.business_names?.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <SectionHeading
@@ -2824,6 +2817,11 @@ const Dashboard = () => {
                       )}
                     </div>
                   </div>
+
+                  <PerformanceComparison
+                    currentData={currentData}
+                    intelligence={intelligence}
+                  />
                 </>
               )}
             </div>
@@ -2946,11 +2944,6 @@ const Dashboard = () => {
                         </div>
                       )}
 
-                      <PerformanceComparison
-                        currentData={currentData}
-                        intelligence={intelligence}
-                      />
-
                       <SeasonalCampaignPlanner
                         currentData={currentData}
                         intelligence={intelligence}
@@ -2984,10 +2977,6 @@ const Dashboard = () => {
               ) : (
                 <>
                   <CustomerAcquisitionStrategies
-                    currentData={currentData}
-                    intelligence={intelligence}
-                  />
-                  <PerformanceComparison
                     currentData={currentData}
                     intelligence={intelligence}
                   />
